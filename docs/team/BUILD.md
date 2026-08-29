@@ -1,10 +1,40 @@
 # Build guide
 
 How to get this running, what each command does, and what to do when it breaks. Your
-[brief](README.md) says *what* you own; this says *how* to run the thing.
+[brief](README.md) says *what* you own; this says *how* to run it.
 
-Every command here has been executed against the current repo. Where output is shown, that
-is the real output, not an illustration.
+Every command here has been executed against the real repo. Where output is shown, that is
+the actual output, not an illustration.
+
+## If you're new to this codebase
+
+Three ideas explain almost everything about how it's organised:
+
+**1. Nothing waits for anything.** Each track writes its results into small JSON files in
+`artifacts/`. Everyone else reads those files. So the website can be built before the
+detector exists, and the attack engine before the data is ready — each of you swaps in real
+results when they're ready, and nothing downstream breaks.
+
+**2. Fake results are labelled, loudly.** Every result file carries a `placeholder` flag.
+While it's `true`, the website shows a large amber banner naming that exact file. This means
+shipping something unfinished is *safe* — the banner tells the truth for you. It also means
+nobody can accidentally show a judge an invented number.
+
+**3. The demo never computes anything.** The website reads finished results and draws them.
+No training, no API calls, nothing that can time out while a judge is looking at it.
+
+Two commands are worth knowing before anything else:
+
+```bash
+python -m adversarial_payments.loop.flows   # safe: shows current results, changes nothing
+pytest -q                                   # are we healthy?
+```
+
+The first one is read-only unless you add `--recompute`. That matters when several people
+share a repo.
+
+**Live status board:** [STATUS.md](STATUS.md) is the source of truth for what's finished. The
+table below is a snapshot and may lag it.
 
 ---
 
