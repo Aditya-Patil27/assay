@@ -165,9 +165,19 @@ HARD CONSTRAINTS
 - A DRAFT WRITEUP IS NOT JUDGED. Publishing is a distinct action from writing.
 
 OBJECTIVE
-Produce the .docx solution walkthrough. It does not currently exist in any form -- this is
-the largest gap in the project. docs/2026-08-31-deck-outline.md targets a slide deck, which
-is NOT what the portal asks for.
+A FIRST DRAFT ALREADY EXISTS at docs/submission/solution-walkthrough.md, and the .docx is
+generated from it by `python scripts/build_docx.py`. READ THE DRAFT BEFORE WRITING
+ANYTHING. Do not start over and do not overwrite it -- revise it.
+
+Your job is to finish it:
+  1. Resolve or remove all six [[PENDING]] markers. They render in orange in the .docx and
+     the build script counts them on every run. A [[PENDING]] marker reaching a judge is
+     worse than the section being absent.
+  2. Sharpen the prose in our own voice.
+  3. Regenerate the .docx and confirm the marker count is zero.
+
+Note docs/2026-08-31-deck-outline.md targets a slide deck, which is NOT what the portal
+asks for. Do not merge it in wholesale.
 
 The portal asks for four things specifically. Cover all four:
   1. the attacks identified
