@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #07090d;
+  --color-panel: #0e1219;
+  --color-panel-2: #141a24;
+  --color-line: #1f2733;
+  --color-text: #e6ebf2;
+  --color-muted: #8b97a8;
+
+  /* Red team / blue team. The whole story is one turning into the other. */
+  --color-attack: #ff5a5f;
+  --color-attack-dim: #7a2b2e;
+  --color-defend: #2dd4bf;
+  --color-defend-dim: #14504a;
+  --color-warn: #f5a524;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+}
+
+html,
+body {
+  background: var(--color-ink);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* React Flow renders its own surface; keep it on our palette. */
+.react-flow__background {
+  background: var(--color-ink);
+}
+.react-flow__attribution {
+  display: none;
+}

@@ -11,7 +11,7 @@
 
 The strategy doc budgeted 10 days. Seven are gone. The team decision is to **keep full
 Approach C scope** — both attack surfaces, Prefect orchestration, the DAG renderer, the
-Streamlit dashboard, SHAP, and latency measurement — on the basis that AI-assisted coding
+dashboard, SHAP, and latency measurement — on the basis that AI-assisted coding
 absorbs the lost implementation hours.
 
 That decision is accepted and this spec builds to it. The recorded caveat is that AI coding
@@ -29,7 +29,8 @@ attack exactly those three, so the compressed schedule is spent on work AI actua
 | LLM provider | OpenRouter **or** NVIDIA NIM via one OpenAI-compatible client | Both are `base_url` swaps on the same SDK |
 | LLM reproducibility | Every request/response cached to `artifacts/agentic/cache/` | Demo replays with zero network and zero credentials |
 | Python | **3.12** (`C:\Program Files\Python312`), managed by `uv` | Closest to Kaggle runtime; 3.14 lacks guaranteed wheels for the ML stack |
-| Orchestration | Prefect 3, in-process, **no server**, with `RUN_ORCHESTRATED=False` fallback | Per strategy §5.3–§5.4 |
+| Orchestration | Prefect 3, ephemeral local server, with `RUN_ORCHESTRATED=False` as the **notebook default** | Gate result, §6a |
+| Frontend | **Static Next.js 16 export** (React Flow + Recharts), no backend | The demo is a URL a judge clicks, not a stack they install — see §4.3 |
 
 ## 3. Why Sparkov, and why not `creditcard.csv`
 
@@ -52,8 +53,8 @@ Sparkov maps 1:1 onto the three projections:
 ### 4.1 Repository layout — ownership by directory
 
 Five people over three days cannot afford merge conflicts. Each owner has directories nobody
-else writes to. The two shared files (`schema.py`, `scorecard.py`) are contracts, written once
-on Day 1 and then read-only.
+else writes to. `schema.py` and `artifacts.py` are contracts, written once on Day 1 and then
+read-only.
 
 ```
 src/adversarial_payments/
@@ -67,7 +68,7 @@ src/adversarial_payments/
                                 redteam.py, defenses.py, scoring.py
   serving/             P1       latency.py
   scorecard.py         * terminal node, both tracks
-app/                   P4       Home.py, components/graph.py, pages/
+web/                   P4       Next.js static export: app/, components/, lib/
 notebooks/             P1+P2    submission.ipynb  <- the graded artifact
 artifacts/             all      committed results (JSON/PNG) — see §4.3
 tests/                 all
@@ -83,25 +84,41 @@ It is therefore an importable frozen object, not a document:
 @dataclass(frozen=True)
 class FeatureSchema:
     columns: tuple[str, ...]
-    frozen: frozenset[str]                       # immutability projection
+    frozen: frozenset[str]                            # immutability projection
+    coupled_groups: tuple[tuple[str, ...], ...]       # inter-feature dependencies
     mutable: frozenset[str]
-    bounds: Mapping[str, tuple[float, float]]    # feasibility projection
-    dtypes: Mapping[str, str]
+    bounds: Mapping[str, tuple[float, float]]         # feasibility projection
 
-    def validate(self, df) -> None: ...          # raises on drift
+    def validate(self, df) -> None: ...               # raises on drift
 ```
+
+The third tier is not in the original strategy doc. It is there because the feasibility
+projection requires that inter-feature dependencies hold, and on Sparkov an attacker who
+switches merchant changes `category_enc`, `merch_lat`, `merch_long` and `distance_km`
+*simultaneously*. Perturbing those independently yields transactions that cannot exist, and an
+ASR measured over impossible transactions is a number we would have to retract under questioning.
 
 `attack/engine.py` calls `schema.validate(df)` at entry. If P1 changes features after the
 freeze, P2's engine raises immediately instead of silently reporting a meaningless ASR.
 
 ### 4.3 `artifacts/` is committed — the key decoupling
 
-Every stage writes a JSON/PNG result to `artifacts/`. Streamlit and the notebook **read those
+Every stage writes JSON to `artifacts/`. The dashboard and the notebook **read those
 artifacts; they never train**. Three consequences, each buying back a day:
 
-1. P4 builds the entire dashboard on Day 1 against real-shaped fixtures, without waiting for P1.
+1. P4 builds the entire dashboard on Day 1 against seeded fixtures, without waiting for P1.
 2. The judged demo cannot fail mid-presentation — nothing heavy runs during it.
 3. A judge on a clean machine sees results even if their environment can't train.
+
+Following that through is what killed Streamlit. If the dashboard never trains, it is a pure
+static data viewer — and then Streamlit's cost is that a judge must install Python 3.12 and the
+whole ML stack to see it. A Next.js static export inlines the same JSON into HTML at build time
+and deploys as a link that cannot break. The shapes are defined once in `artifacts.py` and
+mirrored in `web/lib/types.ts`; `tests/test_artifacts.py` fails if they drift.
+
+Every artifact carries a `placeholder` flag. Seeded fixtures ship `true` and the page renders a
+banner while any are; the real writers set it `false`. A placeholder number cannot silently
+reach a judge.
 
 `RECOMPUTE=True` reruns everything from scratch for anyone verifying the numbers are real.
 
@@ -126,8 +143,8 @@ Reported metrics: **ASR**, mean L0, mean L2, and per-feature attack frequency.
 ### 4.5 The unrolled loop
 
 Rounds r = 0,1,2. Round r's retrained detector feeds round r+1's attacker. Each task writes to
-a plain state dict (`loop/state.py`), which is what the Streamlit graph renderer draws — so the
-visualization survives Prefect being removed entirely.
+a plain state dict (`loop/state.py`), serialised to `artifacts/graph.json` and drawn by React
+Flow — so the visualization survives Prefect being removed entirely.
 
 ```
 train_detector(r) -> score_detector(r) -> generate_attacks(model_r) -> score_attacks -> ASR_r
@@ -159,7 +176,7 @@ non-negotiable per strategy §5.2.
 | **P1** detector | Load Sparkov, EDA, **freeze `schema.py`** | XGBoost baseline, PR-AUC + threshold, SHAP | Retrain harness, latency, notebook cells |
 | **P2** attack | Constraint projections | ASR round 0, retrain rounds 1–2 | Co-evolution plot, scorecard row |
 | **P3** agentic | Client + agent + tools, injection corpus | Red-team loop, exploit rate before | Defenses, exploit rate after, scorecard row |
-| **P4** dashboard | Streamlit shell + graph renderer on fixtures | Wire both tabs to real artifacts | **Repro: clean-env run**, `RUN_ORCHESTRATED=False` |
+| **P4** dashboard | ✅ Static Next.js shell + React Flow DAG on fixtures | Wire real artifacts, deploy preview | **Repro: clean-env run**, `RUN_ORCHESTRATED=False` |
 | **P5** comms | Confirm deliverables/deadline/rules | Deck v1, storyboard | Video, writeup, **submit** |
 
 **Gates:** Day 1 end — `schema.py` frozen and Prefect verified serverless. Day 2 end — first ASR
@@ -171,10 +188,25 @@ number exists. Day 3 midday — feature freeze, comms only after.
 |---|---|
 | Training wall-clock eats Day 2 | Sparkov trains in minutes; subsample switch in `config.py` |
 | Judge's machine can't run it | Committed `artifacts/` + `RECOMPUTE=False` default |
-| Prefect fails on judge's env | `RUN_ORCHESTRATED=False` executes identical tasks as a plain loop |
+| Prefect fails on judge's env | `RUN_ORCHESTRATED=False` executes identical tasks as a plain loop — now the notebook default, see §6a |
 | LLM provider down / no key at judging | Cached request/response fixtures replay offline |
 | Python 3.14 wheel gaps | Pinned to 3.12 via `uv` |
 | P1 changes features after freeze | `schema.validate()` raises at P2's entry point |
+
+## 6a. Prefect gate result (Day 1, verified)
+
+`scripts/check_prefect_offline.py` passes — the flow completes with no remote API. But the log
+shows what "serverless" actually means in Prefect 3:
+
+```
+Starting temporary server on http://127.0.0.1:8684
+... Finished in state Completed()        <- 29 seconds later
+```
+
+It boots an ephemeral HTTP server and binds a port. Fine locally; a real risk in a locked-down
+judging environment or a kernel that blocks socket binding. Consequence: `RUN_ORCHESTRATED=False`
+is promoted from insurance to **the notebook's default**. Prefect still drives the dashboard's
+graph story, where the 29s startup is paid once at build time and never during judging.
 
 ## 7. Still open (P5, Day 1)
 

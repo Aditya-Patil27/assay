@@ -1,0 +1,317 @@
+{
+  "kind": "graph",
+  "placeholder": true,
+  "schema_version": 1,
+  "created_at": "2026-08-29T17:46:54.385762+00:00",
+  "git_sha": "698ed67",
+  "payload": {
+    "nodes": [
+      {
+        "id": "load_data",
+        "label": "Load Sparkov",
+        "stage": "data",
+        "round": null,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "features",
+        "label": "Engineer features",
+        "stage": "data",
+        "round": null,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "schema",
+        "label": "Freeze schema",
+        "stage": "contract",
+        "round": null,
+        "status": "done",
+        "track": "shared"
+      },
+      {
+        "id": "train_0",
+        "label": "Train detector r0",
+        "stage": "detect",
+        "round": 0,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "score_0",
+        "label": "PR-AUC r0",
+        "stage": "detect",
+        "round": 0,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "attack_0",
+        "label": "Generate attacks r0",
+        "stage": "attack",
+        "round": 0,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "asr_0",
+        "label": "ASR r0",
+        "stage": "attack",
+        "round": 0,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "augment_0",
+        "label": "Augment trainset r0",
+        "stage": "loop",
+        "round": 0,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "train_1",
+        "label": "Train detector r1",
+        "stage": "detect",
+        "round": 1,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "score_1",
+        "label": "PR-AUC r1",
+        "stage": "detect",
+        "round": 1,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "attack_1",
+        "label": "Generate attacks r1",
+        "stage": "attack",
+        "round": 1,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "asr_1",
+        "label": "ASR r1",
+        "stage": "attack",
+        "round": 1,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "augment_1",
+        "label": "Augment trainset r1",
+        "stage": "loop",
+        "round": 1,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "train_2",
+        "label": "Train detector r2",
+        "stage": "detect",
+        "round": 2,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "score_2",
+        "label": "PR-AUC r2",
+        "stage": "detect",
+        "round": 2,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "attack_2",
+        "label": "Generate attacks r2",
+        "stage": "attack",
+        "round": 2,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "asr_2",
+        "label": "ASR r2",
+        "stage": "attack",
+        "round": 2,
+        "status": "done",
+        "track": "tabular"
+      },
+      {
+        "id": "build_agent",
+        "label": "Build payment agent",
+        "stage": "agentic",
+        "round": null,
+        "status": "done",
+        "track": "agentic"
+      },
+      {
+        "id": "inject",
+        "label": "Generate injections",
+        "stage": "agentic",
+        "round": null,
+        "status": "done",
+        "track": "agentic"
+      },
+      {
+        "id": "redteam",
+        "label": "Run red team",
+        "stage": "agentic",
+        "round": null,
+        "status": "done",
+        "track": "agentic"
+      },
+      {
+        "id": "defend",
+        "label": "Apply defenses",
+        "stage": "agentic",
+        "round": null,
+        "status": "done",
+        "track": "agentic"
+      },
+      {
+        "id": "redteam2",
+        "label": "Re-run red team",
+        "stage": "agentic",
+        "round": null,
+        "status": "done",
+        "track": "agentic"
+      },
+      {
+        "id": "scorecard",
+        "label": "Framework scorecard",
+        "stage": "terminal",
+        "round": null,
+        "status": "done",
+        "track": "shared"
+      }
+    ],
+    "edges": [
+      {
+        "source": "load_data",
+        "target": "features",
+        "kind": "flow"
+      },
+      {
+        "source": "features",
+        "target": "schema",
+        "kind": "flow"
+      },
+      {
+        "source": "schema",
+        "target": "train_0",
+        "kind": "flow"
+      },
+      {
+        "source": "train_0",
+        "target": "score_0",
+        "kind": "flow"
+      },
+      {
+        "source": "train_0",
+        "target": "attack_0",
+        "kind": "flow"
+      },
+      {
+        "source": "attack_0",
+        "target": "asr_0",
+        "kind": "flow"
+      },
+      {
+        "source": "asr_0",
+        "target": "augment_0",
+        "kind": "flow"
+      },
+      {
+        "source": "augment_0",
+        "target": "train_1",
+        "kind": "unroll"
+      },
+      {
+        "source": "augment_0",
+        "target": "train_1",
+        "kind": "flow"
+      },
+      {
+        "source": "train_1",
+        "target": "score_1",
+        "kind": "flow"
+      },
+      {
+        "source": "train_1",
+        "target": "attack_1",
+        "kind": "flow"
+      },
+      {
+        "source": "attack_1",
+        "target": "asr_1",
+        "kind": "flow"
+      },
+      {
+        "source": "asr_1",
+        "target": "augment_1",
+        "kind": "flow"
+      },
+      {
+        "source": "augment_1",
+        "target": "train_2",
+        "kind": "unroll"
+      },
+      {
+        "source": "augment_1",
+        "target": "train_2",
+        "kind": "flow"
+      },
+      {
+        "source": "train_2",
+        "target": "score_2",
+        "kind": "flow"
+      },
+      {
+        "source": "train_2",
+        "target": "attack_2",
+        "kind": "flow"
+      },
+      {
+        "source": "attack_2",
+        "target": "asr_2",
+        "kind": "flow"
+      },
+      {
+        "source": "build_agent",
+        "target": "inject",
+        "kind": "flow"
+      },
+      {
+        "source": "inject",
+        "target": "redteam",
+        "kind": "flow"
+      },
+      {
+        "source": "redteam",
+        "target": "defend",
+        "kind": "flow"
+      },
+      {
+        "source": "defend",
+        "target": "redteam2",
+        "kind": "flow"
+      },
+      {
+        "source": "redteam2",
+        "target": "scorecard",
+        "kind": "flow"
+      },
+      {
+        "source": "asr_2",
+        "target": "scorecard",
+        "kind": "flow"
+      }
+    ]
+  }
+}

@@ -31,7 +31,11 @@ python scripts/fetch_data.py
 The demo defaults are chosen so nothing heavy runs during judging:
 
 ```bash
-streamlit run app/Home.py      # reads committed artifacts/, never trains
+python scripts/seed_artifacts.py       # placeholder artifacts, so the UI runs before the pipeline does
+
+cd web && npm install && npm run dev   # dashboard at localhost:3000, reads artifacts/, never trains
+npm run build                          # static export to web/out/ — deploy anywhere
+
 RECOMPUTE=1 python -m adversarial_payments.loop.flows   # actually retrain + re-attack
 ```
 
@@ -53,14 +57,16 @@ Directories are assigned so five people rarely touch the same file.
 | **P1** detector | `src/adversarial_payments/{data,detect,serving}/`, `scripts/` |
 | **P2** attack | `src/adversarial_payments/{attack,loop}/` |
 | **P3** agentic | `src/adversarial_payments/agentic/` |
-| **P4** dashboard | `app/` |
+| **P4** dashboard | `web/` |
 | **P5** comms | `docs/` |
 
-`schema.py` and `scorecard.py` are **shared contracts** — written Day 1, read-only after.
+`schema.py` (features) and `artifacts.py` + `web/lib/types.ts` (pipeline → frontend) are
+**shared contracts** — written Day 1, read-only after. Both fail loudly rather than drift.
 
 ## Gates
 
-- **Day 1** — `schema.py` frozen; Prefect verified running serverless and offline.
+- **Day 1** — `schema.py` frozen; Prefect gate run. ✅ Passed, with a caveat: Prefect 3 boots
+  an ephemeral local server and takes ~29s, so `RUN_ORCHESTRATED=0` is the notebook default.
 - **Day 2** — first ASR number exists.
 - **Day 3 midday** — code freeze; comms only after.
 

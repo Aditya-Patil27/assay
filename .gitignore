@@ -32,3 +32,10 @@ venv/
 Thumbs.db
 .vscode/
 .idea/
+
+# Node / Next
+web/node_modules/
+web/.next/
+web/out/
+web/public/data/
+next-env.d.ts
