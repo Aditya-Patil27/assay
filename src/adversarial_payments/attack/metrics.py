@@ -6,10 +6,13 @@ Definitions, stated explicitly because a judge will ask:
                    detector *already flagged*. Transactions the detector was going to
                    miss anyway are excluded from the denominator, so ASR measures
                    evasion and not the detector's baseline recall gap.
-``mean_l0``        mean number of *features* that differ from the original, over
-                   successes. A merchant switch is one decision but four features, and
-                   it is counted as four -- L0 is reported as the perturbation it is,
-                   not as the decision it came from.
+``mean_l0``        mean number of *columns* that differ from the original, over
+                   successes. A merchant switch is one decision but four columns, and it
+                   is counted as four -- L0 is reported as the perturbation it is, not as
+                   the decision it came from. ``AttackResult.coords`` carries the
+                   decision count for anyone who wants the other reading; the search's
+                   sparsity budget and its tie-break both run on that one, because the
+                   column count makes the amount lever look sparser than it is.
 ``mean_l2``        mean Euclidean norm of the per-feature deltas after dividing each by
                    that feature's feasible width. Dollars and degrees of latitude do not
                    share a unit; normalising is what makes the number comparable.

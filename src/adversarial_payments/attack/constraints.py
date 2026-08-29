@@ -131,6 +131,12 @@ class ConstraintProjector:
     #: the literature usually reports on tabular data, and comparing the two is how we
     #: show that number is inflated by transactions that cannot exist.
     enforce: bool = True
+    #: Fraction of the original charge an evasion must still collect. The third
+    #: feasibility statement, and the one that is economic rather than statistical: a
+    #: detector trained on amount will always score a small charge as legitimate,
+    #: because it *is*. Without this the greedy search converges on "steal an eighth as
+    #: much", reports ASR = 1.0, and measures the defense working as though it failed.
+    value_floor: float = 0.5
 
     def permissive(self) -> "ConstraintProjector":
         """The same projector with the immutability and coupling projections removed."""
@@ -140,8 +146,8 @@ class ConstraintProjector:
         """Coordinates a greedy step may move under this projector's rules."""
         if self.enforce:
             return [*SEARCH_COORDS, MERCHANT_COORD]
-        coupled = [c for g in self.schema.coupled_groups for c in g if c not in DERIVED]
-        return [*SEARCH_COORDS, *coupled, *sorted(self.schema.frozen)]
+        # The naive attacker: every column is its own knob, derived and frozen included.
+        return list(FEATURES)
 
     # -- construction ---------------------------------------------------------------
 
@@ -210,11 +216,17 @@ class ConstraintProjector:
     def amt_range(self, origin: pd.Series) -> tuple[float, float]:
         """Feasible ``amt`` window for one transaction.
 
-        The intersection of three separate feasibility statements: the raw ``amt``
-        bound, the bound implied by ``log_amt``, and the bound implied by
-        ``amt_ratio_to_card_mean`` given this card's historical mean spend. Enforcing
-        feasibility on the driver is what keeps the derived features in range without
-        having to clip them and break the coupling.
+        The intersection of four separate feasibility statements: the raw ``amt``
+        bound, the bound implied by ``log_amt``, the bound implied by
+        ``amt_ratio_to_card_mean`` given this card's historical mean spend, and
+        :attr:`value_floor` -- the share of the original charge the attack must still
+        collect. Enforcing feasibility on the driver is what keeps the derived features
+        in range without having to clip them and break the coupling.
+
+        The first three are statistical: they say what a payment network has seen. The
+        fourth is economic: it says what a fraudster would bother doing. Only the fourth
+        rules out shrinking the charge until it scores as legitimate, which is not an
+        evasion but a surrender.
         """
         lo, hi = self._bounds("amt")
         llo, lhi = self._bounds("log_amt")
@@ -230,7 +242,16 @@ class ConstraintProjector:
             hi = min(hi, rhi * card_mean)
 
         if not (np.isfinite(lo) and np.isfinite(hi)) or lo >= hi:
-            return self._bounds("amt")
+            lo, hi = self._bounds("amt")
+
+        if self.enforce and self.value_floor > 0.0:
+            floor = self.value_floor * amt0
+            lo = max(lo, floor)
+            if lo > hi:
+                # Nothing is both statistically feasible and still worth stealing. The
+                # original charge always satisfies the floor, so the amount is pinned.
+                return float(amt0), float(amt0)
+
         return float(max(lo, 0.0)), float(hi)
 
     # -- the projections ------------------------------------------------------------
@@ -316,16 +337,35 @@ class ConstraintProjector:
                     "the immutability projection was bypassed."
                 )
 
-    def assert_coupled(self, cand: pd.DataFrame, *, tol: float = 1e-3) -> None:
+    def assert_coupled(
+        self, cand: pd.DataFrame, origin: pd.Series | None = None, *, tol: float = 1e-3
+    ) -> None:
         """Hard check that every row's coupled group is a merchant that exists.
 
         This is the check that makes the ASR mean something: if a row's category and
         coordinates are not a triple observed in the data, the attack invented a
         merchant and the evasion is fictional.
+
+        ``origin``'s own merchant is always legal -- the bank is subsampled for search
+        speed, and a transaction is not fictional merely because its real merchant did
+        not make the sample.
         """
         bank = np.column_stack(
             [self.merchants.category, self.merchants.lat, self.merchants.long]
         )
+        if origin is not None:
+            bank = np.vstack(
+                [
+                    bank,
+                    np.array(
+                        [
+                            float(origin["category_enc"]),
+                            float(origin["merch_lat"]),
+                            float(origin["merch_long"]),
+                        ]
+                    ),
+                ]
+            )
         got = cand[["category_enc", "merch_lat", "merch_long"]].to_numpy(dtype=float)
         for i, row in enumerate(got):
             if not np.any(np.all(np.abs(bank - row) <= tol, axis=1)):

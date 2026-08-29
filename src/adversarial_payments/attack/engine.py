@@ -5,18 +5,24 @@ in-bounds value of every attacker-controllable coordinate, keep the single move 
 most reduces the fraud probability, and stop when the transaction slips under the
 detector's threshold or the sparsity budget runs out.
 
-Two rules distinguish this from a generic adversarial-example loop, and both exist to
-keep the reported ASR honest:
+Three rules distinguish this from a generic adversarial-example loop, and all three
+exist to keep the reported ASR honest:
 
 1. **Only already-flagged fraud is attacked.** Evading a detector that was going to miss
    the transaction anyway is not an evasion. The attempt set is
    ``is_fraud == 1 AND p(fraud) >= threshold``.
 2. **Every candidate is projected before it is scored.** The engine never asks the model
    about a transaction that could not exist; see ``constraints.py``.
+3. **The evasion must still be worth running.** ``ConstraintProjector.value_floor``
+   holds the charge above a fixed share of the original. Without it the search converges
+   on shrinking the amount until the model scores it as legitimate -- which it is -- and
+   an ASR of 1.0 gets reported for a strategy that hands back most of the money.
 
-Budget is spent on *coordinates*, not features. The merchant switch is one attacker
-decision that moves four columns, so it costs one unit of budget and is reported as the
-L0 it really is.
+Budget is spent on *coordinates*, not columns: the merchant switch is one attacker
+decision that moves four columns, and changing the amount is one that moves three. The
+two counts are reported separately and neither is a substitute for the other --
+``AttackResult.coords`` is the decisions taken, ``AttackResult.l0`` the columns that
+ended up different.
 """
 
 from __future__ import annotations
@@ -214,7 +220,7 @@ def attack_one(
     base = origin[list(FEATURES)].astype(float)
     orig_prob = float(_fraud_prob(model, pd.DataFrame([base]), counter)[0])
 
-    best: tuple[pd.Series, float] | None = None
+    best: tuple[pd.Series, float, set[str]] | None = None
     best_key: tuple[int, float] | None = None
 
     for restart in range(max(cfg.restarts, 1)):
@@ -237,10 +243,14 @@ def attack_one(
             model, base, projector, cfg, counter, rng, start, seeded
         )
         if prob < cfg.threshold:
-            touched, _ = _l0_l2(base, adv, projector)
-            key = (len(touched), prob)
+            # Rank restarts by attacker *decisions*, not by columns that moved. A
+            # merchant switch is one decision spread over four columns; changing the
+            # amount is one decision spread over three. Counting columns makes the
+            # amount lever look sparser than it is and biases every reported attack
+            # toward it.
+            key = (len(coords), prob)
             if best_key is None or key < best_key:
-                best, best_key = (adv, prob), key
+                best, best_key = (adv, prob, coords), key
         if counter.exhausted:
             break
 
@@ -253,13 +263,13 @@ def attack_one(
             queries=counter.n,
         )
 
-    adv, prob = best
+    adv, prob, coords = best
     frame = pd.DataFrame([adv])
     # Belt and braces: the result that leaves this function has been re-checked against
     # all three projections, not merely produced by code that intends to respect them.
     if projector.enforce:
         projector.assert_frozen(frame, base)
-        projector.assert_coupled(frame)
+        projector.assert_coupled(frame, base)
         projector.assert_consistent(frame)
 
     touched, l2 = _l0_l2(base, adv, projector)
@@ -270,7 +280,7 @@ def attack_one(
         adv_prob=prob,
         queries=counter.n,
         touched=touched,
-        coords=tuple(sorted(c for c in touched)),
+        coords=tuple(sorted(coords)),
         l0=len(touched),
         l2=l2,
         adv_row={c: float(adv[c]) for c in FEATURES},
