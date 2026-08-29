@@ -31,12 +31,23 @@ banner while any of them do — so seeded numbers cannot quietly end up in front
 
 ---
 
+## Repo
+
+<https://github.com/Aditya-Patil27/mastercard-adversarial-payments> — **private**.
+
+You need to be added as a collaborator before you can clone. Ask Aditya, or he runs:
+
+```bash
+gh repo add-collaborator Aditya-Patil27/mastercard-adversarial-payments <github-username> --permission push
+```
+
 ## Setup (everyone, once)
 
 Requires **Python 3.12** — not 3.13 or 3.14, the ML stack has no wheels for those yet.
 
 ```bash
-git clone <repo-url> && cd mastercard
+git clone https://github.com/Aditya-Patil27/mastercard-adversarial-payments.git
+cd mastercard-adversarial-payments
 
 uv venv --python 3.12
 uv pip install -e ".[dev]"
