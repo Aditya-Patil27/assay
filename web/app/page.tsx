@@ -1,27 +1,20 @@
 import { AdversarialGraph } from "@/components/AdversarialGraph";
-import { Panel, PlaceholderBanner, Section, Stat } from "@/components/Chrome";
+import {
+  LegendKey,
+  Panel,
+  PlaceholderBanner,
+  Provenance,
+  Section,
+  Stat,
+} from "@/components/Chrome";
 import { CoevolutionChart } from "@/components/CoevolutionChart";
 import { AgenticPanel, AttackExamplePanel } from "@/components/Panels";
 import { Scorecard } from "@/components/Scorecard";
-import {
-  anyPlaceholder,
-  loadAgentic,
-  loadAttackExamples,
-  loadAttackRounds,
-  loadDetectRounds,
-  loadGraph,
-  loadScorecard,
-} from "@/lib/load";
+import { loadArtifacts, placeholderSources, provenance } from "@/lib/load";
 
 export default async function Home() {
-  const [scorecard, graph, detect, attack, examples, agentic] = await Promise.all([
-    loadScorecard(),
-    loadGraph(),
-    loadDetectRounds(),
-    loadAttackRounds(),
-    loadAttackExamples(),
-    loadAgentic(),
-  ]);
+  const artifacts = await loadArtifacts();
+  const { scorecard, graph, detect, attack, examples, agentic } = artifacts;
 
   const first = attack.payload[0];
   const last = attack.payload[attack.payload.length - 1];
@@ -31,20 +24,18 @@ export default async function Home() {
 
   return (
     <main>
-      <PlaceholderBanner
-        shown={anyPlaceholder(scorecard, graph, detect, attack, examples, agentic)}
-      />
+      <PlaceholderBanner sources={placeholderSources(artifacts)} />
 
       {/* Headline */}
-      <header className="px-6 pb-12 pt-16 md:px-10 md:pt-24">
+      <header className="px-4 pb-12 pt-12 sm:px-6 md:px-10 md:pt-24">
         <div className="mx-auto max-w-6xl">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted sm:text-xs">
             Mastercard Innovation Challenge 2026 · AI red teaming for payment security
           </p>
-          <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
+          <h1 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight tracking-tight sm:text-4xl md:text-5xl">
             An attack that works, then stops working.
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted">
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted md:text-base">
             A constraint-aware red team evades a payment fraud detector by moving only what a
             real attacker controls. The detector retrains on those evasions. Repeat. We report
             what the attack costs the defender — measured on two different attack surfaces, in
@@ -102,8 +93,23 @@ export default async function Home() {
         id="graph"
         eyebrow="Architecture"
         title="The unrolled adversarial loop"
-        lede="Attack → detect → score → retrain → attack is a feedback cycle, not a DAG. It becomes acyclic only when unrolled over rounds: round r's retrained detector is a distinct node feeding round r+1's attacker. Those unroll edges are drawn dashed."
+        lede="Attack → detect → score → retrain → attack is a feedback cycle, not a DAG. It becomes acyclic only when unrolled over rounds: round r's retrained detector is a distinct node feeding round r+1's attacker."
       >
+        <div className="mb-4 flex flex-wrap gap-x-5 gap-y-2">
+          <LegendKey
+            swatch={<span className="h-px w-6 bg-line" aria-hidden="true" />}
+            label="flow — ordinary dependency"
+          />
+          <LegendKey
+            swatch={
+              <span
+                className="h-0 w-6 border-t-2 border-dashed border-warn"
+                aria-hidden="true"
+              />
+            }
+            label="unroll — the feedback edge, round r into round r+1"
+          />
+        </div>
         <AdversarialGraph graph={graph.payload} />
       </Section>
 
@@ -129,12 +135,7 @@ export default async function Home() {
         <AgenticPanel categories={agentic.payload} />
       </Section>
 
-      <footer className="border-t border-line px-6 py-10 md:px-10">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 font-mono text-xs text-muted">
-          <span>Dataset: Sparkov · Detector: XGBoost · Attack: constrained coordinate descent</span>
-          <span>build {scorecard.git_sha}</span>
-        </div>
-      </footer>
+      <Provenance {...provenance(artifacts)} />
     </main>
   );
 }

@@ -42,7 +42,77 @@ export const loadAttackRounds = () => load<AttackRound[]>("attack", "rounds.json
 export const loadAttackExamples = () => load<AttackExample[]>("attack", "examples.json");
 export const loadAgentic = () => load<AgenticCategory[]>("agentic", "redteam.json");
 
+export interface Artifacts {
+  scorecard: Envelope<ScorecardRow[]>;
+  graph: Envelope<Graph>;
+  detect: Envelope<DetectRound[]>;
+  attack: Envelope<AttackRound[]>;
+  examples: Envelope<AttackExample[]>;
+  agentic: Envelope<AgenticCategory[]>;
+}
+
+/**
+ * Every artifact the page renders, keyed by the file that produced it.
+ *
+ * The key is the on-disk path rather than a friendly name on purpose: when the banner
+ * names a placeholder, whoever owns that writer must be able to go straight to the file.
+ */
+export const ARTIFACT_FILES: Record<keyof Artifacts, string> = {
+  scorecard: "artifacts/scorecard.json",
+  graph: "artifacts/graph.json",
+  detect: "artifacts/detect/rounds.json",
+  attack: "artifacts/attack/rounds.json",
+  examples: "artifacts/attack/examples.json",
+  agentic: "artifacts/agentic/redteam.json",
+};
+
+export async function loadArtifacts(): Promise<Artifacts> {
+  const [scorecard, graph, detect, attack, examples, agentic] = await Promise.all([
+    loadScorecard(),
+    loadGraph(),
+    loadDetectRounds(),
+    loadAttackRounds(),
+    loadAttackExamples(),
+    loadAgentic(),
+  ]);
+  return { scorecard, graph, detect, attack, examples, agentic };
+}
+
 /** True if any artifact on the page is still seeded placeholder data. */
 export function anyPlaceholder(...envelopes: { placeholder: boolean }[]): boolean {
   return envelopes.some((e) => e.placeholder);
+}
+
+export interface PlaceholderSource {
+  file: string;
+  kind: string;
+}
+
+/**
+ * Which artifacts are still fixtures.
+ *
+ * A page-wide boolean would tell a judge that *something* is fake without saying what --
+ * which is barely better than saying nothing. Naming the files is the point.
+ */
+export function placeholderSources(artifacts: Artifacts): PlaceholderSource[] {
+  return (Object.keys(ARTIFACT_FILES) as (keyof Artifacts)[])
+    .filter((key) => artifacts[key].placeholder)
+    .map((key) => ({ file: ARTIFACT_FILES[key], kind: artifacts[key].kind }));
+}
+
+/**
+ * Provenance for the run that produced these numbers.
+ *
+ * Artifacts are written by four independent stages, so they carry different timestamps
+ * and can carry different commits. We surface the newest timestamp and every distinct
+ * sha -- a mixed-sha footer is itself a finding worth showing.
+ */
+export function provenance(artifacts: Artifacts): { shas: string[]; newest: string } {
+  const envelopes = Object.values(artifacts);
+  const shas = [...new Set(envelopes.map((e) => e.git_sha))].sort();
+  const newest = envelopes
+    .map((e) => e.created_at)
+    .sort()
+    .at(-1)!;
+  return { shas, newest };
 }
