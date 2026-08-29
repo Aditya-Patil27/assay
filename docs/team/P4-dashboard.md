@@ -36,9 +36,25 @@ individual attacks, and the AI-agent results. It builds cleanly to a static expo
 
 Two things to know:
 
-**Nobody has confirmed the exported site opens standalone.** It builds. That's not the same
-as verifying the output folder actually works when opened directly, which is exactly the
-scenario a judge might hit.
+**The exported site does NOT work opened directly from disk.** This was checked in a real
+browser: charts render blank, and React Flow mounts its container but paints nothing.
+
+The cause is worth knowing, because the obvious diagnosis is wrong. The data is fine — it's
+inlined into the HTML at build time, which is why headings, tables and stat tiles all show
+correctly. What fails is *hydration*: Next emits one chunk with a `crossorigin` attribute,
+and under `file://` that triggers a CORS check against an opaque origin, so the chunk is
+blocked and the client components that draw the charts never run.
+
+So checking that asset paths resolve (they do — 26 relative, 0 absolute) was necessary and
+not sufficient. **A served URL is required.** Any static server works:
+
+```bash
+cd web/out && python -m http.server 8000
+```
+
+Consequence: zipping `web/out/` is *not* a usable fallback on its own. If we ship a zip it
+must carry that one-line instruction, because a judge who double-clicks `index.html` sees a
+page with no charts on it.
 
 **The amber banner is currently doing real work.** Five of six result files are still
 placeholders, so the site is correctly announcing which numbers are fake. Do not remove or
@@ -51,9 +67,28 @@ that lets everyone else ship honestly.
    A live link the team can watch fill in with real numbers is worth more than a perfect
    local build.
 2. **Check it in a real browser.** Including on a phone. Judges browse on phones.
-3. **Verify the static export opens standalone**, not just that the build command succeeded.
+3. **Fix the co-evolution chart plotting absent data as zero** — see below. Highest
+   priority correctness bug on the page.
 4. **Re-sync as other tracks land real numbers**, and watch the banner clear.
 5. **Run the reproducibility checks** — you own verifying the claims we make to judges.
+
+## The bug to fix first
+
+The co-evolution chart currently **disproves its own caption.** It plots PR-AUC as
+82.9% → 0% → 0%, collapsing to the axis, directly beneath text reading *"Attack success
+collapses while detection quality holds… the failure mode this chart exists to rule out."*
+
+It isn't a UI bug in origin. `artifacts/detect/rounds.json` holds round 0 only;
+`artifacts/attack/rounds.json` holds rounds 0–2. The chart joins them by round, finds no
+PR-AUC for rounds 1 and 2, and renders the absence as zero.
+
+P1 was *right* not to write invented rounds next to a real number. The chart is what needs
+to change: **suppress missing points rather than plotting them as 0.** Recharts skips `null`
+values in a line series — that's the fix, not a data change.
+
+Plotting absent data as zero is the same class of error as inventing a number, and right now
+it is the worst thing on the page for a judge. The stat tile already contradicts it, showing
+"PR-AUC 0.829 → 0.829, −0.0%" next to a chart showing a collapse to zero.
 
 ## What "done" looks like
 
