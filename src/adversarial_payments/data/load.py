@@ -168,7 +168,7 @@ def _subsample_by_card(raw: pd.DataFrame, sample_rows: int) -> pd.DataFrame:
     ``hours_since_last_txn`` and ``txn_count_*`` are computed from, so entire cards are
     kept or dropped. Deterministic under ``config.SEED``.
     """
-    cards = raw["cc_num"].drop_duplicates().to_numpy()
+    cards = np.array(raw["cc_num"].drop_duplicates().to_numpy(), copy=True)
     rng = np.random.default_rng(config.SEED)
     rng.shuffle(cards)
 

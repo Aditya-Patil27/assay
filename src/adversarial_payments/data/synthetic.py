@@ -309,7 +309,7 @@ def generate_synthetic_sparkov(
             "city_pop": cards["city_pop"].to_numpy()[card_idx],
             "job": cards["job"].to_numpy()[card_idx],
             "dob": cards["dob"].to_numpy()[card_idx],
-            "unix_time": (ts.astype("int64") // 10**9),
+            "unix_time": ts.to_numpy().astype("datetime64[s]").astype("int64"),
             "merch_lat": np.round(merch_lat, 6),
             "merch_long": np.round(merch_long, 6),
             "is_fraud": is_fraud,
@@ -321,7 +321,9 @@ def generate_synthetic_sparkov(
 
     # trans_num last, so it is a stable id over the final row order.
     frame["trans_num"] = [f"{v:032x}" for v in rng.integers(0, 2**63, len(frame))]
-    frame["unix_time"] = frame["trans_date_trans_time"].astype("int64") // 10**9
+    frame["unix_time"] = (
+        frame["trans_date_trans_time"].to_numpy().astype("datetime64[s]").astype("int64")
+    )
 
     return frame.loc[:, list(RAW_COLUMNS)].reset_index(drop=True)
 

@@ -107,10 +107,13 @@ export function CoevolutionChart({
               activeDot={{ r: 7 }}
               isAnimationActive={false}
             >
+              {/* Above the line, not below: at round 0 the two series are only ~11 points
+                  apart and a label hung underneath the PR-AUC point lands on top of the
+                  ASR label. */}
               <LabelList
                 dataKey="prAuc"
-                position="bottom"
-                offset={12}
+                position="top"
+                offset={10}
                 formatter={(v: React.ReactNode) => `${v}%`}
                 style={{
                   fill: "var(--color-defend)",
@@ -193,7 +196,7 @@ function RoundStrip({ rows }: { rows: Row[] }) {
               <td className="border-b border-line px-3 py-2.5">{r.l0.toFixed(1)}</td>
               <td className="border-b border-line px-3 py-2.5">{r.queries}</td>
               <td className="border-b border-line px-3 py-2.5 text-muted">
-                {r.added ? `+${r.added.toLocaleString()}` : "—"}
+                {r.added ? `+${r.added.toLocaleString("en-US")}` : "—"}
               </td>
             </tr>
           ))}

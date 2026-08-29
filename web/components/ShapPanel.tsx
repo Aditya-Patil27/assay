@@ -61,9 +61,9 @@ export function ShapPanel({ rounds }: { rounds: DetectRound[] }) {
 
             <p className="mt-4 border-t border-line pt-3 font-mono text-[10px] leading-relaxed text-muted">
               threshold {r.threshold.toFixed(2)} · P {r.precision.toFixed(2)} · R{" "}
-              {r.recall.toFixed(2)} · n={r.n_train.toLocaleString()}
+              {r.recall.toFixed(2)} · n={r.n_train.toLocaleString("en-US")}
               {r.n_adversarial_added
-                ? ` (+${r.n_adversarial_added.toLocaleString()} adversarial)`
+                ? ` (+${r.n_adversarial_added.toLocaleString("en-US")} adversarial)`
                 : ""}
             </p>
           </Panel>

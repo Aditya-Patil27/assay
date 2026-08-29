@@ -1,0 +1,134 @@
+{
+  "columns": [
+    "age",
+    "amt",
+    "amt_ratio_to_card_mean",
+    "category_enc",
+    "city_pop",
+    "day_of_week",
+    "distance_km",
+    "gender_enc",
+    "home_lat",
+    "home_long",
+    "hour",
+    "hours_since_last_txn",
+    "is_night",
+    "job_enc",
+    "log_amt",
+    "merch_lat",
+    "merch_long",
+    "state_enc",
+    "txn_count_1h",
+    "txn_count_24h"
+  ],
+  "frozen": [
+    "age",
+    "city_pop",
+    "gender_enc",
+    "home_lat",
+    "home_long",
+    "job_enc",
+    "state_enc"
+  ],
+  "coupled_groups": [
+    [
+      "category_enc",
+      "merch_lat",
+      "merch_long",
+      "distance_km"
+    ]
+  ],
+  "mutable": [
+    "amt",
+    "amt_ratio_to_card_mean",
+    "day_of_week",
+    "hour",
+    "hours_since_last_txn",
+    "is_night",
+    "log_amt",
+    "txn_count_1h",
+    "txn_count_24h"
+  ],
+  "bounds": {
+    "age": [
+      19.928815879534564,
+      89.48255989048599
+    ],
+    "amt": [
+      1.13,
+      839.3234000000125
+    ],
+    "amt_ratio_to_card_mean": [
+      0.017052132833409058,
+      12.161754138927678
+    ],
+    "category_enc": [
+      0.0,
+      13.0
+    ],
+    "city_pop": [
+      23.0,
+      2906700.0
+    ],
+    "day_of_week": [
+      0.0,
+      6.0
+    ],
+    "distance_km": [
+      8.033369686616094,
+      135.2288113176372
+    ],
+    "gender_enc": [
+      0.0,
+      1.0
+    ],
+    "home_lat": [
+      27.9611,
+      48.8878
+    ],
+    "home_long": [
+      -122.1866,
+      -69.9656
+    ],
+    "hour": [
+      0.0,
+      23.0
+    ],
+    "hours_since_last_txn": [
+      0.02666666666666667,
+      93.65343750000075
+    ],
+    "is_night": [
+      0.0,
+      1.0
+    ],
+    "job_enc": [
+      0.0,
+      84.0
+    ],
+    "log_amt": [
+      0.7561219797213337,
+      6.733785546429273
+    ],
+    "merch_lat": [
+      27.426208455,
+      49.55607619
+    ],
+    "merch_long": [
+      -122.65214794500001,
+      -69.31240312
+    ],
+    "state_enc": [
+      0.0,
+      33.0
+    ],
+    "txn_count_1h": [
+      0.0,
+      2.0
+    ],
+    "txn_count_24h": [
+      0.0,
+      15.0
+    ]
+  }
+}

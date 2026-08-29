@@ -1,0 +1,15 @@
+{
+  "source": "kaggle",
+  "n_rows": 1852394,
+  "fraud_rate": 0.005210014716091717,
+  "n_fraud": 9651,
+  "n_cards": 999,
+  "date_min": "2019-01-01 00:00:18",
+  "date_max": "2020-12-31 23:59:34",
+  "kaggle_dataset": "kartik2112/fraud-detection",
+  "seed": null,
+  "generator": null,
+  "path": "data\\interim\\sparkov.parquet",
+  "created_at": "2026-08-29T18:22:15.351761+00:00",
+  "warning": null
+}

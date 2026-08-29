@@ -1,153 +1,183 @@
 # P2 — Attack engine
 
-You own the red team, and the number the whole submission is built on: **Attack Success Rate
-before and after adversarial retraining.** Everything else is context for your chart.
-
-**You own:** `src/adversarial_payments/attack/`, `src/adversarial_payments/loop/`
-**Don't touch:** `data/`, `detect/`, `agentic/`, `web/`
+> **⏰ Aug 31, 11:59 PM IST.** You own the single most important number in the submission.
 
 ---
 
-## Start now — don't wait for P1
+# Part 1 — For you
 
-You need a trained model and a schema. Until P1 lands them, make your own:
+## What you're building, in plain terms
 
-```python
-import numpy as np, pandas as pd
-from sklearn.ensemble import GradientBoostingClassifier
-from adversarial_payments.schema import FEATURES, FeatureSchema
+P1 built a fraud detector. You're building the criminal who tries to slip past it.
 
-rng = np.random.default_rng(0)
-df = pd.DataFrame({c: rng.normal(size=5000) for c in FEATURES})
-y = (df["amt"] + df["distance_km"] * 0.5 + rng.normal(scale=0.3, size=5000) > 1).astype(int)
-schema, model = FeatureSchema.fit(df), GradientBoostingClassifier().fit(df[list(FEATURES)], y)
-```
+But not a *cartoon* criminal. The interesting question isn't "can you fool the model if you're
+allowed to change anything?" — of course you can, just claim the transaction was £2 from the
+victim's home town. The interesting question is: **can you fool it while only changing things
+a real fraudster could actually control?**
 
-Your engine should never care where the model came from — it needs `predict_proba` and
-nothing else. When P1 commits `artifacts/schema.json` and a real model, you swap two lines.
+A fraudster with stolen card details:
 
----
+- **Cannot** change the victim's age, their home city, or where they live. Those come with the
+  stolen identity.
+- **Can** choose which shop to hit — but that's one decision that changes several things at
+  once: the shop's category, its GPS location, and the distance from the victim's home. They
+  move together or not at all.
+- **Can** freely choose the amount, the time of day, and how fast to make repeat purchases.
 
-## Tasks, in order
+Your engine searches for the smallest change, within those rules, that flips the detector from
+"fraud" to "fine". Then you count how often that works. **That count is the ASR.**
 
-### 1. `attack/constraints.py` — the three projections
+Then the loop: the detector retrains on your successful attacks and you attack the new one.
+Three rounds. The ASR should fall each round. That falling line is the whole thesis.
 
-This module is the intellectual core of the submission. It is what makes our ASR mean
-something, versus the standard adversarial-ML result that ignores whether the perturbed
-record could exist.
+## Why it matters more than anything else here
 
-```python
-def project(x: pd.Series, x0: pd.Series, schema: FeatureSchema) -> pd.Series
-```
+Every other part of this project has a fallback. If the website is ugly we still have numbers.
+If the AI-agent track fails we still have one attack surface. **If there is no real ASR
+number, there is no submission** — just a fraud detector, which is a solved problem nobody is
+impressed by.
 
-**Immutability.** Every feature in `schema.frozen` is restored to its value in `x0`. Not
-clipped — restored. The attacker cannot touch these at all.
+Everything else is context for your chart.
 
-**Feasibility.** Every feature clipped to `schema.bounds[feature]`. Additionally: integer
-features stay integral (`hour`, `day_of_week`, `txn_count_*`, `is_night`), `is_night` must
-stay consistent with `hour`, and `log_amt` must stay `log1p(amt)` — a perturbation that
-breaks that identity is detectable by inspection and would embarrass us.
+## What's already done
 
-**Coupling.** This is the one the strategy doc only gestures at. `schema.coupled_groups`
-declares that `category_enc`, `merch_lat`, `merch_long` and `distance_km` move *together*.
-Implement it as a **discrete choice, not a continuous perturbation**: build a lookup of real
-(category, merchant lat/long) combinations that appear in the data, and let the attacker
-*swap to a different real merchant*, recomputing `distance_km` from the victim's unchanged
-home coordinates. An attacker picks a merchant; they don't invent one at arbitrary
-coordinates.
+A lot. Do not start from scratch — read the existing code first.
 
-Write `tests/test_constraints.py` first. Property: for any random perturbation,
-`project(x, x0, schema)` never changes a frozen feature, never leaves bounds, and never
-breaks the `log_amt`/`amt` identity. This is exactly the kind of code where a subtle bug
-produces a great-looking, wrong ASR.
+- `attack/constraints.py`, `attack/engine.py`, `attack/metrics.py` — written and passing tests
+- `loop/state.py`, `loop/flows.py` — the round-by-round loop, with a working CLI
+- Tests in `tests/test_attack.py` and `tests/test_loop.py`
 
-### 2. `attack/engine.py` — greedy coordinate descent
+**A serious bug was already found and fixed here today**, and it's worth understanding because
+it's exactly the kind of thing you're guarding against. The engine reported ASR = 1.0 — a
+perfect 100% success rate. It looked like a triumph. It was achieved by shrinking transactions
+to about 12% of their value. The attacker "won" every time while giving up 88% of the money,
+which is not evasion, it's surrender. Shipping that number would have collapsed under the
+first judge question.
 
-Tree ensembles have no gradients, so no FGSM/PGD. Greedy coordinate descent instead — it
-also gives L0 sparsity for free, which *is* the sparsity projection rather than a bolt-on.
+The fix added a floor on how much value the attacker must retain (now 74.5%), stopped
+crediting the attacker for moving columns that are just arithmetic on the amount, and fixed a
+ranking bug that made it always reach for the amount lever. The ASR is still 1.0 afterwards —
+but now it's an honest 1.0, meaning *it evades every time while keeping three quarters of the
+money*. That's a legitimate "before" number.
 
-```
-for restart in range(n_restarts):
-    x = x0.copy(); touched = set()
-    while model.predict_proba(x)[1] > threshold and len(touched) < budget:
-        best = None
-        for f in schema.attackable():                 # frozen never enters this loop
-            for candidate in candidates(f, x, schema):  # line search / real merchants
-                trial = project(x.with_(f, candidate), x0, schema)
-                p = model.predict_proba(trial)[1]
-                if p < best_p: best = (f, trial, p)
-        if best is None: break                        # no single move helps -> stuck
-        x, touched = best.trial, touched | {best.f}
-    if evaded(x): keep the x with the smallest len(touched)
-```
+## What's left
 
-Only attack transactions the detector **correctly flags as fraud** — evading on a record the
-model already scores as legitimate is not an evasion. State that in the notebook; it's the
-first thing a sharp judge checks.
+1. Run the loop against P1's **real** round-0 detector instead of the stub model
+2. Produce rounds 1 and 2 — **these have never been run on real data**
+3. Confirm the ASR actually falls across rounds while PR-AUC holds
+4. Write the real result files and the tabular row of the scorecard
 
-Count and report queries per successful attack. It's a black-box realism argument: an
-attacker who needs 300 queries against a live API gets rate-limited.
+Step 3 is the moment of truth for the entire project.
 
-### 3. `attack/metrics.py`
+## What "done" looks like
 
-`ASR = successful evasions / attempted evasions`, plus mean L0, mean L2 (over the mutable
-subspace only — L2 across a categorical encoding is meaningless), median queries, and
-per-feature attack frequency.
+- `artifacts/attack/rounds.json` says `placeholder: false`
+- The website's amber banner no longer lists your files
+- The co-evolution chart shows a real falling line
+- Running it with and without `--orchestrated` gives **identical** numbers
 
-### 4. `loop/state.py` — the run state and the graph
+## How to check your agent isn't fooling you
 
-A plain dict every task writes into, serialised to `artifacts/graph.json` via
-`A.GraphNode` / `A.GraphEdge`. The frontend draws it directly.
+| If it says | Ask |
+|---|---|
+| "ASR is 100%" | *"What did the attacker sacrifice? Show me value retained, and the actual feature changes."* |
+| "ASR dropped to 5%" | *"Did PR-AUC hold? If the detector also got worse, we broke it rather than hardening it."* |
+| "The attack works" | *"Which features did it touch, and how often? If it's 95% one feature, the constraints are too loose."* |
+| "Tests pass" | *"Show me a constraint test failing when I deliberately let a frozen feature move."* |
 
-`scripts/seed_artifacts.py:build_graph()` already produces the exact shape and layering —
-read it, then make the real one match. Keep `kind="unroll"` on the retrain edges: those are
-the feedback edges, drawn dashed, because calling a feedback loop a DAG is the mistake
-strategy §5.1 explicitly warns against.
+**Red flags:** an attack that only ever changes the amount. A frozen feature appearing in the
+changed list. ASR that doesn't move at all across rounds.
 
-### 5. `loop/flows.py` — the unrolled loop
+## If you get stuck
 
-```
-r=0: train -> score -> attack -> ASR_0 -> augment
-r=1: train -> score -> attack -> ASR_1 -> augment
-r=2: train -> score -> attack -> ASR_2
-```
-
-Augmentation: add successful adversarial examples to the training set **labelled fraud**
-(they are fraud — that's the point), retrain, re-attack with a *fresh* attack budget.
-
-Two execution paths, same tasks:
-
-```python
-if SETTINGS.run_orchestrated:   # Prefect @flow/@task
-    ...
-else:                           # plain Python loop -- the notebook default
-    ...
-```
-
-The fallback is not optional and it is not decorative. **Prefect 3 boots an ephemeral local
-HTTP server and costs ~29 s** (verified — `scripts/check_prefect_offline.py`), which is a
-real risk on a locked-down judging machine. Test both paths give identical numbers.
-
-### 6. Write your artifacts
-
-`attack_rounds`, `attack_examples`, `graph`, and the tabular row of `scorecard`.
-Pick 2–4 genuinely interesting worked examples — ideally one where the attacker succeeded by
-swapping merchant rather than just lowering the amount.
+You don't need the real data to make progress — there's a synthetic fallback that lets the
+whole loop run. Say: *"Run the loop on synthetic data first so I can see the shape of the
+result, then swap in the real model."*
 
 ---
 
-## What "success" looks like
+# Part 2 — Paste this to your AI agent
 
-ASR should **fall a lot** across rounds while P1's PR-AUC **barely moves**. If PR-AUC craters
-too, we bought robustness by breaking the detector, and the honest thing is to report that.
+```
+You are working on the P2 attack-engine track of an adversarial ML project.
 
-If ASR at round 0 is near 100%, your constraints are too loose — check that frozen features
-really are frozen. If it's near 0%, your budget or bounds are too tight.
+CONTEXT
+Read first, in this order:
+  docs/team/BUILD.md                  (how to run things)
+  src/adversarial_payments/schema.py  (the feature contract)
+  src/adversarial_payments/attack/    (constraints.py, engine.py, metrics.py -- EXISTING, working)
+  src/adversarial_payments/loop/      (state.py, flows.py -- EXISTING, working)
+  tests/test_attack.py, tests/test_loop.py
 
-## Done when
+Substantial working code already exists and passes its tests. READ IT BEFORE WRITING
+ANYTHING. Do not rewrite these modules; extend them.
 
-- [ ] `tests/test_constraints.py` proves all three projections hold under random input
-- [ ] Both `RUN_ORCHESTRATED=1` and `=0` produce identical ASR
-- [ ] `artifacts/attack/rounds.json`, `examples.json`, `graph.json` at `placeholder: false`
-- [ ] Tabular row written to `artifacts/scorecard.json`
-- [ ] Co-evolution chart on the dashboard shows the real curve
+SCOPE -- you may edit ONLY:
+  src/adversarial_payments/attack/**
+  src/adversarial_payments/loop/**
+  tests/test_attack.py, tests/test_loop.py
+Do NOT touch data/, detect/, agentic/, web/, or docs/.
+
+OBJECTIVE
+Produce the project's headline result: a real Attack Success Rate across 3 adversarial
+rounds, computed against P1's real trained detector (not the stub model), showing ASR
+falling across rounds while the detector's PR-AUC holds.
+
+THE THREE CONSTRAINT PROJECTIONS (already implemented -- preserve their semantics)
+1. Immutability: features in schema.FROZEN are restored to their original values, never
+   clipped. The attacker inherits the victim's identity and cannot forge it.
+2. Feasibility: values stay within schema.bounds. Integer features stay integral.
+   is_night stays consistent with hour. log_amt must remain log1p(amt). A value floor
+   (ConstraintProjector.value_floor, default 0.5) requires the attacker to retain a
+   realistic fraction of transaction value.
+3. Coupling: schema.coupled_groups declares that category_enc, merch_lat, merch_long and
+   distance_km move TOGETHER, as a discrete swap to a real merchant that exists in the
+   data -- never as independent continuous perturbation. distance_km is recomputed from
+   the victim's unchanged home coordinates.
+
+ALGORITHM
+Greedy coordinate descent with random restarts. Tree ensembles have no gradients, so no
+FGSM/PGD. Coordinate descent yields L0 sparsity natively. Rank restarts by number of
+attacker DECISIONS, not number of changed columns -- a merchant swap is 1 decision across
+4 columns, and ranking by columns structurally biases the search toward the amount lever.
+
+Only attack transactions the detector correctly flags as fraud. Evading on a record already
+scored legitimate is not an evasion. Count model queries per successful attack.
+
+TASKS, IN ORDER
+1. Run the existing test suite. Report the actual output.
+2. Load P1's real artifacts: artifacts/feature_schema.json and the round-0 detector.
+   Confirm the schema validates against the real feature frame.
+3. Run round 0 against the real model. Report ASR, mean L0, median queries, mean value
+   retained, and the per-feature attack frequency distribution.
+4. Implement/verify augmentation: successful adversarial examples are added to the
+   training set labelled as fraud, the detector retrains, and round r+1 attacks the new
+   model with a fresh attack budget.
+5. Run rounds 1 and 2. These have never been run on real data.
+6. Verify RUN_ORCHESTRATED=1 (Prefect) and =0 (plain loop) produce IDENTICAL numbers.
+7. Write artifacts via `from adversarial_payments import artifacts as A`:
+   A.write("attack_rounds", ..., placeholder=False)
+   A.write("attack_examples", ..., placeholder=False)   # 2-4 examples; include at least
+                                                        # one won by merchant swap, not amount
+   A.write("graph", ..., placeholder=False)             # match seed_artifacts.build_graph()
+                                                        # shape; keep kind="unroll" on
+                                                        # retrain edges
+   Plus the tabular row of A.write("scorecard", ...).
+
+CORRECTNESS BARS -- these are not optional
+- If ASR at round 0 is ~100%, report what the attacker SACRIFICED (value retained,
+  features touched). A previous version of this engine scored 1.0 by shrinking
+  transactions to 12% of value -- that is surrender, not evasion. Do not reintroduce it.
+- If PR-AUC collapses alongside ASR, say so plainly. That means we broke the detector
+  rather than hardening it, and it is a finding, not a failure to hide.
+- If the attack only ever touches `amt`, the constraints are too loose. Investigate.
+- A frozen feature must NEVER appear in a changed-feature list. Assert this.
+
+METHOD
+Test-driven. Write the test, watch it FAIL, then make it pass. For any numeric claim, paste
+the real terminal output -- never a number you did not execute. If something does not work,
+leave the artifact at placeholder=true and say so; the dashboard banners it honestly. Never
+replace a fixture with an invented value.
+
+Run `pytest -q` after each task and report the real result.
+```

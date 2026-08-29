@@ -67,7 +67,7 @@ def synthetic_features(n: int = 40_000, *, seed: int = SEED) -> pd.DataFrame:
     # -- label: a nonlinear, interacting rule so a tree model has something to learn --
     risky_category = np.isin(category_enc.astype(int), (2, 5, 11, 13)).astype(float)
     logit = (
-        -6.4
+        -10.4
         + 1.35 * np.log1p(amt_ratio)
         + 0.9 * is_night
         + 0.0016 * distance_km

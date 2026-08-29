@@ -26,7 +26,9 @@ const STATUS: Record<NodeStatus, { glyph: string; word: string }> = {
   pending: { glyph: "○", word: "pending" },
 };
 
-const LANE: Record<Track, number> = { tabular: 0, shared: 1, agentic: 2 };
+const COL = 224;
+const ROW = 132;
+const LABEL_X = -196;
 
 /**
  * The unrolled adversarial loop.
@@ -50,7 +52,7 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
     }
     const edgeList = [...deduped.values()];
 
-    // Layered layout: x by pipeline depth, y by track lane and seat within the column.
+    // Topological depth, used only to order nodes left-to-right within their band.
     const depth = new Map<string, number>();
     const incoming = new Map<string, string[]>();
     for (const e of edgeList) {
@@ -68,20 +70,46 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
     };
     graph.nodes.forEach((n) => resolve(n.id));
 
-    const perColumn = new Map<string, number>();
+    // One row per round, rather than one long ribbon ordered by raw depth.
+    //
+    // Depth alone puts all 23 nodes on a single 17-column line, which fitView then shrinks
+    // until the labels are unreadable on a projector. Banding by round costs nothing and
+    // makes the unroll edges do visible work: each one drops from the end of round r back
+    // to the start of round r+1, so the loop reads as a loop.
+    const bandOf = (n: (typeof graph.nodes)[number]): string => {
+      if (n.stage === "terminal") return "zz-terminal";
+      if (n.track === "agentic") return "zy-agentic";
+      if (n.round !== null) return `r${String(n.round).padStart(3, "0")}`;
+      return "aa-setup";
+    };
+    const bandLabel = (band: string): string =>
+      band === "aa-setup"
+        ? "Setup"
+        : band === "zy-agentic"
+          ? "Agent track"
+          : band === "zz-terminal"
+            ? "Scorecard"
+            : `Round ${Number(band.slice(1))}`;
+
+    const bands = [...new Set(graph.nodes.map(bandOf))].sort();
+    const rowOf = new Map(bands.map((b, i) => [b, i]));
+    const seatOf = new Map<string, number>();
+    for (const band of bands) {
+      graph.nodes
+        .filter((n) => bandOf(n) === band)
+        .sort((a, b) => resolve(a.id) - resolve(b.id) || a.id.localeCompare(b.id))
+        .forEach((n, i) => seatOf.set(n.id, i));
+    }
 
     const rfNodes: Node[] = graph.nodes.map((n) => {
-      const x = resolve(n.id);
-      const lane = LANE[n.track] ?? 1;
-      const key = `${x}:${lane}`;
-      const seat = perColumn.get(key) ?? 0;
-      perColumn.set(key, seat + 1);
+      const row = rowOf.get(bandOf(n))!;
+      const seat = seatOf.get(n.id)!;
       const { color } = TRACK[n.track] ?? { color: "var(--color-muted)" };
       const status = STATUS[n.status] ?? STATUS.pending;
 
       return {
         id: n.id,
-        position: { x: x * 220, y: lane * 250 + seat * 84 },
+        position: { x: seat * COL, y: row * ROW },
         data: {
           label: (
             <div className="text-left">
@@ -112,6 +140,32 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
       };
     });
 
+    // Row gutter labels. Presentation chrome derived from the data, not extra pipeline
+    // state: without them the bands are just three near-identical rows of boxes.
+    const labelNodes: Node[] = bands.map((band) => ({
+      id: `__band-${band}`,
+      className: "band-label",
+      position: { x: LABEL_X, y: rowOf.get(band)! * ROW + 16 },
+      draggable: false,
+      selectable: false,
+      connectable: false,
+      data: {
+        label: (
+          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">
+            {bandLabel(band)}
+          </span>
+        ),
+      },
+      style: {
+        background: "transparent",
+        border: "none",
+        boxShadow: "none",
+        padding: 0,
+        width: 170,
+        textAlign: "right" as const,
+      },
+    }));
+
     const rfEdges: Edge[] = edgeList.map((e, i) => {
       const unroll = e.kind === "unroll";
       const stroke = unroll ? "var(--color-warn)" : "var(--color-line)";
@@ -137,7 +191,7 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
       };
     });
 
-    return { nodes: rfNodes, edges: rfEdges };
+    return { nodes: [...labelNodes, ...rfNodes], edges: rfEdges };
   }, [graph]);
 
   return (

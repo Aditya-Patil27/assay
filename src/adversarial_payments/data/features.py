@@ -30,6 +30,16 @@ NIGHT_START = 22
 NIGHT_END = 6
 
 
+def to_epoch_seconds(values: pd.Series) -> np.ndarray:
+    """Datetimes -> int64 seconds since epoch, whatever the datetime resolution.
+
+    Not ``astype("int64") // 10**9``: parquet round-trips these columns as
+    ``datetime64[us]``, so that expression silently returns kiloseconds and every gap
+    and rolling-window count comes out ~1000x wrong while still looking plausible.
+    """
+    return pd.to_datetime(values).to_numpy().astype("datetime64[s]").astype(np.int64)
+
+
 def haversine_km(
     lat1: np.ndarray, lon1: np.ndarray, lat2: np.ndarray, lon2: np.ndarray
 ) -> np.ndarray:
@@ -130,7 +140,7 @@ def build_features(raw: pd.DataFrame) -> pd.DataFrame:
     ts = pd.to_datetime(df["trans_date_trans_time"])
     dob = pd.to_datetime(df["dob"])
     cc = df["cc_num"].to_numpy()
-    times_s = (ts.astype("int64") // 10**9).to_numpy()
+    times_s = to_epoch_seconds(ts)
 
     out = pd.DataFrame(index=df.index)
 

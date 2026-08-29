@@ -33,3 +33,7 @@ body {
 .react-flow__attribution {
   display: none;
 }
+/* Row gutter labels are not real pipeline nodes -- no connection handles. */
+.band-label .react-flow__handle {
+  display: none;
+}

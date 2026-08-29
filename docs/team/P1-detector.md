@@ -1,157 +1,145 @@
 # P1 — Detector & data
 
-You own the blue team and the data everything else stands on. **Your Day-1 output is the
-contract two other people are blocked on**, so ship the schema freeze before you polish
-anything.
-
-**You own:** `src/adversarial_payments/data/`, `src/adversarial_payments/detect/`,
-`src/adversarial_payments/serving/`, `scripts/`
-**Don't touch:** `attack/`, `loop/`, `agentic/`, `web/`
+> **⏰ Aug 31, 11:59 PM IST.** Your main job is done. Two things still need fixing.
 
 ---
 
-## The one thing that will ruin this project
+# Part 1 — For you
 
-**Leakage.** Every per-card aggregate you build (`amt_ratio_to_card_mean`,
-`txn_count_1h`, `hours_since_last_txn`) must be computed from *past transactions only*. If
-you use a whole-column `groupby().mean()`, each row sees its own future and your PR-AUC
-comes out near 0.99 — a number that is fake, that P2's attack will trivially break, and
-that a judge will ask about.
+## What you built, in plain terms
 
-- Sort by time, then use `.shift()` / `.expanding()` / time-based `.rolling()` per `cc_num`.
-- Sparkov already ships a temporal split: `fraudTrain.csv` and `fraudTest.csv`. Use it.
-  **Never `train_test_split(shuffle=True)`** on this data.
+The defender. Given a card transaction, your model answers: is this fraud?
 
-If PR-AUC comes out above ~0.95, assume leakage before you assume success.
+You also built the data everything else stands on — turning 1.85 million raw transactions
+into the ~20 numeric columns the model learns from, and freezing that column list into a
+written contract so P2's attacker knows exactly what it's allowed to touch.
+
+## Where you are: mostly done, and the numbers are honest
+
+| | |
+|---|---|
+| Real data loaded | ✅ 1,852,394 transactions, 0.52% fraud, 999 cards, 2019–2020 |
+| Column contract frozen | ✅ `artifacts/feature_schema.json` — P2 is building against it |
+| Detector trained | ✅ PR-AUC **0.829**, ROC-AUC 0.978 |
+
+**PR-AUC 0.829 is a good result and, more importantly, a believable one.** The most common
+way this project could have failed was *leakage* — the model accidentally seeing information
+from the future, producing a spectacular score like 0.99 that means nothing. Anything above
+0.95 on this data would have been a bug. 0.829 says your causal feature work held.
+
+## Two things still wrong
+
+### 1. The speed number isn't quotable yet
+
+`artifacts/latency.json` says 6.6 ms at the 99th percentile — comfortably under the 50 ms
+target. But it was measured **100 times against the XGBoost model directly**, and the spec
+calls for **1,000 measurements against an exported ONNX model**. ONNX is the format you'd
+actually deploy, so the current number describes something we're not claiming to ship.
+
+It's probably fine. But "probably fine" is not what you say to a judge who asks how you
+measured it. Re-run it properly, or the number stays off the slides.
+
+### 2. Two of your result files bypass the safety net
+
+Every result file in this project carries a flag saying whether it's real or a placeholder,
+and the website shows a warning banner listing any that are fake. It's the mechanism that
+makes it impossible to accidentally show a judge an invented number.
+
+`latency.json` and `data_provenance.json` don't have that flag. They were written with plain
+`json.dump` instead of going through `artifacts.py`. So the "under 50 ms" claim currently sits
+*outside* the exact machinery we built to guarantee a number is real — and the website can't
+display them at all.
+
+Small fix, real consequence.
+
+### 3. One caveat to carry everywhere
+
+The detector was trained on **96,000 rows**, a subsample of the 1.85 million. That's a
+perfectly reasonable choice. But PR-AUC 0.829 must always appear *with* that number attached,
+or a reader will assume it's the full dataset. Tell P5 so the writeup says it too.
+
+## What "done" looks like
+
+- Latency re-measured on ONNX with 1,000 samples
+- `latency.json` and `data_provenance.json` go through `artifacts.py` like everything else
+- The subsample size travels with the PR-AUC figure everywhere it appears
+
+## How to check your agent isn't fooling you
+
+| If it says | Ask |
+|---|---|
+| "PR-AUC 0.97, great!" | *"That's too high for this data. Check for leakage — is any per-card average computed over the whole column instead of only past rows?"* |
+| "Latency is 2 ms" | *"On which backend, and how many samples? Show me the raw distribution, not just p99."* |
+| "Features are done" | *"Show me `schema.validate(df)` running clean on the real frame."* |
+| "Tests pass" | *"Show me a test proving row N's card average uses only rows before N."* |
+
+The leakage one is worth internalising. It is the single most common way a fraud-detection
+project produces an impressive, worthless number.
 
 ---
 
-## Tasks, in order
+# Part 2 — Paste this to your AI agent
 
-### 1. `scripts/fetch_data.py` — get Sparkov
-
-```python
-import kagglehub
-path = kagglehub.dataset_download("kartik2112/fraud-detection")
 ```
+You are working on the P1 detector-and-data track of an adversarial ML project.
 
-Copy `fraudTrain.csv` / `fraudTest.csv` into `data/raw/`. Skip the download if they already
-exist. Print the row counts and the fraud rate (~0.5%) so anyone can sanity-check.
+CONTEXT
+Read first:
+  docs/team/BUILD.md
+  src/adversarial_payments/schema.py     (the frozen feature contract)
+  src/adversarial_payments/artifacts.py  (the result-file contract)
+  src/adversarial_payments/data/, detect/, serving/   (EXISTING, working)
 
-### 2. `data/load.py`
+The main track is COMPLETE: real Sparkov data loaded (1,852,394 rows, 0.52% fraud),
+features engineered causally, schema frozen to artifacts/feature_schema.json, XGBoost
+trained to PR-AUC 0.829 / ROC-AUC 0.978 on n_train=96,000. Do not redo this work.
 
-Load both CSVs, parse `trans_date_trans_time` and `dob` as datetimes, sort by time. Respect
-`SETTINGS.sample_rows` from `config.py` so the rest of us can iterate on a subset.
+SCOPE -- you may edit ONLY:
+  src/adversarial_payments/data/**
+  src/adversarial_payments/detect/**
+  src/adversarial_payments/serving/**
+  scripts/**
+  tests/ files covering the above
+Do NOT touch attack/, loop/, agentic/, or web/.
 
-### 3. `data/features.py` — produce EXACTLY the contracted columns
+TASK 1 -- Re-measure latency correctly
+serving/latency.py currently reports p50 4.1ms / p99 6.6ms from 100 samples against the
+XGBoost booster directly. The specification requires 1,000 samples against an exported
+ONNX model, batch size 1, because ONNX is the deployment format we are claiming.
+- Export the round-0 detector to ONNX
+- Measure p50/p95/p99 over >=1000 single-transaction calls
+- Report BOTH backends if they differ materially -- that difference is itself interesting
+- Report what you measure. Do not round toward the 50ms target.
 
-`schema.py` lists 20 features. Nothing more, nothing less — `validate()` rejects extras as
-well as omissions.
+TASK 2 -- Bring two artifacts inside the contract
+artifacts/latency.json and artifacts/data_provenance.json are written with plain
+json.dump. They therefore lack the {kind, placeholder, schema_version, created_at,
+git_sha} envelope, are absent from artifacts._PATHS, and cannot be read by
+web/lib/load.ts. This puts the "<50ms" claim outside the placeholder machinery that
+guarantees a number is real.
 
-**FROZEN** (victim attributes):
+- Add `latency` and `data_provenance` entries to artifacts._PATHS
+- Add matching dataclasses in artifacts.py
+- Add the mirrored TypeScript interfaces to web/lib/types.ts  <-- REQUIRED, the contract
+  test parses that file and will fail if you skip it
+- Rewrite both via A.write(..., placeholder=False)
+- Run pytest tests/test_artifacts.py and confirm green
 
-| Feature | From |
-|---|---|
-| `age` | `(trans_date_trans_time - dob).days / 365.25` |
-| `gender_enc` | `(gender == "M").astype(int)` |
-| `city_pop` | as-is |
-| `home_lat`, `home_long` | `lat`, `long` |
-| `state_enc` | ordinal encode `state` |
-| `job_enc` | ordinal encode `job` |
+TASK 3 -- Attach the subsample size to the headline figure
+PR-AUC 0.829 was computed on n_train=96,000, a subsample of 1.85M. Ensure n_train is
+present in the artifact and surfaced wherever the figure appears.
 
-**COUPLED** (all four move together when the attacker picks a merchant):
+LEAKAGE -- the standing correctness bar
+Every per-card aggregate (amt_ratio_to_card_mean, txn_count_1h, txn_count_24h,
+hours_since_last_txn) must use ONLY past transactions: sort by time, then shift/expanding/
+time-based rolling per cc_num. Never a whole-column groupby. Never train_test_split with
+shuffle=True -- Sparkov ships a temporal split already.
+If PR-AUC ever exceeds ~0.95, assume leakage before assuming success.
 
-| Feature | From |
-|---|---|
-| `category_enc` | ordinal encode `category` |
-| `merch_lat`, `merch_long` | as-is |
-| `distance_km` | haversine(`lat`, `long`, `merch_lat`, `merch_long`) |
+METHOD
+Test-driven: write the test, watch it FAIL, then make it pass. For any numeric claim,
+paste the real terminal output -- never a number you did not execute. If something does
+not work, leave the artifact at placeholder=true and say so.
 
-**MUTABLE** (attacker-controlled) — *all of these are the leakage risk*:
-
-| Feature | From |
-|---|---|
-| `amt` | as-is |
-| `log_amt` | `np.log1p(amt)` |
-| `amt_ratio_to_card_mean` | `amt / expanding-mean of amt per cc_num, shifted by 1` |
-| `hour` | `dt.hour` |
-| `day_of_week` | `dt.dayofweek` |
-| `is_night` | `hour.between(0, 5).astype(int)` |
-| `hours_since_last_txn` | per-`cc_num` diff of `unix_time` / 3600 |
-| `txn_count_1h` | causal time-window count per `cc_num` |
-| `txn_count_24h` | causal time-window count per `cc_num` |
-
-Save your ordinal encoders — P2 needs them to map `category_enc` back to a real merchant
-category when it perturbs the coupled group.
-
-Fill the unavoidable first-transaction NaNs (`hours_since_last_txn`,
-`amt_ratio_to_card_mean`) with explicit sentinels. `validate()` rejects nulls.
-
-### 4. FREEZE THE SCHEMA — this unblocks P2
-
-```python
-from adversarial_payments.schema import FeatureSchema
-from adversarial_payments.config import ARTIFACTS
-
-schema = FeatureSchema.fit(train_df)      # bounds from the training split only
-schema.save(ARTIFACTS / "schema.json")
-schema.validate(train_df, require_target=True)
+Run `pytest -q` after each task and report the real result.
 ```
-
-Commit `artifacts/schema.json` and **tell P2 it's there**. After this point, changing the
-feature list is a team decision, not a solo one.
-
-### 5. `detect/train.py` — XGBoost
-
-`scale_pos_weight` for the ~0.5% fraud rate, early stopping on a validation slice.
-Signature should be reusable across rounds — P2 calls it repeatedly with augmented data:
-
-```python
-def train_detector(X, y, *, seed=SEED) -> xgboost.XGBClassifier
-```
-
-### 6. `detect/evaluate.py` — PR-AUC and the threshold
-
-PR-AUC is the headline (ROC-AUC flatters imbalanced data — report both, lead with PR-AUC).
-Pick the threshold that maximises F1, or hits a fixed precision target; whichever you
-choose, write it into the artifact, because **P2's attack is defined relative to it**.
-
-### 7. `detect/explain.py` — SHAP
-
-`shap.TreeExplainer`, mean absolute SHAP per feature, top 5. On a sample of a few thousand
-rows, not the full set.
-
-### 8. Write your artifact
-
-```python
-from adversarial_payments import artifacts as A
-
-A.write("detect_rounds", [A.DetectRound(...)], placeholder=False)
-```
-
-One `DetectRound` per adversarial round. Round 0 has `n_adversarial_added=0`. P2 fills in
-rounds 1+ when it retrains; coordinate so you don't overwrite each other — simplest is that
-P2 owns the write once the loop exists, and you own it until then.
-
-### 9. `serving/latency.py` — the <50 ms claim
-
-Export to ONNX, batch of 1, measure p50/p95/p99 over ~1000 calls. **Report what you measure,
-not what the research report promised.** If it's 12 ms, say 12 ms.
-
----
-
-## Done when
-
-- [ ] `python scripts/fetch_data.py` works from nothing
-- [ ] `features.py` output passes `schema.validate(df, require_target=True)`
-- [ ] `artifacts/schema.json` committed and P2 notified
-- [ ] PR-AUC is *plausible* (0.75–0.90). Above 0.95 means go hunt the leak.
-- [ ] `artifacts/detect/rounds.json` has `placeholder: false`
-- [ ] Dashboard banner has cleared for your section
-- [ ] `pytest -q` green
-
-## Test yourself
-
-Add `tests/test_features.py` proving causality — build a tiny frame of 5 transactions for
-one card and assert that row *i*'s `amt_ratio_to_card_mean` uses only rows `< i`. That test
-is worth more than any other you could write.
