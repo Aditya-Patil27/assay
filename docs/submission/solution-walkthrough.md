@@ -166,7 +166,7 @@ Two design decisions worth stating because they materially affect the number:
   Ranking by column count structurally biases the search toward the amount lever and hides
   the attacker's real options.
 
-### 3.4 An error worth reporting
+### 3.4 Two errors worth reporting
 
 An earlier version of our engine reported a 100% attack success rate. It achieved this by
 shrinking transactions to roughly 12% of their original value.
@@ -185,6 +185,33 @@ We report this because it illustrates the central methodological point of the en
 **an adversarial metric is only as meaningful as the constraints it is computed under.** An
 unconstrained attack success rate is not a hard number that happens to be high. It is not a
 number at all.
+
+**The second error was the same mistake, one layer down.**
+
+Our dashboard plots attack success against detector quality across rounds. It read the
+detector's results for each round, and where a round had not been trained yet it substituted
+zero. The chart therefore drew detection quality collapsing to the floor — directly beneath a
+caption stating that detection quality holds. The figure disproved its own caption, and a
+statistic panel two inches away simultaneously reported the correct, unchanged value.
+
+The cause was a single defaulting expression: `?? 0`. It converts *"I have no measurement"*
+into *"I measured zero"*, and everything downstream then treats the fabrication as data.
+
+The two errors are worth setting beside each other because they differ in exactly one
+respect that matters. The first — an attack scoring 100% by surrendering the money — was
+caught by a colleague asking what the attacker had given up. It was wrong in a report, where
+somebody can push back. The second was wrong *in code*, rendered confidently, on the artifact
+a reviewer actually looks at, with nobody in the loop to object. **A missing measurement
+presented as a confident zero is not a smaller error than a fabricated result. It is a
+fabricated result, produced automatically.**
+
+Both are instances of the same thesis this framework exists to argue. A number means nothing
+apart from the conditions under which it was obtained — and a system that cannot represent
+*"not measured"* as distinct from *"measured zero"* will eventually assert the second when it
+means the first. The fix was not a better default but the removal of the default: the value
+is now nullable, absent rounds are drawn as absent, and the round table names them "not run"
+rather than letting them silently vanish. A point that quietly disappears still leaves the
+reader to guess.
 
 ---
 
