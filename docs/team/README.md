@@ -3,6 +3,12 @@
 One brief per person. Read yours, plus §Contracts below. You do not need to read anyone
 else's brief, and that is the point.
 
+**Setting up, or something broke? → [BUILD.md](BUILD.md)** — every command, the current
+state of each artifact, and the failures we have actually hit.
+
+**Start each day at [STATUS.md](STATUS.md)** — what is actually real, what is still a seed
+fixture, and the next three things you personally owe the team.
+
 | | Owner | Brief | Owns these paths |
 |---|---|---|---|
 | **P1** | Detector & data | [P1-detector.md](P1-detector.md) | `src/adversarial_payments/{data,detect,serving}/`, `scripts/` |
@@ -53,7 +59,7 @@ uv venv --python 3.12
 uv pip install -e ".[dev]"
 
 python scripts/seed_artifacts.py     # fixtures so everything runs immediately
-pytest -q                            # should be 24 passed
+pytest -q                            # should be 65 passed (Day 2)
 ```
 
 Frontend people also:
