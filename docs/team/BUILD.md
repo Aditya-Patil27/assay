@@ -38,33 +38,24 @@ table below is a snapshot and may lag it.
 
 ---
 
-## Where the project actually is — Day 2 morning
+## What's finished right now
+
+**[STATUS.md](STATUS.md) is the source of truth.** Check it each morning. This guide
+deliberately does not repeat the state of each artifact — two documents disagreeing about
+what is real is worse than either alone, and that has already bitten us once today.
+
+To see the current results yourself, read-only and safe:
 
 ```bash
-python -m adversarial_payments.loop.flows      # read-only, safe, run this first
+python -m adversarial_payments.loop.flows
 ```
 
-| Artifact | State | Owner | Notes |
-|---|---|---|---|
-| `artifacts/feature_schema.json` | ✅ **real** | P1 | Frozen against real Sparkov. **The contract is live — P2 can rely on it.** |
-| `artifacts/data_provenance.json` | ✅ **real** | P1 | 1,852,394 rows · 0.52% fraud · 999 cards · 2019-01-01 → 2020-12-31 |
-| `artifacts/detect/rounds.json` | ✅ **real** | P1 | Round 0 only. PR-AUC **0.829**, ROC-AUC 0.978, threshold 0.233 — **on `n_train=96,000`, a subsample of the 1.85M.** Quote the subsample size everywhere the figure appears. |
-| `artifacts/latency.json` | ⚠️ **real but not quotable** | P1 | p99 6.6 ms, but **100 samples on the XGBoost backend** — P1's brief specifies 1,000 on ONNX. Indicative only; do not put it on a slide yet. |
-| `artifacts/attack/rounds.json` | ⬜ placeholder | P2 | **The headline number. Highest priority in the project.** |
-| `artifacts/attack/examples.json` | ⬜ placeholder | P2 | |
-| `artifacts/graph.json` | ⬜ placeholder | P2 | |
-| `artifacts/agentic/redteam.json` | ⬜ placeholder | P3 | Cache is 101 entries, all **scripted stub** — see §Agentic |
-| `artifacts/scorecard.json` | ⬜ placeholder | P2 + P3 | Terminal node; fills in when the two above are real |
+Two figures are worth knowing before you quote anything:
 
-PR-AUC 0.829 sits in the plausible band, so P1's causal feature work held — no leakage.
-
-**Two numbers here are not yet submittable.** The latency figure was measured on the wrong
-backend at a tenth of the specified sample count, and the PR-AUC is on a 96k subsample of a
-1.85M-row dataset. Both are fine as engineering signal and both need a caveat, or a re-run,
-before they reach a judge. A figure quoted without its sample size is the kind of thing that
-unravels in questioning.
-
-**The critical path is P2.** Everything else has either landed or can land independently.
+- **PR-AUC 0.829** is real and honest — but it was trained on `n_train=96,000`, a subsample
+  of 1.85M rows. Carry that qualifier everywhere the number appears.
+- **Latency 6.6 ms** is *not quotable yet*. It was measured 100 times against XGBoost
+  directly; the spec calls for 1,000 against an exported ONNX model. Indicative only.
 
 ---
 
