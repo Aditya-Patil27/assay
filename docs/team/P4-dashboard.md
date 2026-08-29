@@ -14,7 +14,7 @@ The website that shows a judge what we did, in about ninety seconds of scrolling
 It's deliberately simple under the hood: **it does no work.** Every other track writes its
 results into small JSON files, and your site just reads those and draws them. No server, no
 database, no Python running anywhere. The whole thing compiles down to plain HTML and
-JavaScript that could be opened from a USB stick.
+JavaScript that any static file server can host.
 
 That was a design choice with a purpose. It means the demo cannot break during judging.
 Nothing is training, nothing is calling an API, nothing can time out.
@@ -69,6 +69,9 @@ that lets everyone else ship honestly.
 2. **Check it in a real browser.** Including on a phone. Judges browse on phones.
 3. **Fix the co-evolution chart plotting absent data as zero** — see below. Highest
    priority correctness bug on the page.
+
+   Also at 390px the body scrolls horizontally and text clips at the right edge — a
+   container min-width, not the grid, since the cards stack correctly.
 4. **Re-sync as other tracks land real numbers**, and watch the banner clear.
 5. **Run the reproducibility checks** — you own verifying the claims we make to judges.
 
@@ -156,9 +159,12 @@ TASKS, IN PRIORITY ORDER
      npm run build && npx vercel deploy out --prod
    For GitHub Pages instead: BASE_PATH=/<repo-name> npm run build
    Report the URL. Confirm it loads in a logged-out/incognito session.
-2. Verify the static export opens STANDALONE -- not merely that `npm run build` exited 0.
-   Serve web/out/ and confirm the page renders with all data present. Report what you
-   actually observed, not that the build succeeded.
+2. KNOWN: the export does NOT render from file:// -- one chunk carries a crossorigin
+   attribute and is CORS-blocked against an opaque origin, so hydration never runs and
+   the charts stay blank. Data is inlined and fine; this is a hydration failure, not a
+   data failure. Do not try to "fix" it by changing data loading. A served URL is
+   required. Verify by serving web/out/ and LOOKING at the page, not by checking the
+   build exited 0.
 3. Check rendering in a real browser at 375px, 768px and 1440px. Nothing may scroll
    horizontally. Wide tables and charts scroll inside their own container.
 4. Do NOT remove, soften or hide the placeholder banner. Five of six artifacts are
