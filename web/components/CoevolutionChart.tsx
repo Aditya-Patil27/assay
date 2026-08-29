@@ -17,7 +17,8 @@ import type { AttackRound, DetectRound } from "@/lib/types";
 interface Row {
   round: string;
   asr: number;
-  prAuc: number;
+  /** null when that round's detector has not been trained yet -- never coerce to 0. */
+  prAuc: number | null;
   l0: number;
   queries: number;
   added: number;
@@ -44,7 +45,10 @@ export function CoevolutionChart({
     return {
       round: `Round ${a.round}`,
       asr: +(a.asr * 100).toFixed(1),
-      prAuc: +((d?.pr_auc ?? 0) * 100).toFixed(1),
+      // A round with no detector is ABSENT, not zero. Coercing it renders a collapse to
+      // the axis under a caption claiming PR-AUC holds -- the chart disproving its own
+      // caption. Recharts skips nulls in a line series, which is the correct reading.
+      prAuc: d ? +(d.pr_auc * 100).toFixed(1) : null,
       l0: a.mean_l0,
       queries: a.median_queries,
       added: d?.n_adversarial_added ?? 0,
@@ -192,7 +196,9 @@ function RoundStrip({ rows }: { rows: Row[] }) {
               <td className="border-b border-line px-3 py-2.5 font-semibold text-attack">
                 {r.asr}%
               </td>
-              <td className="border-b border-line px-3 py-2.5 text-defend">{r.prAuc}%</td>
+              <td className="border-b border-line px-3 py-2.5 text-defend">
+                {r.prAuc === null ? <span className="text-muted">not run</span> : `${r.prAuc}%`}
+              </td>
               <td className="border-b border-line px-3 py-2.5">{r.l0.toFixed(1)}</td>
               <td className="border-b border-line px-3 py-2.5">{r.queries}</td>
               <td className="border-b border-line px-3 py-2.5 text-muted">
@@ -221,7 +227,11 @@ function CoevolutionTooltip({
     <div className="rounded-lg border border-line bg-panel-2 px-3 py-2 font-mono text-xs shadow-lg">
       <p className="text-muted">{label}</p>
       <p className="mt-1.5 text-attack">ASR {r.asr}%</p>
-      <p className="text-defend">PR-AUC {r.prAuc}%</p>
+      {r.prAuc === null ? (
+        <p className="text-muted">PR-AUC — detector not trained for this round</p>
+      ) : (
+        <p className="text-defend">PR-AUC {r.prAuc}%</p>
+      )}
       <p className="mt-1.5 text-muted">
         mean L0 {r.l0.toFixed(1)} · median {r.queries} queries
       </p>
