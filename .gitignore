@@ -1,0 +1,34 @@
+# Data — never commit raw datasets
+data/raw/*
+data/interim/*
+data/processed/*
+!data/**/.gitkeep
+
+# Models are regenerable; artifacts/ (results) ARE committed on purpose — see spec 4.3
+models/
+*.ubj
+*.joblib
+*.pkl
+
+# LLM credentials
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Prefect local state
+.prefect/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

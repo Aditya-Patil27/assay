@@ -1,0 +1,38 @@
+[project]
+name = "adversarial-payments"
+version = "0.1.0"
+description = "Constraint-aware adversarial red/blue framework for payment fraud detection"
+requires-python = ">=3.12,<3.13"
+
+dependencies = [
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "pyarrow>=16.0",
+    "scikit-learn>=1.5",
+    "xgboost>=2.1",
+    "lightgbm>=4.5",
+    "shap>=0.46",
+    "matplotlib>=3.9",
+    "prefect>=3.0",
+    "streamlit>=1.38",
+    "openai>=1.40",
+    "python-dotenv>=1.0",
+    "kagglehub>=0.3",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6", "ipykernel>=6.29", "nbformat>=5.10"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/adversarial_payments"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
