@@ -16,11 +16,18 @@ Through the Kaggle **Writeups** section:
 | # | Artifact | Who produces it | State |
 |---|---|---|---|
 | 1 | This GitHub repo | everyone | ✅ exists |
-| 2 | A **`.docx` solution walkthrough** | **you** | 🔴 **does not exist in any form** |
+| 2 | A **`.docx` solution walkthrough** | **you** | 🟡 **first draft written** — `docs/submission/solution-walkthrough.md` → `.docx` |
 | 3 | A **working web prototype** (live URL) | P4 | 🟡 built, not deployed |
 
-**Row 2 is the biggest gap in the whole project.** It's a required artifact with nothing
-behind it. `docs/2026-08-31-deck-outline.md` targets a slide deck, which is not what the
+**Row 2 now has a draft.** Source is `docs/submission/solution-walkthrough.md`; run
+`python scripts/build_docx.py` to regenerate the `.docx`. Keeping the text in Markdown means
+it stays reviewable and diffable in git rather than becoming a binary someone hand-edited.
+
+It covers the portal's four criteria and carries **six `[[PENDING]]` markers**, rendered in
+orange, wherever a number does not yet exist. Your job is to resolve or remove every one of
+them before submitting — the build script counts them for you on each run.
+
+Note that `docs/2026-08-31-deck-outline.md` targets a slide deck, which is *not* what the
 portal asks for.
 
 **No video is required.** Both earlier planning docs budgeted hours for one. Don't spend a
