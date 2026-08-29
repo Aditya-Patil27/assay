@@ -3,7 +3,11 @@
 **Date:** 2026-08-29
 **Supersedes scope in:** `docs/2026-08-22-challenge-strategy.md` (§4 schedule only; §1–§3 taxonomy still stands)
 **Budget:** 3 days · team of 5 · AI-assisted implementation
-**Timeline:** Day 1 = Aug 29 · Day 2 = Aug 30 · Day 3 = Aug 31 · submit early Sep 1
+**Deadline:** **Aug 31 2026, 11:59 PM IST (GMT+5:30)** — confirmed from the Kaggle portal
+**Timeline:** Day 1 = Aug 29 · Day 2 = Aug 30 · **Day 3 = Aug 31 is submission day, not a build day**
+
+> The earlier plan said "submit early Sep 1". That is a day *past* the deadline. Corrected
+> 2026-08-30. There is no Day-3 evening and no buffer day.
 
 ---
 
@@ -212,6 +216,8 @@ graph story, where the 29s startup is paid once at build time and never during j
 
 - [ ] Exact submission deadline and timezone
 - [ ] Is there a scored leaderboard and hosted dataset?
-- [ ] Deliverable formats: deck page limit, demo video length, notebook vs repo
+- [x] **Deliverables confirmed:** three artifacts via the Kaggle Writeups section — a GitHub
+      repo, a `.docx` walkthrough, and a working web prototype. **No video is required.**
+      Draft writeups are explicitly not judged, so a draft left unsubmitted scores zero.
 - [ ] External-data and pretrained-model policy
 - [ ] Real names assigned to P1–P5

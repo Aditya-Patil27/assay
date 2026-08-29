@@ -18,8 +18,8 @@ python -m adversarial_payments.loop.flows      # read-only, safe, run this first
 |---|---|---|---|
 | `artifacts/feature_schema.json` | ✅ **real** | P1 | Frozen against real Sparkov. **The contract is live — P2 can rely on it.** |
 | `artifacts/data_provenance.json` | ✅ **real** | P1 | 1,852,394 rows · 0.52% fraud · 999 cards · 2019-01-01 → 2020-12-31 |
-| `artifacts/detect/rounds.json` | ✅ **real** | P1 | Round 0 only. PR-AUC **0.829**, ROC-AUC 0.978, threshold 0.233 |
-| `artifacts/latency.json` | ✅ **real** | P1 | p50 4.1 ms · p99 **6.6 ms** — comfortably under the 50 ms claim |
+| `artifacts/detect/rounds.json` | ✅ **real** | P1 | Round 0 only. PR-AUC **0.829**, ROC-AUC 0.978, threshold 0.233 — **on `n_train=96,000`, a subsample of the 1.85M.** Quote the subsample size everywhere the figure appears. |
+| `artifacts/latency.json` | ⚠️ **real but not quotable** | P1 | p99 6.6 ms, but **100 samples on the XGBoost backend** — P1's brief specifies 1,000 on ONNX. Indicative only; do not put it on a slide yet. |
 | `artifacts/attack/rounds.json` | ⬜ placeholder | P2 | **The headline number. Highest priority in the project.** |
 | `artifacts/attack/examples.json` | ⬜ placeholder | P2 | |
 | `artifacts/graph.json` | ⬜ placeholder | P2 | |
@@ -27,6 +27,12 @@ python -m adversarial_payments.loop.flows      # read-only, safe, run this first
 | `artifacts/scorecard.json` | ⬜ placeholder | P2 + P3 | Terminal node; fills in when the two above are real |
 
 PR-AUC 0.829 sits in the plausible band, so P1's causal feature work held — no leakage.
+
+**Two numbers here are not yet submittable.** The latency figure was measured on the wrong
+backend at a tenth of the specified sample count, and the PR-AUC is on a 96k subsample of a
+1.85M-row dataset. Both are fine as engineering signal and both need a caveat, or a re-run,
+before they reach a judge. A figure quoted without its sample size is the kind of thing that
+unravels in questioning.
 
 **The critical path is P2.** Everything else has either landed or can land independently.
 
@@ -58,7 +64,8 @@ uv pip install -e ".[dev]"
 pytest -q
 ```
 
-Expect `24 passed`. If not, stop and post the failure — don't build on a red suite.
+Expect all green — the count climbs as people add tests, so don't treat a specific number
+as the target. If anything **fails**, stop and post it; don't build on a red suite.
 
 At this point the dashboard already works, because artifacts are committed:
 

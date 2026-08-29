@@ -15,7 +15,7 @@ fixture, and the next three things you personally owe the team.
 | **P2** | Attack engine | [P2-attack.md](P2-attack.md) | `src/adversarial_payments/{attack,loop}/` |
 | **P3** | Agentic red team | [P3-agentic.md](P3-agentic.md) | `src/adversarial_payments/agentic/` |
 | **P4** | Dashboard | [P4-dashboard.md](P4-dashboard.md) | `web/` |
-| **P5** | Comms & compliance | [P5-comms.md](P5-comms.md) | `docs/`, deck, video, submission |
+| **P5** | Comms & compliance | [P5-comms.md](P5-comms.md) | `docs/`, .docx walkthrough, submission |
 
 ---
 
@@ -59,7 +59,7 @@ uv venv --python 3.12
 uv pip install -e ".[dev]"
 
 python scripts/seed_artifacts.py     # fixtures so everything runs immediately
-pytest -q                            # should be 65 passed (Day 2)
+pytest -q                            # all green; the count climbs as tests land
 ```
 
 Frontend people also:
@@ -137,9 +137,9 @@ Push small and often. A three-day project dies on a Day-3 merge of five long-liv
 | When | Gate | Owner |
 |---|---|---|
 | Day 1 end | `schema.py` frozen against real Sparkov data | P1 |
-| Day 1 end | Deadline, deliverable format and rules confirmed | **P5 — blocking** |
+| ~~Day 1~~ | ~~Deadline confirmed~~ — **DONE: Aug 31 2026 23:59 IST** | P5 |
 | Day 2 end | A real ASR number exists | P2 |
-| Day 3 midday | Code freeze. Comms only after. | all |
+| **Aug 31, early** | **SUBMIT.** Repo + .docx + live web prototype. No video required. A draft writeup is not judged. | P5 |
 
 ---
 
