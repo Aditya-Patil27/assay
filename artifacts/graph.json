@@ -1,14 +1,14 @@
 {
   "kind": "graph",
-  "placeholder": true,
+  "placeholder": false,
   "schema_version": 1,
-  "created_at": "2026-08-29T17:46:54.385762+00:00",
-  "git_sha": "698ed67",
+  "created_at": "2026-08-30T11:32:05.684718+00:00",
+  "git_sha": "a20565f",
   "payload": {
     "nodes": [
       {
         "id": "load_data",
-        "label": "Load Sparkov",
+        "label": "Load transactions",
         "stage": "data",
         "round": null,
         "status": "done",
@@ -40,7 +40,7 @@
       },
       {
         "id": "score_0",
-        "label": "PR-AUC r0",
+        "label": "Score detector (PR-AUC) r0",
         "stage": "detect",
         "round": 0,
         "status": "done",
@@ -56,7 +56,7 @@
       },
       {
         "id": "asr_0",
-        "label": "ASR r0",
+        "label": "Score attacks (ASR) r0",
         "stage": "attack",
         "round": 0,
         "status": "done",
@@ -80,7 +80,7 @@
       },
       {
         "id": "score_1",
-        "label": "PR-AUC r1",
+        "label": "Score detector (PR-AUC) r1",
         "stage": "detect",
         "round": 1,
         "status": "done",
@@ -96,7 +96,7 @@
       },
       {
         "id": "asr_1",
-        "label": "ASR r1",
+        "label": "Score attacks (ASR) r1",
         "stage": "attack",
         "round": 1,
         "status": "done",
@@ -120,7 +120,7 @@
       },
       {
         "id": "score_2",
-        "label": "PR-AUC r2",
+        "label": "Score detector (PR-AUC) r2",
         "stage": "detect",
         "round": 2,
         "status": "done",
@@ -136,7 +136,7 @@
       },
       {
         "id": "asr_2",
-        "label": "ASR r2",
+        "label": "Score attacks (ASR) r2",
         "stage": "attack",
         "round": 2,
         "status": "done",
@@ -147,7 +147,7 @@
         "label": "Build payment agent",
         "stage": "agentic",
         "round": null,
-        "status": "done",
+        "status": "pending",
         "track": "agentic"
       },
       {
@@ -155,7 +155,7 @@
         "label": "Generate injections",
         "stage": "agentic",
         "round": null,
-        "status": "done",
+        "status": "pending",
         "track": "agentic"
       },
       {
@@ -163,7 +163,7 @@
         "label": "Run red team",
         "stage": "agentic",
         "round": null,
-        "status": "done",
+        "status": "pending",
         "track": "agentic"
       },
       {
@@ -171,7 +171,7 @@
         "label": "Apply defenses",
         "stage": "agentic",
         "round": null,
-        "status": "done",
+        "status": "pending",
         "track": "agentic"
       },
       {
@@ -179,7 +179,7 @@
         "label": "Re-run red team",
         "stage": "agentic",
         "round": null,
-        "status": "done",
+        "status": "pending",
         "track": "agentic"
       },
       {
@@ -233,11 +233,6 @@
         "kind": "unroll"
       },
       {
-        "source": "augment_0",
-        "target": "train_1",
-        "kind": "flow"
-      },
-      {
         "source": "train_1",
         "target": "score_1",
         "kind": "flow"
@@ -261,11 +256,6 @@
         "source": "augment_1",
         "target": "train_2",
         "kind": "unroll"
-      },
-      {
-        "source": "augment_1",
-        "target": "train_2",
-        "kind": "flow"
       },
       {
         "source": "train_2",
@@ -303,12 +293,12 @@
         "kind": "flow"
       },
       {
-        "source": "redteam2",
+        "source": "asr_2",
         "target": "scorecard",
         "kind": "flow"
       },
       {
-        "source": "asr_2",
+        "source": "redteam2",
         "target": "scorecard",
         "kind": "flow"
       }

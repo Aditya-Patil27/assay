@@ -1,53 +1,294 @@
 {
   "kind": "attack_examples",
-  "placeholder": true,
+  "placeholder": false,
   "schema_version": 1,
-  "created_at": "2026-08-29T17:46:54.285708+00:00",
-  "git_sha": "698ed67",
+  "created_at": "2026-08-30T11:32:05.640367+00:00",
+  "git_sha": "a20565f",
   "payload": [
     {
-      "id": "txn_0f3a91",
+      "id": "txn_25311",
       "round": 0,
-      "orig_prob": 0.91,
-      "adv_prob": 0.34,
+      "orig_prob": 0.9544,
+      "adv_prob": 0.0,
       "touched": [
         {
-          "feature": "amt",
-          "before": 1042.0,
-          "after": 878.5
-        },
-        {
-          "feature": "hours_since_last_txn",
-          "before": 0.4,
-          "after": 6.2
+          "feature": "hour",
+          "before": 22.0,
+          "after": 4.0
         }
       ]
     },
     {
-      "id": "txn_77bc12",
-      "round": 2,
-      "orig_prob": 0.88,
-      "adv_prob": 0.44,
+      "id": "txn_54954",
+      "round": 0,
+      "orig_prob": 0.8833,
+      "adv_prob": 0.0,
       "touched": [
         {
           "feature": "amt",
-          "before": 764.0,
-          "after": 611.25
+          "before": 9.99,
+          "after": 82.9005
+        },
+        {
+          "feature": "amt_ratio_to_card_mean",
+          "before": 0.1937,
+          "after": 1.6074
+        },
+        {
+          "feature": "log_amt",
+          "before": 2.397,
+          "after": 4.4296
+        }
+      ]
+    },
+    {
+      "id": "txn_114288",
+      "round": 0,
+      "orig_prob": 0.9999,
+      "adv_prob": 0.0026,
+      "touched": [
+        {
+          "feature": "amt",
+          "before": 1129.4,
+          "after": 849.59
+        },
+        {
+          "feature": "amt_ratio_to_card_mean",
+          "before": 1.9355,
+          "after": 1.456
         },
         {
           "feature": "category_enc",
-          "before": 7.0,
-          "after": 3.0
+          "before": 11.0,
+          "after": 13.0
         },
         {
           "feature": "distance_km",
-          "before": 812.4,
-          "after": 96.7
+          "before": 97.2016,
+          "after": 1974.6858
         },
         {
-          "feature": "txn_count_1h",
-          "before": 4.0,
-          "after": 1.0
+          "feature": "hour",
+          "before": 22.0,
+          "after": 6.0
+        },
+        {
+          "feature": "is_night",
+          "before": 1.0,
+          "after": 0.0
+        },
+        {
+          "feature": "log_amt",
+          "before": 7.0303,
+          "after": 6.7459
+        },
+        {
+          "feature": "merch_lat",
+          "before": 30.3851,
+          "after": 41.3284
+        },
+        {
+          "feature": "merch_long",
+          "before": -98.5074,
+          "after": -80.8799
+        }
+      ]
+    },
+    {
+      "id": "txn_78365",
+      "round": 1,
+      "orig_prob": 0.9995,
+      "adv_prob": 0.232,
+      "touched": [
+        {
+          "feature": "hour",
+          "before": 22.0,
+          "after": 2.0
+        }
+      ]
+    },
+    {
+      "id": "txn_33127",
+      "round": 1,
+      "orig_prob": 0.9685,
+      "adv_prob": 0.0003,
+      "touched": [
+        {
+          "feature": "amt",
+          "before": 10.84,
+          "after": 94.0616
+        },
+        {
+          "feature": "amt_ratio_to_card_mean",
+          "before": 0.1848,
+          "after": 1.6035
+        },
+        {
+          "feature": "log_amt",
+          "before": 2.4715,
+          "after": 4.5545
+        }
+      ]
+    },
+    {
+      "id": "txn_9487",
+      "round": 1,
+      "orig_prob": 0.9999,
+      "adv_prob": 0.23,
+      "touched": [
+        {
+          "feature": "amt",
+          "before": 1064.72,
+          "after": 849.59
+        },
+        {
+          "feature": "amt_ratio_to_card_mean",
+          "before": 1.2641,
+          "after": 1.0087
+        },
+        {
+          "feature": "category_enc",
+          "before": 12.0,
+          "after": 5.0
+        },
+        {
+          "feature": "distance_km",
+          "before": 51.262,
+          "after": 359.3761
+        },
+        {
+          "feature": "hour",
+          "before": 22.0,
+          "after": 11.0
+        },
+        {
+          "feature": "is_night",
+          "before": 1.0,
+          "after": 0.0
+        },
+        {
+          "feature": "log_amt",
+          "before": 6.9714,
+          "after": 6.7459
+        },
+        {
+          "feature": "merch_lat",
+          "before": 41.61,
+          "after": 38.9298
+        },
+        {
+          "feature": "merch_long",
+          "before": -75.7467,
+          "after": -74.7881
+        },
+        {
+          "feature": "txn_count_24h",
+          "before": 6.0,
+          "after": 12.0
+        }
+      ]
+    },
+    {
+      "id": "txn_239",
+      "round": 2,
+      "orig_prob": 0.9987,
+      "adv_prob": 0.7683,
+      "touched": [
+        {
+          "feature": "hour",
+          "before": 23.0,
+          "after": 4.0
+        }
+      ]
+    },
+    {
+      "id": "txn_61302",
+      "round": 2,
+      "orig_prob": 0.9637,
+      "adv_prob": 0.0041,
+      "touched": [
+        {
+          "feature": "amt",
+          "before": 276.31,
+          "after": 140.3243
+        },
+        {
+          "feature": "amt_ratio_to_card_mean",
+          "before": 23.9852,
+          "after": 12.1809
+        },
+        {
+          "feature": "hour",
+          "before": 3.0,
+          "after": 10.0
+        },
+        {
+          "feature": "is_night",
+          "before": 1.0,
+          "after": 0.0
+        },
+        {
+          "feature": "log_amt",
+          "before": 5.6251,
+          "after": 4.9511
+        }
+      ]
+    },
+    {
+      "id": "txn_81597",
+      "round": 2,
+      "orig_prob": 1.0,
+      "adv_prob": 0.607,
+      "touched": [
+        {
+          "feature": "amt",
+          "before": 716.52,
+          "after": 358.26
+        },
+        {
+          "feature": "amt_ratio_to_card_mean",
+          "before": 0.976,
+          "after": 0.488
+        },
+        {
+          "feature": "category_enc",
+          "before": 8.0,
+          "after": 5.0
+        },
+        {
+          "feature": "distance_km",
+          "before": 14.4956,
+          "after": 64.6183
+        },
+        {
+          "feature": "hour",
+          "before": 23.0,
+          "after": 16.0
+        },
+        {
+          "feature": "is_night",
+          "before": 1.0,
+          "after": 0.0
+        },
+        {
+          "feature": "log_amt",
+          "before": 6.5758,
+          "after": 5.884
+        },
+        {
+          "feature": "merch_lat",
+          "before": 41.0732,
+          "after": 40.9811
+        },
+        {
+          "feature": "merch_long",
+          "before": -72.5355,
+          "after": -73.1205
+        },
+        {
+          "feature": "txn_count_24h",
+          "before": 5.0,
+          "after": 17.0
         }
       ]
     }
