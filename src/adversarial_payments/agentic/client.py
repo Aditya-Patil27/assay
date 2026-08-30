@@ -41,6 +41,8 @@ from ..config import ARTIFACTS, SETTINGS
 CACHE_DIR = ARTIFACTS / "agentic" / "cache"
 
 STUB_PROVENANCE = "scripted-stub-v1"
+#: cache namespace for stub responses, so they cannot collide with a live model's
+STUB_MODEL = "scripted/payment-agent-sim"
 
 
 class CacheMissError(RuntimeError):
@@ -95,9 +97,17 @@ class LLMClient:
     def cache_key(
         self, messages: list[dict[str, Any]], tools: list[dict[str, Any]] | None, temperature: float
     ) -> str:
+        # A stub response is namespaced away from the live model it was configured
+        # alongside. Without this, `--bake` with LLM_MODEL set to a real provider model
+        # writes scripted output under that model's key -- and the next LLM_LIVE=1 run
+        # reads it back as a cache hit and never contacts the provider. The artifact stays
+        # honest either way, because placeholder is derived from provenance, but the
+        # operator sees a "live" run that silently produced stub numbers. Cheaper to make
+        # the two namespaces incapable of colliding.
+        model = STUB_MODEL if (self.allow_stub and not self.live) else self.model
         return _digest(
             {
-                "model": self.model,
+                "model": model,
                 "messages": messages,
                 "tools": tools or [],
                 "temperature": temperature,
