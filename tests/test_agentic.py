@@ -164,3 +164,35 @@ def test_the_agentic_scorecard_row_reports_significance_not_just_a_drop(sandbox)
     assert "openai/gpt-oss-120b" in row.defense_cost
     assert "0.2" in row.defense_cost or "p=" in row.defense_cost
     assert "pending" not in row.defense_cost.lower()
+
+
+def test_multiple_keys_for_one_provider_are_rotated(monkeypatch):
+    """Several keys in one variable pool their quota instead of exhausting the first.
+
+    Free tiers are capped per key, not per provider, so a comma-separated list is the
+    cheapest way to run a corpus that does not fit inside one allowance. Rotation is
+    round-robin rather than failover-on-error: spreading the load keeps every key inside
+    its own rate window instead of hammering one until it 429s.
+    """
+    from adversarial_payments.agentic.client import resolve_provider
+
+    monkeypatch.setenv("GROQ_API_KEY", "gsk_one,gsk_two , gsk_three")
+    spec = resolve_provider("groq")
+
+    assert list(spec.api_keys) == ["gsk_one", "gsk_two", "gsk_three"]
+    assert spec.api_key == "gsk_one"
+    assert [spec.next_key() for _ in range(4)] == [
+        "gsk_two",
+        "gsk_three",
+        "gsk_one",
+        "gsk_two",
+    ]
+
+
+def test_a_single_key_still_works_unchanged(monkeypatch):
+    monkeypatch.setenv("GROQ_API_KEY", "gsk_only")
+    spec = resolve_provider_single = __import__(
+        "adversarial_payments.agentic.client", fromlist=["resolve_provider"]
+    ).resolve_provider("groq")
+    assert list(spec.api_keys) == ["gsk_only"]
+    assert spec.next_key() == "gsk_only"

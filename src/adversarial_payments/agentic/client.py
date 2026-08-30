@@ -50,6 +50,21 @@ class Provider:
     model: str
     #: populated by resolve_provider; empty on the registry entries themselves
     api_key: str = ""
+    #: every key found in ``key_env``. Free tiers cap per key rather than per account, so
+    #: a comma-separated list pools allowances across keys for one corpus run.
+    api_keys: tuple[str, ...] = ()
+    _cursor: list[int] = field(default_factory=lambda: [0], repr=False, compare=False)
+
+    def next_key(self) -> str:
+        """Round-robin, not failover-on-error.
+
+        Spreading load keeps every key inside its own rate window; draining one until it
+        429s wastes the retry budget and delays the run by the backoff each time.
+        """
+        if not self.api_keys:
+            return self.api_key
+        self._cursor[0] = (self._cursor[0] + 1) % len(self.api_keys)
+        return self.api_keys[self._cursor[0]]
 
 
 #: The endpoints we red-team. Each has its own free-tier quota, which is why the same
@@ -95,7 +110,9 @@ def resolve_provider(name: str) -> Provider:
             f"unknown provider {name!r}; known: {sorted(PROVIDERS)}"
         ) from None
 
-    key = os.getenv(base.key_env, "")
+    raw = os.getenv(base.key_env, "")
+    keys = tuple(k.strip() for k in raw.split(",") if k.strip())
+    key = keys[0] if keys else ""
     if not key:
         raise RuntimeError(
             f"provider {name!r} needs {base.key_env} in .env -- refusing to fall back to "
@@ -109,6 +126,7 @@ def resolve_provider(name: str) -> Provider:
         key_env=base.key_env,
         model=model,
         api_key=key,
+        api_keys=keys,
     )
 
 
@@ -159,8 +177,10 @@ class LLMClient:
         provider: str | None = None,
         cache_dir: Path | None = None,
     ) -> None:
+        self._provider: Provider | None = None
         if provider is not None:
             spec = resolve_provider(provider)
+            self._provider = spec
             base_url = base_url or spec.base_url
             api_key = api_key if api_key is not None else spec.api_key
             model = model or spec.model
@@ -285,7 +305,10 @@ class LLMClient:
             raise RuntimeError("LLM_LIVE=1 but LLM_API_KEY is empty; see .env.example")
         from openai import OpenAI  # imported lazily so the offline path needs no SDK call
 
-        client = OpenAI(base_url=self.base_url, api_key=self.api_key)
+        # Rotate per call when several keys were supplied: free tiers cap per key, so a
+        # corpus larger than one allowance only completes if the load is spread.
+        key = self._provider.next_key() if self._provider is not None else self.api_key
+        client = OpenAI(base_url=self.base_url, api_key=key)
         kwargs: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
