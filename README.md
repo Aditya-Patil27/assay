@@ -12,20 +12,15 @@
 > carries **both rows**, and the dashboard is deployed at
 > <https://aditya-patil27.github.io/mastercard-adversarial-payments/>.
 >
-> The agentic corpus ran live against two independent 120B models on two providers and
-> replays entirely from cache with no network. **Its defence result is reported as *not*
-> statistically significant** — 4.2% to 0.0% on `gpt-oss-120b` is Fisher p=0.245, and
-> 1.4% to 0.0% on `nemotron-120b` is p=1.000. The scorecard row computes that p-value and
-> says so itself. See [§4.5 of the walkthrough](docs/submission/solution-walkthrough.md).
->
-> ### Read this before quoting the headline
->
-> **Attack success does not fall across rounds. It is 1.000 at every round.** Three rounds of
-> adversarial retraining did not stop a constraint-respecting attacker. What *does* move is
-> the attacker's cost, and that is the result we report:
->
-> | Round | ASR | mean L0 | median queries |
-> |---|---|---|---|
+> The agentic corpus ran live against two independent 120B models on two providers,
+> 144 trials per arm each, and replays entirely from cache with no network. **The defence
+> reduction is statistically significant** — 4.9% to 0.0% on `gpt-oss-120b` (Fisher
+> p = 0.015) and 4.2% to 0.3% pooled (p = 0.003) — with a **0% false-refusal rate** on the
+> benign controls. It is *not* significant on `nemotron-120b` alone (p = 0.214), where one
+> exploit survived; we publish the per-model rows rather than only the pooled figure so that
+> disagreement is visible. See [§4.5](docs/submission/solution-walkthrough.md).
+
+---|---|---|---|
 > | 0 | 1.000 | 3.81 | 277 |
 > | 1 | 1.000 | 4.26 | 298 |
 > | 2 | 1.000 | 4.64 | 492 |

@@ -12,13 +12,13 @@ const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
  */
 export function Scorecard({ rows }: { rows: ScorecardRow[] }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-line">
+    <div className="overflow-x-auto">
       <table className="w-full min-w-[760px] border-collapse text-sm">
         <caption className="sr-only">
           Framework scorecard: attack success before and after defense, per attack surface
         </caption>
         <thead>
-          <tr className="bg-panel-2 text-left">
+          <tr className="bg-figure-2 text-left">
             {[
               "Attack surface",
               "Primary metric",
@@ -30,7 +30,7 @@ export function Scorecard({ rows }: { rows: ScorecardRow[] }) {
               <th
                 key={h}
                 scope="col"
-                className="border-b border-line px-4 py-3 font-mono text-[11px] font-normal uppercase tracking-[0.15em] text-muted"
+                className="border-b border-rule px-4 py-3 text-[11px] font-medium text-muted"
               >
                 {h}
               </th>
@@ -43,29 +43,29 @@ export function Scorecard({ rows }: { rows: ScorecardRow[] }) {
               ? 1 - r.attack_success_after / r.attack_success_before
               : 0;
             return (
-              <tr key={r.surface} className="bg-panel align-top">
-                <td className="border-b border-line px-4 py-5">
+              <tr key={r.surface} className="align-top">
+                <td className="border-b border-rule px-4 py-5">
                   <span className="text-base font-semibold">{r.surface}</span>
                 </td>
-                <td className="border-b border-line px-4 py-5 text-muted">{r.primary_metric}</td>
-                <td className="border-b border-line px-4 py-5">
+                <td className="border-b border-rule px-4 py-5 text-muted">{r.primary_metric}</td>
+                <td className="border-b border-rule px-4 py-5">
                   <span className="font-mono text-lg tabular-nums text-attack">
                     {pct(r.attack_success_before)}
                   </span>
                   <MiniBar value={r.attack_success_before} tone="attack" />
                 </td>
-                <td className="border-b border-line px-4 py-5">
+                <td className="border-b border-rule px-4 py-5">
                   <span className="font-mono text-lg tabular-nums text-defend">
                     {pct(r.attack_success_after)}
                   </span>
                   <MiniBar value={r.attack_success_after} tone="defend" />
                 </td>
-                <td className="border-b border-line px-4 py-5">
+                <td className="border-b border-rule px-4 py-5">
                   <span className="font-mono text-2xl font-semibold tabular-nums">
                     −{(drop * 100).toFixed(0)}%
                   </span>
                 </td>
-                <td className="border-b border-line px-4 py-5 text-xs leading-relaxed text-muted">
+                <td className="border-b border-rule px-4 py-5 text-xs leading-relaxed text-muted">
                   {r.defense_cost}
                 </td>
               </tr>
@@ -79,9 +79,9 @@ export function Scorecard({ rows }: { rows: ScorecardRow[] }) {
 
 function MiniBar({ value, tone }: { value: number; tone: "attack" | "defend" }) {
   return (
-    <span className="mt-2 block h-1.5 w-24 overflow-hidden rounded-full bg-panel-2 ring-1 ring-line">
+    <span className="mt-2 block h-1.5 w-24 overflow-hidden bg-figure-2 ring-1 ring-rule">
       <span
-        className={`block h-full rounded-full ${tone === "attack" ? "bg-attack" : "bg-defend"}`}
+        className={`block h-full ${tone === "attack" ? "bg-attack" : "bg-defend"}`}
         style={{ width: `${Math.max(value * 100, value > 0 ? 2 : 0)}%` }}
       />
     </span>

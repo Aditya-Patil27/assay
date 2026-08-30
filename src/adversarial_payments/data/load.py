@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
+import os
 from pathlib import Path
 
 import numpy as np
@@ -49,15 +50,25 @@ def download_kaggle() -> pd.DataFrame | None:
     Any failure (missing ``kagglehub``, absent credentials, no network, unexpected
     layout) is a soft failure: the caller falls back to synthetic and records that fact.
     """
-    try:
-        import kagglehub
-    except ImportError:
-        return None
+    # A Kaggle notebook already has the dataset mounted read-only under /kaggle/input,
+    # where kagglehub cannot reach it and no network is available. Pointing this at the
+    # mount reuses the identical parsing path rather than growing a second loader that
+    # could drift from it.
+    override = os.getenv("SPARKOV_CSV_DIR", "")
+    if override:
+        root = Path(override)
+        if not root.exists():
+            return None
+    else:
+        try:
+            import kagglehub
+        except ImportError:
+            return None
 
-    try:
-        root = Path(kagglehub.dataset_download(config.KAGGLE_DATASET))
-    except Exception:  # noqa: BLE001 -- kagglehub raises many unrelated types
-        return None
+        try:
+            root = Path(kagglehub.dataset_download(config.KAGGLE_DATASET))
+        except Exception:  # noqa: BLE001 -- kagglehub raises many unrelated types
+            return None
 
     csvs = sorted(root.rglob("*.csv"))
     if not csvs:

@@ -64,13 +64,13 @@ export function CoevolutionChart({
       <div className="h-[300px] w-full sm:h-[400px] md:h-[440px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 28, right: 12, bottom: 4, left: 0 }}>
-            <CartesianGrid stroke="var(--color-line)" strokeDasharray="3 3" vertical={false} />
+            <CartesianGrid stroke="var(--color-rule)" strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="round"
               stroke="var(--color-muted)"
-              tick={{ fontSize: 13, fontFamily: "var(--font-mono)", fill: "var(--color-text)" }}
+              tick={{ fontSize: 13, fontFamily: "var(--font-mono)", fill: "var(--color-ink)" }}
               tickLine={false}
-              axisLine={{ stroke: "var(--color-line)" }}
+              axisLine={{ stroke: "var(--color-rule)" }}
               padding={{ left: 24, right: 24 }}
             />
             <YAxis
@@ -96,12 +96,12 @@ export function CoevolutionChart({
               width={52}
               unit="%"
             />
-            <Tooltip content={<CoevolutionTooltip />} cursor={{ stroke: "var(--color-line)" }} />
+            <Tooltip content={<CoevolutionTooltip />} cursor={{ stroke: "var(--color-rule)" }} />
             <Legend
               verticalAlign="top"
               align="left"
               height={32}
-              wrapperStyle={{ fontSize: 13, fontFamily: "var(--font-mono)" }}
+              wrapperStyle={{ fontSize: 13, fontFamily: "var(--font-sans)" }}
             />
             <Line
               yAxisId="right"
@@ -111,7 +111,7 @@ export function CoevolutionChart({
               stroke="var(--color-defend)"
               strokeWidth={2.5}
               strokeDasharray="7 4"
-              dot={{ r: 5, fill: "var(--color-ink)", stroke: "var(--color-defend)", strokeWidth: 2.5 }}
+              dot={{ r: 5, fill: "var(--color-paper)", stroke: "var(--color-defend)", strokeWidth: 2.5 }}
               activeDot={{ r: 7 }}
               isAnimationActive={false}
             >
@@ -172,10 +172,10 @@ export function CoevolutionChart({
  */
 function RoundStrip({ rows }: { rows: Row[] }) {
   return (
-    <div className="mt-6 overflow-x-auto rounded-lg border border-line">
+    <div className="mt-6 overflow-x-auto border border-rule">
       <table className="w-full min-w-[600px] border-collapse text-sm">
         <thead>
-          <tr className="bg-panel-2 text-left">
+          <tr className="bg-figure-2 text-left">
             {[
               "Round",
               "ASR",
@@ -186,7 +186,7 @@ function RoundStrip({ rows }: { rows: Row[] }) {
             ].map((h) => (
               <th
                 key={h}
-                className="border-b border-line px-3 py-2.5 font-mono text-[11px] font-normal uppercase tracking-[0.12em] text-muted"
+                className="border-b border-rule px-3 py-2.5 text-[11px] font-medium text-muted"
               >
                 {h}
               </th>
@@ -196,16 +196,16 @@ function RoundStrip({ rows }: { rows: Row[] }) {
         <tbody className="font-mono tabular-nums">
           {rows.map((r) => (
             <tr key={r.round}>
-              <td className="border-b border-line px-3 py-2.5 text-muted">{r.round}</td>
-              <td className="border-b border-line px-3 py-2.5 font-semibold text-attack">
+              <td className="border-b border-rule px-3 py-2.5 text-muted">{r.round}</td>
+              <td className="border-b border-rule px-3 py-2.5 font-semibold text-attack">
                 {r.asr}%
               </td>
-              <td className="border-b border-line px-3 py-2.5 text-defend">
+              <td className="border-b border-rule px-3 py-2.5 text-defend">
                 {r.prAuc === null ? <span className="text-muted">not run</span> : `${r.prAuc}%`}
               </td>
-              <td className="border-b border-line px-3 py-2.5">{r.l0.toFixed(1)}</td>
-              <td className="border-b border-line px-3 py-2.5">{r.queries}</td>
-              <td className="border-b border-line px-3 py-2.5 text-muted">
+              <td className="border-b border-rule px-3 py-2.5">{r.l0.toFixed(1)}</td>
+              <td className="border-b border-rule px-3 py-2.5">{r.queries}</td>
+              <td className="border-b border-rule px-3 py-2.5 text-muted">
                 {r.added ? `+${r.added.toLocaleString("en-US")}` : "—"}
               </td>
             </tr>
@@ -228,7 +228,7 @@ function CoevolutionTooltip({
   if (!active || !payload?.length) return null;
   const r = payload[0].payload;
   return (
-    <div className="rounded-lg border border-line bg-panel-2 px-3 py-2 font-mono text-xs shadow-lg">
+    <div className="border border-rule bg-paper px-3 py-2 font-mono text-xs">
       <p className="text-muted">{label}</p>
       <p className="mt-1.5 text-attack">ASR {r.asr}%</p>
       {r.prAuc === null ? (

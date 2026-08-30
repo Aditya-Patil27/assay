@@ -16,9 +16,9 @@ export function AgenticPanel({ categories }: { categories: AgenticCategory[] }) 
 
   return (
     <div className="space-y-4">
-      <Panel className="bg-panel-2">
+      <Panel className="bg-figure-2">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-          <h3 className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted">
+          <h3 className="text-[13px] font-medium text-muted">
             All categories · {attempts} injection attempts
           </h3>
           <p className="font-mono text-sm">
@@ -47,7 +47,7 @@ export function AgenticPanel({ categories }: { categories: AgenticCategory[] }) 
             <Panel key={c.category}>
               <div className="flex items-baseline justify-between gap-3">
                 <h3 className="text-sm font-medium">{c.category}</h3>
-                <span className="shrink-0 rounded border border-line px-1.5 py-0.5 font-mono text-[10px] text-muted">
+                <span className="shrink-0 rounded-[2px] border border-rule px-1.5 py-0.5 font-mono text-[10px] text-muted">
                   OWASP {c.owasp_id}
                 </span>
               </div>
@@ -59,12 +59,12 @@ export function AgenticPanel({ categories }: { categories: AgenticCategory[] }) 
 
               <p className="mt-3 font-mono text-[11px] text-muted">
                 {c.success_before}/{c.attempts} → {c.success_after}/{c.attempts} ·{" "}
-                <span className="font-semibold text-text">−{(drop * 100).toFixed(0)}%</span>{" "}
+                <span className="font-semibold text-ink">−{(drop * 100).toFixed(0)}%</span>{" "}
                 exploit rate
               </p>
 
-              <p className="mt-4 border-l-2 border-warn/50 bg-panel-2 py-2 pl-3 pr-2 font-mono text-[11px] leading-relaxed text-muted">
-                <span className="mb-1 block text-[10px] uppercase tracking-[0.12em] text-warn">
+              <p className="mt-4 border-l-2 border-warn/50 bg-figure-2 py-2 pl-3 pr-2 font-mono text-[11px] leading-relaxed text-muted">
+                <span className="mb-1 block text-[10px] text-warn">
                   example injection
                 </span>
                 {c.example_injection}
@@ -90,12 +90,12 @@ function Bar({
   const text = tone === "attack" ? "text-attack" : "text-defend";
   return (
     <div className="flex items-center gap-3">
-      <span className="w-12 shrink-0 font-mono text-[10px] uppercase tracking-wider text-muted">
+      <span className="w-12 shrink-0 text-[10px] text-muted">
         {label}
       </span>
-      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-panel-2 ring-1 ring-line">
+      <div className="h-2.5 flex-1 overflow-hidden bg-figure-2 ring-1 ring-rule">
         <div
-          className={`h-full rounded-full ${color}`}
+          className={`h-full ${color}`}
           style={{ width: `${Math.max(value * 100, value > 0 ? 1.5 : 0)}%` }}
         />
       </div>
@@ -124,14 +124,14 @@ export function AttackExamplePanel({
     <Panel>
       <div className="flex items-baseline justify-between gap-2">
         <span className="font-mono text-xs text-muted">{example.id}</span>
-        <span className="font-mono text-[10px] uppercase tracking-wider text-muted">
+        <span className="text-[10px] text-muted">
           round {example.round}
         </span>
       </div>
 
       <div className="mt-4 flex items-end gap-3">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-wider text-muted">
+          <p className="text-[10px] text-muted">
             flagged as fraud
           </p>
           <p className="font-mono text-3xl tabular-nums text-attack">
@@ -139,10 +139,10 @@ export function AttackExamplePanel({
           </p>
         </div>
         <div className="flex-1 pb-3">
-          <div className="border-t-2 border-dashed border-line" />
+          <div className="border-t-2 border-dashed border-rule" />
         </div>
         <div className="text-right">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-muted">
+          <p className="text-[10px] text-muted">
             passes as legitimate
           </p>
           <p className="font-mono text-3xl tabular-nums text-defend">
@@ -163,7 +163,7 @@ export function AttackExamplePanel({
       <table className="mt-4 w-full text-xs">
         <caption className="sr-only">Features changed by the attack, before and after</caption>
         <thead>
-          <tr className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted">
+          <tr className="text-[10px] text-muted">
             <th scope="col" className="pb-2 text-left font-normal">
               feature
             </th>
@@ -181,7 +181,7 @@ export function AttackExamplePanel({
         </thead>
         <tbody>
           {example.touched.map((d) => (
-            <tr key={d.feature} className="border-t border-line">
+            <tr key={d.feature} className="border-t border-rule">
               <td className="py-2 pr-3 font-mono text-muted">{d.feature}</td>
               <td className="py-2 text-right font-mono tabular-nums">{fmt(d.before)}</td>
               <td className="px-2 py-2 text-center text-muted" aria-label="becomes">

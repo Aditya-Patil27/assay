@@ -1,34 +1,122 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #07090d;
-  --color-panel: #0e1219;
-  --color-panel-2: #141a24;
-  --color-line: #1f2733;
-  --color-text: #e6ebf2;
-  --color-muted: #8b97a8;
+  /* ------------------------------------------------------------------------------
+   * Printing inks on paper stock.
+   *
+   * This is not a UI palette, it is a press palette: one paper, one black, two inks
+   * (an attack vermilion and a defense prussian) and an ochre for anything
+   * provisional. The page is a report someone could have printed, so the colours are
+   * the ones a two-colour print job would have bought.
+   *
+   * Nothing here is a framework default. The previous accent was Tailwind's teal-400
+   * (#2dd4bf) verbatim, which is a rename rather than a decision.
+   * ------------------------------------------------------------------------------ */
+  --color-paper: #f4f4f1;
+  --color-figure: #eaeae5;
+  --color-figure-2: #e0e0d9;
+  --color-rule: #c6c6bc;
+  --color-rule-strong: #a6a69c;
+  --color-ink: #1a1a17;
+  --color-muted: #62625b;
 
   /* Red team / blue team. The whole story is one turning into the other. */
-  --color-attack: #ff5a5f;
-  --color-attack-dim: #7a2b2e;
-  --color-defend: #2dd4bf;
-  --color-defend-dim: #14504a;
-  --color-warn: #f5a524;
+  --color-attack: #c3341f;
+  --color-attack-dim: #dd8a79;
+  --color-defend: #1f5673;
+  --color-defend-dim: #8aa9bb;
+  /* Ochre, darkened until small text on paper clears 4.5:1 -- it labels placeholder
+     data and unroll edges, both of which are read at 10-11px. */
+  --color-warn: #8a5a08;
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+  /* ------------------------------------------------------------------------------
+   * Three faces, each with a job.
+   *
+   *   Newsreader     prose. A screen-first text serif with a display cut, so the
+   *                  headline and the body are the same voice at two sizes.
+   *   IBM Plex Sans  the machine layer: captions, table headers, axis labels.
+   *   IBM Plex Mono  anything that is a measurement.
+   *
+   * Plex is the pair to Newsreader rather than Inter because it was drawn as an
+   * engineering type system and its mono is the same skeleton as its sans -- so a
+   * figure's caption and the numbers inside it read as one object.
+   * ------------------------------------------------------------------------------ */
+  --font-serif: var(--font-newsreader), Charter, "Bitstream Charter", Georgia, serif;
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, Menlo, monospace;
+
+  /* A radius scale, applied on purpose. Figures and rules are square; only genuinely
+     soft affordances (chips, bar caps) get the 2px. */
+  --radius-card: 0px;
+  --radius-chip: 2px;
+}
+
+html {
+  color-scheme: light;
 }
 
 html,
 body {
-  background: var(--color-ink);
-  color: var(--color-text);
+  background: var(--color-paper);
+  color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* React Flow renders its own surface; keep it on our palette. */
+/* --------------------------------------------------------------------------------
+ * The report grid.
+ *
+ * One reading column, one margin. Figures are allowed to break the column and run to
+ * the full measure; prose never is. This is the whole layout system -- there is no
+ * card, and no three-up feature grid, because the document is read top to bottom.
+ * -------------------------------------------------------------------------------- */
+.wrap {
+  width: 100%;
+  max-width: 74rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+@media (min-width: 768px) {
+  .wrap {
+    padding-inline: 2.5rem;
+  }
+}
+
+/* The measure. 68ch is the long end of comfortable for a serif at this size; prose
+   wider than this is the single fastest way to make a report unreadable. */
+.col {
+  max-width: 68ch;
+}
+
+.prose {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+@media (min-width: 768px) {
+  .prose {
+    font-size: 1.125rem;
+  }
+}
+.prose strong {
+  font-weight: 600;
+}
+
+/* Old-style figures in running prose, lining figures in tables -- Newsreader carries
+   both, and the tabular sets are what keep a column of numbers aligned. */
+.prose {
+  font-variant-numeric: oldstyle-nums proportional-nums;
+}
+table,
+.tnum {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* --------------------------------------------------------------------------------
+ * React Flow renders its own surface; keep it on the paper.
+ * -------------------------------------------------------------------------------- */
 .react-flow__background {
-  background: var(--color-ink);
+  background: var(--color-paper);
 }
 .react-flow__attribution {
   display: none;
@@ -36,4 +124,9 @@ body {
 /* Row gutter labels are not real pipeline nodes -- no connection handles. */
 .band-label .react-flow__handle {
   display: none;
+}
+.react-flow__controls-button {
+  border-color: var(--color-rule) !important;
+  background: var(--color-paper) !important;
+  fill: var(--color-ink) !important;
 }

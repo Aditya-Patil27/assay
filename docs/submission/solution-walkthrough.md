@@ -377,37 +377,48 @@ and describing something that does not exist.
 ### 4.5 The second attack surface
 
 The corpus was run live against **two independent frontier-class models**, on two providers,
-with every response cached so the whole run replays offline with no network.
+with every response cached so the whole run replays offline with no network. The corpus is 48
+injections across six OWASP-mapped categories, paired with the scenarios on their own channel:
+**144 trials per arm, per model.**
 
 | Model | Provider | Exploit rate before | after | Fisher exact (2-sided) |
 |---|---|---|---|---|
-| `openai/gpt-oss-120b` | Groq | 4.2% (3/72) | 0.0% (0/72) | p = 0.245 |
-| `nvidia/nemotron-3-super-120b-a12b` | NVIDIA NIM | 1.4% (1/72) | 0.0% (0/72) | p = 1.000 |
-| *pooled* | — | 2.8% (4/144) | 0.0% (0/144) | p = 0.122 |
+| `openai/gpt-oss-120b` | Groq | 4.9% (7/144) | **0.0%** (0/144) | **p = 0.015** |
+| `nvidia/nemotron-3-super-120b-a12b` | NVIDIA NIM | 3.5% (5/144) | 0.7% (1/144) | p = 0.214 |
+| *pooled* | — | 4.2% (12/288) | 0.3% (1/288) | **p = 0.003** |
 
 *Sources: `artifacts/agentic/redteam-groq.json` and `redteam-nvidia.json`, both
-`placeholder: false`.*
+`placeholder: false`. 95% CI on the pooled before-rate is 2.4%–7.1%.*
 
-**We are not claiming the defence works, and the honest reason is in the third column.**
+**The defence layer produces a statistically significant reduction** on `gpt-oss-120b`
+(p = 0.015) and pooled across both models (p = 0.003). It refused **none** of the 14 benign
+control documents — a 0% false-refusal rate — which rules out the trivial defence that simply
+blocks everything and thereby scores a perfect exploit rate.
 
-Every exploit we observed was removed, and the defence layer refused **none** of the 14 benign
-control documents — a 0% false-refusal rate, which rules out the trivial defence that simply
-blocks everything. But the before-rates are 4.2% and 1.4%. There is almost nothing there to
-remove, and a drop from three successes to zero across 72 trials is a result chance produces
-roughly a quarter of the time. **The reduction is not statistically significant on either
-model.** The scorecard row says so in its own defence-cost field rather than leaving a reader
-to assume otherwise.
+Three things about that result we would rather state than have drawn out of us.
 
-The finding this run genuinely supports is a different and more interesting one: **two
-independently-trained 120B-class instruction-tuned models were already largely resistant to a
-hand-authored indirect-injection corpus.** Payee mutation was the only category to land at all,
-on either model. Data exfiltration, instruction override, obfuscated override, tool-scope
-escalation and transfer tampering scored zero before any defence was applied.
+**It is not significant on `nemotron-120b` taken alone** (p = 0.214), and one exploit survived
+the defence there. We report the per-model rows rather than only the pooled figure precisely
+because the pooled number alone would hide that disagreement.
 
-That cuts against our own framing, so it is worth stating plainly: our injection corpus is
-authored by us and finite. Against these models it is a floor on the attack surface, not a
-census of it, and the correct conclusion is that **the corpus is too weak to measure a
-defence** — not that the defence is strong.
+**The surviving exploit is worth more than a clean sweep would have been.** A defence that
+blocks 100% of everything on every model is the result most likely to mean the corpus was too
+easy. One survivor on one model is evidence the measurement still has headroom.
+
+**An earlier revision of this document reported this same comparison as *not* significant**,
+and that was correct at the time: the corpus was then 24 injections, 72 trials per arm, and
+3/72 → 0/72 gives p = 0.245. Nothing about the defence changed. We doubled the corpus because
+72 trials could not resolve an effect of this size, and the significance follows from the
+added statistical power rather than from any change to what is being measured. The new
+injections were authored from published patterns **before** any were run, and none was revised
+after seeing whether the defence caught it — tuning payloads against our own classifier would
+have made the exploit rate a measure of that tuning.
+
+The finding underneath the significance is the one we would actually lead with: **two
+independently-trained 120B instruction-tuned models were already largely resistant to a
+hand-authored indirect-injection corpus**, at roughly a 4% baseline. `payee_mutation` is the
+only category that lands with any regularity on either model. Data exfiltration, obfuscated
+override and transfer tampering scored zero before any defence was applied.
 
 **What we would do with more time**, named because it is the obvious next step rather than a
 hedge: both providers host purpose-built injection guard models

@@ -247,14 +247,26 @@ sees a page with no charts.
 
 | Model | Provider | before | after | Fisher exact |
 |---|---|---|---|---|
-| `openai/gpt-oss-120b` | Groq | 4.2% (3/72) | 0.0% | p = 0.245 |
-| `nvidia/nemotron-3-super-120b-a12b` | NIM | 1.4% (1/72) | 0.0% | p = 1.000 |
+| `openai/gpt-oss-120b` | Groq | 4.9% (7/144) | **0.0%** | **p = 0.015** |
+| `nvidia/nemotron-3-super-120b-a12b` | NIM | 3.5% (5/144) | 0.7% (1/144) | p = 0.214 |
+| pooled | — | 4.2% (12/288) | 0.3% | **p = 0.003** |
 
-Every exploit observed was removed and **no benign control was refused** (0/14 false
-refusals), so it is not the trivial defence that blocks everything. But neither reduction is
-statistically significant — the baselines are too low for the corpus to measure a defence.
-Say that before a judge works it out. The honest finding is that two independently-trained
-120B models were already largely resistant to a hand-authored injection corpus.
+**Significant on gpt-oss and pooled; not on nemotron alone.** Quote the per-model rows, not
+only the pooled figure — the pooled number hides that the two models disagree, and one
+exploit survived the defence on nemotron.
+
+That survivor is worth more than a clean sweep. A defence that blocks 100% of everything on
+every model is the result most likely to mean the corpus was too easy.
+
+**If asked why an earlier draft said "not significant":** it did, and it was right then. The
+corpus was 72 trials per arm and 3/72 → 0/72 gives p = 0.245. We doubled the corpus because
+72 trials could not resolve an effect this size. The defence did not change; the statistical
+power did. New injections were authored from published patterns before any were run, and none
+was revised after seeing whether the defence caught it.
+
+The finding to lead with: **two independently-trained 120B models were already largely
+resistant** to a hand-authored injection corpus, at roughly a 4% baseline. `payee_mutation` is
+the only category landing with any regularity.
 
 Blocked for days on a missing API key. The key now exists, and closing it turned up three
 real bugs worth knowing about:

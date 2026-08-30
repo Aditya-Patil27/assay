@@ -24,14 +24,14 @@ export function FeasibilityPanel({
   return (
     <div className="grid gap-4">
       {placeholder && (
-        <p className="rounded-lg border border-attack/40 bg-attack/5 px-3 py-2 font-mono text-[11px] text-attack">
+        <p className="border border-attack/40 bg-attack/5 px-3 py-2 text-[11px] text-attack">
           Fixture data — this audit has not been computed from a real run.
         </p>
       )}
 
       <div className="grid gap-4 md:grid-cols-2">
         <Panel>
-          <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted">
+          <p className="text-sm font-medium text-muted">
             Unconstrained attacker
           </p>
           <p className="mt-3 text-3xl font-semibold text-attack">
@@ -42,9 +42,9 @@ export function FeasibilityPanel({
             touched
           </p>
 
-          <div className="mt-5 border-t border-line pt-4">
+          <div className="mt-5 border-t border-rule pt-4">
             <div
-              className="flex h-2.5 w-full overflow-hidden rounded-full bg-line"
+              className="flex h-2.5 w-full overflow-hidden bg-rule"
               role="img"
               aria-label={`${pct(impossible)} of successes are physically impossible, ${pct(plausible)} are plausible`}
             >
@@ -67,7 +67,7 @@ export function FeasibilityPanel({
         </Panel>
 
         <Panel>
-          <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted">
+          <p className="text-sm font-medium text-muted">
             Constraint-aware attacker
           </p>
           <p className="mt-3 text-3xl font-semibold text-defend">
@@ -77,9 +77,9 @@ export function FeasibilityPanel({
             attack success · {audit.constrained_mean_l0.toFixed(2)} mean features touched
           </p>
 
-          <div className="mt-5 border-t border-line pt-4">
+          <div className="mt-5 border-t border-rule pt-4">
             <div
-              className="flex h-2.5 w-full overflow-hidden rounded-full bg-line"
+              className="flex h-2.5 w-full overflow-hidden bg-rule"
               role="img"
               aria-label="Every success is a transaction that could occur"
             >
@@ -106,7 +106,7 @@ export function FeasibilityPanel({
 
       <p className="text-sm leading-relaxed text-muted">
         Read the left panel before believing any adversarial-ML result, including ours.{" "}
-        <strong className="font-semibold text-text">
+        <strong className="font-semibold text-ink">
           {pct(impossible)} of the unconstrained attacker&apos;s &ldquo;evasions&rdquo; are
           transactions that could not physically occur
         </strong>{" "}

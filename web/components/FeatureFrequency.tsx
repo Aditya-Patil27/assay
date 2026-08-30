@@ -14,7 +14,7 @@ import {
 import type { AttackRound } from "@/lib/types";
 
 /** One bar shade per round -- attack red, walked from bright to dim as rounds advance. */
-const ROUND_FILL = ["var(--color-attack)", "#c2454a", "var(--color-attack-dim)"];
+const ROUND_FILL = ["var(--color-attack)", "#d05f4b", "var(--color-attack-dim)"];
 
 /**
  * Which features the attacker actually reaches for, and how that shifts as the detector
@@ -42,7 +42,7 @@ export function FeatureFrequencyPanel({ rounds }: { rounds: AttackRound[] }) {
     <div className="h-[340px] w-full sm:h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout="vertical" margin={{ top: 4, right: 24, bottom: 4, left: 8 }}>
-          <CartesianGrid stroke="var(--color-line)" strokeDasharray="3 3" horizontal={false} />
+          <CartesianGrid stroke="var(--color-rule)" strokeDasharray="3 3" horizontal={false} />
           <XAxis
             type="number"
             domain={[0, 100]}
@@ -50,23 +50,23 @@ export function FeatureFrequencyPanel({ rounds }: { rounds: AttackRound[] }) {
             stroke="var(--color-muted)"
             tick={{ fontSize: 11, fontFamily: "var(--font-mono)", fill: "var(--color-muted)" }}
             tickLine={false}
-            axisLine={{ stroke: "var(--color-line)" }}
+            axisLine={{ stroke: "var(--color-rule)" }}
           />
           <YAxis
             type="category"
             dataKey="feature"
             width={168}
             stroke="var(--color-muted)"
-            tick={{ fontSize: 11, fontFamily: "var(--font-mono)", fill: "var(--color-text)" }}
+            tick={{ fontSize: 11, fontFamily: "var(--font-mono)", fill: "var(--color-ink)" }}
             tickLine={false}
             axisLine={false}
           />
           <Tooltip
-            cursor={{ fill: "rgba(255,255,255,0.04)" }}
+            cursor={{ fill: "rgba(0,0,0,0.05)" }}
             contentStyle={{
-              background: "var(--color-panel-2)",
-              border: "1px solid var(--color-line)",
-              borderRadius: 8,
+              background: "var(--color-figure-2)",
+              border: "1px solid var(--color-rule)",
+              borderRadius: 0,
               fontFamily: "var(--font-mono)",
               fontSize: 12,
             }}
@@ -77,7 +77,7 @@ export function FeatureFrequencyPanel({ rounds }: { rounds: AttackRound[] }) {
             verticalAlign="top"
             align="right"
             height={28}
-            wrapperStyle={{ fontSize: 12, fontFamily: "var(--font-mono)" }}
+            wrapperStyle={{ fontSize: 12, fontFamily: "var(--font-sans)" }}
           />
           {rounds.map((r, i) => (
             <Bar

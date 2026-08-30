@@ -25,7 +25,7 @@ export function ShapPanel({ rounds }: { rounds: DetectRound[] }) {
                 PR-AUC {r.pr_auc.toFixed(3)}
               </span>
             </div>
-            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-muted">
+            <p className="mt-1 text-[10px] text-muted">
               mean |SHAP| · top {r.top_shap.length}
             </p>
 
@@ -35,7 +35,7 @@ export function ShapPanel({ rounds }: { rounds: DetectRound[] }) {
                 return (
                   <li key={f.feature}>
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="truncate font-mono text-[11px] text-text" title={f.feature}>
+                      <span className="truncate font-mono text-[11px] text-ink" title={f.feature}>
                         {isNew ? (
                           <span className="text-warn" title="new to the top features this round">
                             <span aria-hidden="true">↑ </span>
@@ -48,9 +48,9 @@ export function ShapPanel({ rounds }: { rounds: DetectRound[] }) {
                         {f.mean_abs_shap.toFixed(2)}
                       </span>
                     </div>
-                    <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-panel-2">
+                    <div className="mt-1 h-1.5 w-full overflow-hidden bg-figure-2">
                       <div
-                        className={`h-full rounded-full ${isNew ? "bg-warn" : "bg-defend"}`}
+                        className={`h-full ${isNew ? "bg-warn" : "bg-defend"}`}
                         style={{ width: `${(f.mean_abs_shap / max) * 100}%` }}
                       />
                     </div>
@@ -59,7 +59,7 @@ export function ShapPanel({ rounds }: { rounds: DetectRound[] }) {
               })}
             </ol>
 
-            <p className="mt-4 border-t border-line pt-3 font-mono text-[10px] leading-relaxed text-muted">
+            <p className="mt-4 border-t border-rule pt-3 font-mono text-[10px] leading-relaxed text-muted">
               threshold {r.threshold.toFixed(2)} · P {r.precision.toFixed(2)} · R{" "}
               {r.recall.toFixed(2)} · n={r.n_train.toLocaleString("en-US")}
               {r.n_adversarial_added

@@ -113,7 +113,7 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
         data: {
           label: (
             <div className="text-left">
-              <div className="flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-wider text-muted">
+              <div className="flex items-center justify-between gap-2 text-[10px] text-muted">
                 <span>
                   {n.stage}
                   {n.round !== null ? ` · r${n.round}` : ""}
@@ -128,10 +128,10 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
           ),
         },
         style: {
-          background: "var(--color-panel-2)",
+          background: "var(--color-figure-2)",
           border: `1.5px ${n.status === "pending" ? "dashed" : "solid"} ${color}`,
-          borderRadius: 8,
-          color: "var(--color-text)",
+          borderRadius: 2,
+          color: "var(--color-ink)",
           padding: "8px 10px",
           width: 186,
           fontSize: 12,
@@ -151,7 +151,7 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
       connectable: false,
       data: {
         label: (
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">
+          <span className="text-[11px] text-muted">
             {bandLabel(band)}
           </span>
         ),
@@ -168,7 +168,7 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
 
     const rfEdges: Edge[] = edgeList.map((e, i) => {
       const unroll = e.kind === "unroll";
-      const stroke = unroll ? "var(--color-warn)" : "var(--color-line)";
+      const stroke = unroll ? "var(--color-warn)" : "var(--color-rule)";
       return {
         id: `${e.source}->${e.target}-${i}`,
         source: e.source,
@@ -180,7 +180,7 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
           fontSize: 10,
           fontFamily: "var(--font-mono)",
         },
-        labelBgStyle: { fill: "var(--color-ink)" },
+        labelBgStyle: { fill: "var(--color-paper)" },
         labelBgPadding: [4, 2] as [number, number],
         markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 16, height: 16 },
         style: {
@@ -196,7 +196,7 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
 
   return (
     <div>
-      <div className="h-[420px] w-full overflow-hidden rounded-xl border border-line bg-ink sm:h-[520px] md:h-[600px]">
+      <div className="h-[420px] w-full overflow-hidden border border-rule bg-paper sm:h-[520px] md:h-[600px]">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -208,8 +208,8 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
           edgesFocusable={false}
           autoPanOnNodeFocus={false}
         >
-          <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="#1a212c" />
-          <Controls showInteractive={false} className="!border-line !bg-panel" />
+          <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="#bdbdb2" />
+          <Controls showInteractive={false} className="!border-rule !bg-figure" />
         </ReactFlow>
       </div>
 
@@ -220,13 +220,13 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
 
 function GraphLegend() {
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-lg border border-line bg-panel px-4 py-3 font-mono text-[11px] text-muted">
+    <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 border border-rule bg-figure px-4 py-3 text-[11px] text-muted">
       {(Object.keys(TRACK) as Track[]).map((t) => (
         <span key={t} className="inline-flex items-center gap-2">
           <span
             aria-hidden="true"
-            className="inline-block h-3 w-5 rounded-sm border-[1.5px]"
-            style={{ borderColor: TRACK[t].color, background: "var(--color-panel-2)" }}
+            className="inline-block h-3 w-5 border-[1.5px]"
+            style={{ borderColor: TRACK[t].color, background: "var(--color-figure-2)" }}
           />
           {TRACK[t].label}
         </span>
@@ -234,7 +234,7 @@ function GraphLegend() {
 
       <span className="inline-flex items-center gap-2">
         <svg width="30" height="10" aria-hidden="true">
-          <line x1="0" y1="5" x2="30" y2="5" stroke="var(--color-line)" strokeWidth="2" />
+          <line x1="0" y1="5" x2="30" y2="5" stroke="var(--color-rule)" strokeWidth="2" />
         </svg>
         flow edge
       </span>
