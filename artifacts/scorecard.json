@@ -2,14 +2,14 @@
   "kind": "scorecard",
   "placeholder": false,
   "schema_version": 1,
-  "created_at": "2026-08-30T19:48:59.639084+00:00",
-  "git_sha": "0cc36dc",
+  "created_at": "2026-08-30T20:01:36.848561+00:00",
+  "git_sha": "18a2ab0",
   "payload": [
     {
       "surface": "Tabular detector",
       "attack_success_before": 1.0,
       "attack_success_after": 1.0,
-      "defense_cost": "PR-AUC 0.829 -> 0.829 (+0.0%) over 1 rounds",
+      "defense_cost": "PR-AUC 0.829 at round 0; delta not measured (only one detector round published)",
       "primary_metric": "Attack Success Rate (constrained evasion)"
     },
     {

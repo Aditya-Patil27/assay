@@ -110,3 +110,29 @@ def test_read_rejects_a_future_schema_version(tmp_path, monkeypatch):
 def test_unknown_kind_is_rejected():
     with pytest.raises(KeyError, match="unknown artifact kind"):
         A.path_for("not_a_real_artifact")
+
+
+def test_latency_is_written_through_the_provenance_envelope(tmp_path, monkeypatch):
+    """The sub-50ms claim must sit inside the machinery that guarantees a number is real.
+
+    latency.json was written with a plain json.dump: no placeholder flag, no git_sha, no
+    created_at, and unreadable by the dashboard's loader. The one claim we make about
+    production viability was therefore the one claim standing outside the audit that makes
+    every other number checkable.
+    """
+    from adversarial_payments.serving.latency import LatencyReport, write_latency
+
+    paths = {kind: tmp_path / f"{kind}.json" for kind in A._PATHS}
+    monkeypatch.setattr(A, "_PATHS", paths)
+
+    report = LatencyReport(
+        p50_ms=1.0, p95_ms=2.0, p99_ms=3.0, mean_ms=1.2, max_ms=4.0,
+        n_samples=1000, backend="onnxruntime",
+    )
+    write_latency(report)
+
+    env = A.read("latency")
+    assert env["placeholder"] is False
+    assert env["git_sha"] and env["created_at"]
+    assert env["payload"]["n_samples"] == 1000
+    assert env["payload"]["backend"] == "onnxruntime"

@@ -289,3 +289,31 @@ def test_write_artifacts_publishes_the_feasibility_audit(sandbox):
     assert payload["forged_frozen_share"] == pytest.approx(0.03)
     assert payload["unconstrained_asr"] == pytest.approx(1.0)
     assert payload["constrained_asr"] == pytest.approx(1.0)
+
+
+def test_a_single_detector_round_reports_no_delta_rather_than_zero_cost():
+    """One round cannot express a change, and "+0.0%" reads as "the defence was free".
+
+    Same class of error as plotting an absent round as zero: a missing measurement rendered
+    as a confident value. The scorecard is the one table a judge reads, so it has to say
+    "not measured" where that is what it means.
+    """
+    from adversarial_payments import scorecard as SC
+    from adversarial_payments.artifacts import AttackRound, DetectRound
+
+    atk = [
+        AttackRound(
+            round=0, asr=1.0, n_attempts=400, n_success=400, mean_l0=3.8,
+            mean_l2=3.4, median_queries=277, per_feature_freq={},
+        )
+    ]
+    one = [
+        DetectRound(
+            round=0, pr_auc=0.829, roc_auc=0.978, threshold=0.23, precision=0.72,
+            recall=0.80, n_train=96000, n_adversarial_added=0, top_shap=[],
+        )
+    ]
+
+    row = SC.build(atk, one)[0][0]
+    assert "+0.0%" not in row.defense_cost
+    assert "not measured" in row.defense_cost.lower()

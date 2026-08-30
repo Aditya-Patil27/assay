@@ -8,8 +8,9 @@
 
 > **Editorial status.** Every figure in this document traces to a result file in
 > `artifacts/` produced by code in this repository. Figures not yet computed are marked
-> `[[PENDING]]` rather than estimated. Nothing here is an aspiration written in the present
-> tense.
+> with an orange PENDING marker rather than estimated. **As of this revision there are
+> none left:** every figure below is computed. Nothing here is an aspiration written in the
+> present tense.
 
 ---
 
@@ -462,9 +463,24 @@ would it cost an adaptive attacker to evade the model we are about to ship, and 
 hardening against them cost us in detection quality?*
 
 **Inference cost is not the obstacle.** Scoring is a single gradient-boosted tree evaluation,
-comfortably within real-time authorisation budgets. `[[PENDING — latency figures. A
-measurement exists but was taken against the training-time backend at a tenth of the
-specified sample count, so we do not quote it.]]`
+comfortably within real-time authorisation budgets. Measured on the **serving** path — the round-0 detector exported to ONNX and run under
+ONNX Runtime on CPU, one transaction at a time, 1,000 timed calls after 100 discarded
+warmups:
+
+| p50 | p95 | p99 | mean |
+|---|---|---|---|
+| 0.035 ms | 0.081 ms | 0.145 ms | 0.043 ms |
+
+*Source: `artifacts/latency.json`, `placeholder: false`. Tail percentiles are reported
+because p99 is what breaches an authorisation SLA, not the mean.*
+
+Two things make this figure defensible rather than merely small. The exported graph was
+checked against the training-time model over 256 inputs and agrees to **8.6e-08**, so the
+number describes the model we actually evaluated and not a lookalike. And the earlier
+measurement this replaces — 4.1 ms — was taken through XGBoost's Python API, which builds a
+one-row DataFrame per call; that overhead, not the tree evaluation, was almost all of it.
+Quoting the training-time path as a serving cost would have overstated inference by two
+orders of magnitude in our own disfavour.
 
 **Attack generation is offline and does not need to be fast.** It runs in evaluation, not in
 the authorisation path.
@@ -498,12 +514,12 @@ boundaries should not be trusted.
   faithful model of the attack surface, not an integration with a real payment system.
 - **Three of the five mapped threat vectors are not implemented** — synthetic identity,
   deepfake voice, and localised social engineering. They are section 2, not section 3.
-- **One result is still incomplete** — single-transaction inference latency, marked
-  `[[PENDING]]` above rather than estimated. The figure we have was measured on 100 XGBoost
-  samples rather than the 1,000 ONNX samples specified, and `artifacts/latency.json` is
-  written outside the provenance envelope described in section 2, so it carries no
-  `placeholder` flag. We would rather leave the marker than quote a number our own audit
-  cannot vouch for.
+- **Every result in this document is now backed by an artifact carrying
+  `placeholder: false`**, and no PENDING markers remain. The last one to close was
+  latency, which had been measured against the training-time backend at a tenth of the
+  specified sample count *and* written outside the provenance envelope of section 2 — so it
+  was both the wrong number and an unauditable one. Both defects are fixed rather than
+  argued away.
 - **The agentic defence result is reported as not statistically significant** (section 4.5).
   It would have been easy to present "4.2% to 0.0%" as a success and most readers would have
   accepted it.

@@ -8,9 +8,15 @@
 > (see [Provenance](#provenance)). `attack/rounds`, `attack/examples`, `graph`, `scorecard`
 > and `detect/rounds` all carry `placeholder: false` and are safe to quote.
 >
-> **One artifact is still a fixture: `agentic/redteam.json`.** It is blocked on a single
-> missing API key, not on engineering. Until that lands, the dashboard banner names it, the
-> notebook substitutes `TK`, and the scorecard ships **one row instead of two**.
+> **Every result artifact is now real.** The placeholder banner is gone, the scorecard
+> carries **both rows**, and the dashboard is deployed at
+> <https://aditya-patil27.github.io/mastercard-adversarial-payments/>.
+>
+> The agentic corpus ran live against two independent 120B models on two providers and
+> replays entirely from cache with no network. **Its defence result is reported as *not*
+> statistically significant** — 4.2% to 0.0% on `gpt-oss-120b` is Fisher p=0.245, and
+> 1.4% to 0.0% on `nemotron-120b` is p=1.000. The scorecard row computes that p-value and
+> says so itself. See [§4.5 of the walkthrough](docs/submission/solution-walkthrough.md).
 >
 > ### Read this before quoting the headline
 >

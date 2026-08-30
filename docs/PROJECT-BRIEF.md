@@ -5,7 +5,7 @@ understand it. Every number here traces to a committed artifact carrying
 `placeholder: false`; where a number does not exist yet, this document says so instead of
 estimating.
 
-Last updated 2026-08-30. Deadline: **Aug 31 2026, 23:59 IST.**
+Last updated 2026-08-31. Deadline: **Aug 31 2026, 23:59 IST.**
 
 ---
 
@@ -127,8 +127,10 @@ have survived and we would have been quoting it for the wrong reason without kno
 | `artifacts/attack/examples.json` | Real |
 | `artifacts/attack/feasibility.json` | Real |
 | `artifacts/graph.json` | Real |
-| `artifacts/scorecard.json` | Real — **one row**; agentic row absent |
-| `artifacts/agentic/redteam.json` | In progress on a free model |
+| `artifacts/scorecard.json` | Real — **both rows** |
+| `artifacts/agentic/redteam.json` | Real — `gpt-oss-120b`, 101 live calls |
+| `artifacts/agentic/redteam-nvidia.json` | Real — `nemotron-120b` |
+| `artifacts/latency.json` | Real — ONNX, 1,000 samples |
 
 **The rule the whole repo enforces: a number is real only when its artifact says
 `placeholder: false`.** The dashboard renders a banner naming every fixture; the notebook
@@ -138,7 +140,7 @@ substitutes `TK`. A fake number cannot silently reach a reader. Check any time w
 grep -r placeholder artifacts/
 ```
 
-**98 tests pass** (`pytest -q`). The tabular run **reproduces byte-for-byte** on a second
+**104 tests pass** (`pytest -q`). The tabular run **reproduces byte-for-byte** on a second
 execution — only `created_at` and `git_sha` move.
 
 ### Data provenance
@@ -147,13 +149,17 @@ Real Sparkov from Kaggle, not synthetic: **1,852,394 transactions, 999 cards,
 2019-01-01 to 2020-12-31, 9,651 frauds (0.521%)**. Recorded by machine in
 `artifacts/data_provenance.json`, not asserted in prose.
 
-### Two numbers that are NOT quotable yet
+### One number that is still NOT quotable
 
 - **Per-round PR-AUC.** The loop does not write `detect/rounds.json`, so its per-round PR-AUC
-  exists only in a run log — outside the provenance machinery. Do not put it in the deck.
-- **Latency.** `artifacts/latency.json` bypasses the artifact envelope entirely: no
-  `placeholder` flag, no `git_sha`. It reports p50 4.1 ms over 100 XGBoost samples, not the
-  1,000 ONNX samples specified. Indicative, not quotable.
+  exists only in a run log — outside the provenance machinery. Do not put it in the deck. The
+  scorecard says "delta not measured" for exactly this reason.
+
+**Latency is now quotable.** It was the other one on this list. The detector is exported to
+ONNX and timed under ONNX Runtime — **p50 0.035 ms, p95 0.081 ms, p99 0.145 ms over 1,000
+single-transaction calls** — and `latency.json` now goes through `artifacts.write`, so it
+carries a `placeholder` flag and a `git_sha` like everything else. The exported graph agrees
+with the training-time model to 8.6e-08, so the figure describes the model we evaluated.
 
 ---
 
@@ -236,6 +242,19 @@ sees a page with no charts.
 ---
 
 ## 10. The agentic track
+
+**Result, and the caveat that must travel with it.** The corpus ran live against two models:
+
+| Model | Provider | before | after | Fisher exact |
+|---|---|---|---|---|
+| `openai/gpt-oss-120b` | Groq | 4.2% (3/72) | 0.0% | p = 0.245 |
+| `nvidia/nemotron-3-super-120b-a12b` | NIM | 1.4% (1/72) | 0.0% | p = 1.000 |
+
+Every exploit observed was removed and **no benign control was refused** (0/14 false
+refusals), so it is not the trivial defence that blocks everything. But neither reduction is
+statistically significant — the baselines are too low for the corpus to measure a defence.
+Say that before a judge works it out. The honest finding is that two independently-trained
+120B models were already largely resistant to a hand-authored injection corpus.
 
 Blocked for days on a missing API key. The key now exists, and closing it turned up three
 real bugs worth knowing about:

@@ -29,10 +29,19 @@ def tabular_row(
         raise ValueError("no attack rounds; run the loop before writing the scorecard")
 
     first, last = attack_rounds[0], attack_rounds[-1]
-    if detect_rounds:
+    if len(detect_rounds) > 1:
         pr0, prn = detect_rounds[0].pr_auc, detect_rounds[-1].pr_auc
         rel = (prn - pr0) / pr0 if pr0 else 0.0
         cost = f"PR-AUC {pr0:.3f} -> {prn:.3f} ({rel:+.1%}) over {len(detect_rounds)} rounds"
+    elif detect_rounds:
+        # A single round cannot express a change. Differencing it against itself yields
+        # "+0.0%", which reads as "the defence cost nothing" when it means "we did not
+        # measure it" -- the same missing-value-as-confident-zero error as plotting an
+        # absent round at the axis.
+        cost = (
+            f"PR-AUC {detect_rounds[0].pr_auc:.3f} at round {detect_rounds[0].round}; "
+            f"delta not measured (only one detector round published)"
+        )
     else:
         cost = "PR-AUC delta not measured"
 

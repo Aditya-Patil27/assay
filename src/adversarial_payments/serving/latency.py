@@ -86,7 +86,15 @@ def measure_latency(
     )
 
 
-def write_latency(report: LatencyReport, path: Path = LATENCY_PATH) -> Path:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(report.as_dict(), indent=2) + "\n", encoding="utf-8")
-    return path
+def write_latency(report: LatencyReport) -> Path:
+    """Publish through ``artifacts.write`` so the number carries provenance.
+
+    This used to be a plain ``json.dump``, which left the one claim we make about
+    production viability standing outside the machinery that makes every other number
+    checkable: no ``placeholder`` flag, no ``git_sha``, no ``created_at``, and invisible
+    to the dashboard's loader. A latency figure a reader cannot audit is not better than
+    no latency figure, so it now goes through the same envelope as everything else.
+    """
+    from .. import artifacts as A
+
+    return A.write("latency", report, placeholder=False)

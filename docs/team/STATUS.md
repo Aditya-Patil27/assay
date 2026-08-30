@@ -36,9 +36,8 @@ What is actually real right now, and what each person does next. Update your own
 when something lands; do not update anyone else's.
 
 The rule this board exists to enforce: **a number is real only when its artifact says
-`placeholder: false`.** As of 2026-08-30 midday **one of seven** still says `true` —
-`agentic/redteam.json`. That one is a seed fixture and must not be quoted in the deck, the
-notebook, or to a judge. The rest are real.
+`placeholder: false`.** As of 2026-08-31 **every result artifact says `false`.** There are
+no fixtures left. The banner is gone from the dashboard and the scorecard has both rows.
 
 ---
 
@@ -89,9 +88,12 @@ deployed; nothing is submitted; and `.env` exists, pre-filled, waiting on a key.
 | `artifacts/attack/rounds.json` | P2 | **`false`** | Real — 3 rounds, 400 attacks each |
 | `artifacts/attack/examples.json` | P2 | **`false`** | Real |
 | `artifacts/attack/feasibility.json` | P2 | **`false`** | Real — **new kind**, see below |
-| `artifacts/agentic/redteam.json` | P3 | `true` | Seed fixture — **the only one left** |
+| `artifacts/agentic/redteam.json` | P3 | **`false`** | Real — `gpt-oss-120b`, 101 live calls |
+| `artifacts/agentic/redteam-groq.json` | P3 | **`false`** | Real |
+| `artifacts/agentic/redteam-nvidia.json` | P3 | **`false`** | Real — `nemotron-120b` |
+| `artifacts/latency.json` | P1 | **`false`** | Real — ONNX, 1,000 samples, now enveloped |
 | `artifacts/graph.json` | P2 | **`false`** | Real |
-| `artifacts/scorecard.json` | P2 + P3 | **`false`** | Real — one row; agentic row still absent |
+| `artifacts/scorecard.json` | P2 + P3 | **`false`** | Real — **both rows** |
 
 **Six of seven are real.** The run reproduced byte-for-byte on a second execution — only
 `created_at` and `git_sha` moved — which is the first determinism evidence we have.

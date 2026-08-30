@@ -201,6 +201,7 @@ _PATHS = {
     "scorecard": ARTIFACTS / "scorecard.json",
     "graph": ARTIFACTS / "graph.json",
     "feasibility_audit": ARTIFACTS / "attack" / "feasibility.json",
+    "latency": ARTIFACTS / "latency.json",
 }
 
 
