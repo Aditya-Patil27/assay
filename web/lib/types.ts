@@ -82,6 +82,8 @@ export interface AgenticCategory {
   success_before: number;
   success_after: number;
   example_injection: string;
+  /** the model these rates were measured on; an exploit rate is a property of one. */
+  model?: string;
 }
 
 export interface ScorecardRow {

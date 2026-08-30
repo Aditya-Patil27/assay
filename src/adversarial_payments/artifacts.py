@@ -140,6 +140,9 @@ class AgenticCategory:
     success_before: int
     success_after: int
     example_injection: str
+    #: the model these rates were measured on. An exploit rate is a property of a model,
+    #: not of the corpus, so it travels with one or it is not attributable.
+    model: str = ""
 
 
 # --- terminal node -----------------------------------------------------------------
@@ -193,6 +196,8 @@ _PATHS = {
     "attack_rounds": ARTIFACTS / "attack" / "rounds.json",
     "attack_examples": ARTIFACTS / "attack" / "examples.json",
     "agentic_redteam": ARTIFACTS / "agentic" / "redteam.json",
+    "agentic_redteam_nvidia": ARTIFACTS / "agentic" / "redteam-nvidia.json",
+    "agentic_redteam_groq": ARTIFACTS / "agentic" / "redteam-groq.json",
     "scorecard": ARTIFACTS / "scorecard.json",
     "graph": ARTIFACTS / "graph.json",
     "feasibility_audit": ARTIFACTS / "attack" / "feasibility.json",

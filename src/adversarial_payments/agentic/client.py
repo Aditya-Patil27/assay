@@ -40,6 +40,78 @@ from ..config import ARTIFACTS, SETTINGS
 
 CACHE_DIR = ARTIFACTS / "agentic" / "cache"
 
+@dataclass(frozen=True)
+class Provider:
+    """One OpenAI-compatible endpoint, its credential, and the model we test on it."""
+
+    name: str
+    base_url: str
+    key_env: str
+    model: str
+    #: populated by resolve_provider; empty on the registry entries themselves
+    api_key: str = ""
+
+
+#: The endpoints we red-team. Each has its own free-tier quota, which is why the same
+#: corpus is run once per provider rather than load-balanced across them: the quota is the
+#: binding constraint, and load balancing would spread one reported exploit rate over
+#: several models. A rate that belongs to no model is exactly the sort of number this
+#: project exists to argue against, so the corpus is repeated instead of divided.
+#:
+#: Models are overridable per provider, because a provider's free catalogue churns and a
+#: hard-coded id that silently 404s is worse than one that has to be named.
+PROVIDERS: dict[str, Provider] = {
+    "openrouter": Provider(
+        name="openrouter",
+        base_url="https://openrouter.ai/api/v1",
+        key_env="LLM_API_KEY",
+        model="nvidia/nemotron-3-super-120b-a12b:free",
+    ),
+    "nvidia": Provider(
+        name="nvidia",
+        base_url="https://integrate.api.nvidia.com/v1",
+        key_env="NVIDIA_API_KEY",
+        model="meta/llama-3.3-70b-instruct",
+    ),
+    "groq": Provider(
+        name="groq",
+        base_url="https://api.groq.com/openai/v1",
+        key_env="GROQ_API_KEY",
+        model="llama-3.3-70b-versatile",
+    ),
+}
+
+
+def resolve_provider(name: str) -> Provider:
+    """Look up a provider and fail loudly when its credential is missing.
+
+    Loudly matters. Without it a missing GROQ_API_KEY falls through to whatever
+    LLM_API_KEY holds, and the run reports a Groq exploit rate measured on OpenRouter.
+    """
+    try:
+        base = PROVIDERS[name]
+    except KeyError:
+        raise RuntimeError(
+            f"unknown provider {name!r}; known: {sorted(PROVIDERS)}"
+        ) from None
+
+    key = os.getenv(base.key_env, "")
+    if not key:
+        raise RuntimeError(
+            f"provider {name!r} needs {base.key_env} in .env -- refusing to fall back to "
+            f"another provider's credential, which would attribute its results to {name!r}"
+        )
+
+    model = os.getenv(f"{name.upper()}_MODEL", "") or base.model
+    return Provider(
+        name=name,
+        base_url=base.base_url,
+        key_env=base.key_env,
+        model=model,
+        api_key=key,
+    )
+
+
 class _TransientProviderError(RuntimeError):
     """A 200 response that carries no usable completion. Retryable."""
 
@@ -84,8 +156,14 @@ class LLMClient:
         api_key: str | None = None,
         live: bool | None = None,
         allow_stub: bool | None = None,
+        provider: str | None = None,
         cache_dir: Path | None = None,
     ) -> None:
+        if provider is not None:
+            spec = resolve_provider(provider)
+            base_url = base_url or spec.base_url
+            api_key = api_key if api_key is not None else spec.api_key
+            model = model or spec.model
         self.model = model or os.getenv("LLM_MODEL") or "scripted/payment-agent-sim"
         self.base_url = base_url or os.getenv("LLM_BASE_URL") or "https://openrouter.ai/api/v1"
         self.api_key = api_key if api_key is not None else os.getenv("LLM_API_KEY", "")

@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from .agent import AgentRun, PaymentAgent, Scenario
-from .client import LLMClient
+from .client import PROVIDERS, LLMClient
 from .defenses import SCOPES, DefenseConfig, DefenseStack
 from .injections import BENIGN_SUITE, INJECTIONS, SCENARIOS, Injection
 from .tools import CUSTOMER
@@ -299,7 +299,7 @@ def attribution(trials: Iterable[Trial]) -> dict[str, int]:
 # --- the artifact --------------------------------------------------------------------
 
 
-def write_artifact(results: dict[str, Any]) -> Path:
+def write_artifact(results: dict[str, Any], *, provider: str = "openrouter") -> Path:
     """Publish the before/after exploit rates as ``artifacts/agentic/redteam.json``.
 
     ``placeholder`` is derived, never passed in. A trial whose response came from the
@@ -319,9 +319,15 @@ def write_artifact(results: dict[str, Any]) -> Path:
     before = results["trials"]["before"]
     after = results["trials"]["after"]
 
-    stubbed = any(
-        t.provenance == STUB_PROVENANCE or not t.provenance for t in [*before, *after]
+    trials_all = [*before, *after]
+    stubbed = any(t.provenance == STUB_PROVENANCE or not t.provenance for t in trials_all)
+
+    # Every live provenance reads "live:<model>". If a run somehow spans more than one, say
+    # so in the field rather than picking one and implying the rates belong to it.
+    models = sorted(
+        {t.provenance.split("live:", 1)[1] for t in trials_all if t.provenance.startswith("live:")}
     )
+    model = models[0] if len(models) == 1 else ("+".join(models) if models else "scripted-stub")
 
     by_before = exploit_rate_by_category(before)
     by_after = exploit_rate_by_category(after)
@@ -340,11 +346,15 @@ def write_artifact(results: dict[str, Any]) -> Path:
             success_before=row["successes"],
             success_after=by_after.get(category, {}).get("successes", 0),
             example_injection=examples.get(category, ""),
+            model=model,
         )
         for category, row in sorted(by_before.items())
     ]
 
-    return A.write("agentic_redteam", rows, placeholder=stubbed)
+    # openrouter keeps the unsuffixed path: it is the one the dashboard and the scorecard
+    # already read, so the default run stays where every downstream reader expects it.
+    kind = "agentic_redteam" if provider == "openrouter" else f"agentic_redteam_{provider}"
+    return A.write(kind, rows, placeholder=stubbed)
 
 
 # --- CLI -----------------------------------------------------------------------------
@@ -382,6 +392,12 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="allow the scripted stub to populate the cache (no network either way)",
     )
+    parser.add_argument(
+        "--provider",
+        default="openrouter",
+        choices=sorted(PROVIDERS),
+        help="which endpoint to red-team; each has its own quota and its own artifact",
+    )
     parser.add_argument("--json", action="store_true", help="dump per-trial results as JSON")
     parser.add_argument(
         "--minimal",
@@ -395,7 +411,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    client = LLMClient(allow_stub=args.bake)
+    provider = None if args.bake else args.provider
+    client = LLMClient(allow_stub=args.bake, provider=provider)
+    if provider:
+        print(f"provider: {args.provider}  model: {client.model}")
     results = run_all(client, minimal=args.minimal)
 
     if args.json:
@@ -410,7 +429,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"\ncache: {results['cache_stats']}")
 
     if args.write:
-        dest = write_artifact(results)
+        dest = write_artifact(results, provider=args.provider)
         flag = json.loads(dest.read_text(encoding="utf-8"))["placeholder"]
         print()
         print(f"wrote {dest}  placeholder={flag}")

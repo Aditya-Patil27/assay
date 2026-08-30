@@ -82,3 +82,51 @@ def test_a_single_stub_response_contaminates_the_whole_artifact(sandbox):
     RT.write_artifact(results)
 
     assert A.read("agentic_redteam")["placeholder"] is True
+
+
+# --- provider profiles --------------------------------------------------------------
+
+
+def test_each_provider_resolves_its_own_endpoint_key_and_model(monkeypatch):
+    """One corpus, several providers, and never a silent fallback to the wrong one.
+
+    The quota that blocks this track is per provider, so the same corpus is run once per
+    provider rather than load-balanced across them. Load balancing would spread a single
+    reported exploit rate over several models, and a rate that belongs to no model is the
+    exact failure this project exists to argue against.
+    """
+    from adversarial_payments.agentic.client import PROVIDERS, resolve_provider
+
+    monkeypatch.setenv("GROQ_API_KEY", "gsk-test")
+    monkeypatch.setenv("NVIDIA_API_KEY", "nvapi-test")
+
+    assert set(PROVIDERS) == {"openrouter", "nvidia", "groq"}
+
+    groq = resolve_provider("groq")
+    assert groq.base_url == "https://api.groq.com/openai/v1"
+    assert groq.api_key == "gsk-test"
+    assert groq.model
+
+    nvidia = resolve_provider("nvidia")
+    assert nvidia.base_url == "https://integrate.api.nvidia.com/v1"
+    assert nvidia.api_key == "nvapi-test"
+
+
+def test_a_provider_without_a_key_fails_loudly(monkeypatch):
+    """Rather than falling through to whatever LLM_API_KEY happens to hold."""
+    from adversarial_payments.agentic.client import resolve_provider
+
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    with pytest.raises(RuntimeError, match="GROQ_API_KEY"):
+        resolve_provider("groq")
+
+
+def test_each_provider_publishes_to_its_own_artifact_naming_its_model(sandbox):
+    """An exploit rate is a property of the model under test, so it travels with one."""
+    results = _results("live:meta/llama-3.3-70b-instruct")
+
+    RT.write_artifact(results, provider="nvidia")
+
+    written = A.read("agentic_redteam_nvidia")
+    assert written["placeholder"] is False
+    assert written["payload"][0]["model"] == "meta/llama-3.3-70b-instruct"
