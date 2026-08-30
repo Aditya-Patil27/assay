@@ -25,13 +25,17 @@ interface Row {
 }
 
 /**
- * The headline result: attack success collapses across rounds while detection quality
- * barely moves.
+ * The headline result, which is not the one this chart was originally built to show.
  *
- * Two axes because the two series answer different questions -- forcing them onto one
- * scale would flatten the ASR collapse into nothing. The two series are also drawn with
- * different stroke patterns and dot shapes, so the argument survives a projector that
- * mangles colour and a reader who cannot separate red from teal.
+ * Attack success does NOT collapse across rounds. It is 100% at every round. An earlier
+ * version of this component was captioned for a collapse that the run did not produce; the
+ * series names promised it too. What the rounds actually show is the attacker being pushed
+ * to spend more -- read the L0 and query columns in the table below the chart, which are
+ * where the real movement is.
+ *
+ * Two axes because the two series answer different questions and share no unit. The series
+ * are also drawn with different stroke patterns and dot shapes, so the argument survives a
+ * projector that mangles colour and a reader who cannot separate red from teal.
  */
 export function CoevolutionChart({
   detect,
@@ -103,7 +107,7 @@ export function CoevolutionChart({
               yAxisId="right"
               type="monotone"
               dataKey="prAuc"
-              name="Detector PR-AUC (holds)"
+              name="Detector PR-AUC"
               stroke="var(--color-defend)"
               strokeWidth={2.5}
               strokeDasharray="7 4"
@@ -130,7 +134,7 @@ export function CoevolutionChart({
               yAxisId="left"
               type="monotone"
               dataKey="asr"
-              name="Attack success rate (collapses)"
+              name="Attack success rate"
               stroke="var(--color-attack)"
               strokeWidth={3.5}
               dot={{ r: 5, fill: "var(--color-attack)" }}

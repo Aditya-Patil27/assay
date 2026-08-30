@@ -45,6 +45,22 @@ export interface AttackRound {
   per_feature_freq: Record<string, number>;
 }
 
+/**
+ * Why a constrained ASR and an unconstrained one are not the same kind of number.
+ *
+ * Both attackers report a high success rate. The unconstrained one's wins are mostly not
+ * transactions: they sit at merchants absent from the network, or they forged an attribute
+ * the real attacker inherits from the victim. Mirrors `artifacts.FeasibilityAudit`.
+ */
+export interface FeasibilityAudit {
+  constrained_asr: number;
+  unconstrained_asr: number;
+  impossible_merchant_share: number;
+  forged_frozen_share: number;
+  constrained_mean_l0: number;
+  unconstrained_mean_l0: number;
+}
+
 export interface FeatureDelta {
   feature: string;
   before: number;

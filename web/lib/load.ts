@@ -14,6 +14,7 @@ import type {
   AttackRound,
   DetectRound,
   Envelope,
+  FeasibilityAudit,
   Graph,
   ScorecardRow,
 } from "./types";
@@ -41,6 +42,23 @@ export const loadDetectRounds = () => load<DetectRound[]>("detect", "rounds.json
 export const loadAttackRounds = () => load<AttackRound[]>("attack", "rounds.json");
 export const loadAttackExamples = () => load<AttackExample[]>("attack", "examples.json");
 export const loadAgentic = () => load<AgenticCategory[]>("agentic", "redteam.json");
+
+/**
+ * The feasibility audit, or null when this run did not produce one.
+ *
+ * Optional by design rather than by accident: the audit only exists when the round-0
+ * unconstrained baseline was run, and a run with `--no-baseline` legitimately has nothing
+ * to report. Returning null keeps the page buildable instead of inventing a zeroed audit,
+ * which would be the exact dishonesty this artifact exists to prevent.
+ */
+export async function loadFeasibility(): Promise<Envelope<FeasibilityAudit> | null> {
+  try {
+    return await load<FeasibilityAudit>("attack", "feasibility.json");
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException)?.code === "ENOENT") return null;
+    throw err;
+  }
+}
 
 export interface Artifacts {
   scorecard: Envelope<ScorecardRow[]>;
