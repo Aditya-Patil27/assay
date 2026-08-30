@@ -358,8 +358,16 @@ CONFIGS: dict[str, DefenseConfig] = {
 }
 
 
-def run_all(client: LLMClient) -> dict[str, Any]:
-    trials = {name: run_corpus(client, cfg) for name, cfg in CONFIGS.items()}
+def run_all(client: LLMClient, *, minimal: bool = False) -> dict[str, Any]:
+    """Run the corpus. ``minimal`` drops the three single-layer ablations.
+
+    The published artifact only ever reads ``before`` and ``after``; the ablations exist to
+    attribute a block to a layer, which is analysis rather than a deliverable. On a
+    rate-limited free endpoint they are more than half the call budget, so they are the
+    first thing to cut when the choice is between the ablations and a real number.
+    """
+    configs = {k: v for k, v in CONFIGS.items() if k in ("before", "after")} if minimal else CONFIGS
+    trials = {name: run_corpus(client, cfg) for name, cfg in configs.items()}
     benign = {
         "before": run_benign(client, CONFIGS["before"]),
         "after": run_benign(client, CONFIGS["after"]),
@@ -376,6 +384,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--json", action="store_true", help="dump per-trial results as JSON")
     parser.add_argument(
+        "--minimal",
+        action="store_true",
+        help="before/after only; skips the three single-layer ablations",
+    )
+    parser.add_argument(
         "--write",
         action="store_true",
         help="publish artifacts/agentic/redteam.json; placeholder is derived from provenance",
@@ -383,13 +396,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     client = LLMClient(allow_stub=args.bake)
-    results = run_all(client)
+    results = run_all(client, minimal=args.minimal)
 
     if args.json:
         print(json.dumps({k: [asdict(t) for t in v] for k, v in results["trials"].items()}, indent=2))
         return 0
 
-    for name in CONFIGS:
+    for name in results["trials"]:
         rows = results["trials"][name]
         print(f"\n[{name}] overall exploit rate {overall_rate(rows):.1%} over {len(rows)} trials")
         for category, row in sorted(exploit_rate_by_category(rows).items()):

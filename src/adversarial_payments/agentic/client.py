@@ -86,6 +86,10 @@ class LLMClient:
         self.base_url = base_url or os.getenv("LLM_BASE_URL") or "https://openrouter.ai/api/v1"
         self.api_key = api_key if api_key is not None else os.getenv("LLM_API_KEY", "")
         self.max_tokens = int(os.getenv("LLM_MAX_TOKENS", "1024"))
+        self.max_retries = int(os.getenv("LLM_MAX_RETRIES", "6"))
+        self.retry_base = float(os.getenv("LLM_RETRY_BASE", "2.0"))
+        #: seconds to wait between live calls; free tiers cap requests per minute
+        self.pace_s = float(os.getenv("LLM_PACE_SECONDS", "0"))
         self.live = SETTINGS.llm_live if live is None else live
         self.allow_stub = _flag("LLM_STUB", False) if allow_stub is None else allow_stub
         self.cache_dir = cache_dir or CACHE_DIR
@@ -169,6 +173,10 @@ class LLMClient:
         }
 
         if self.live:
+            if self.pace_s:
+                import time as _t
+
+                _t.sleep(self.pace_s)
             response = self._call_provider(messages, tools, temperature)
             self.stats["live"] += 1
         elif self.allow_stub:
@@ -212,7 +220,30 @@ class LLMClient:
         if tools:
             kwargs["tools"] = tools
             kwargs["tool_choice"] = "auto"
-        completion = client.chat.completions.create(**kwargs)
+        # Free-tier endpoints rate-limit aggressively and the corpus is a few hundred
+        # sequential calls, so a single 429 must not abort a run that is half cached.
+        # Exponential backoff, and the caller's cache means a genuinely exhausted quota
+        # loses only the trials that had not been reached yet.
+        import time
+
+        from openai import APIStatusError, RateLimitError
+
+        last: Exception | None = None
+        for attempt in range(self.max_retries):
+            try:
+                completion = client.chat.completions.create(**kwargs)
+                break
+            except (RateLimitError, APIStatusError) as exc:  # noqa: PERF203
+                status = getattr(exc, "status_code", None)
+                if status not in (429, 502, 503, 520, 524):
+                    raise
+                last = exc
+                time.sleep(min(self.retry_base * (2**attempt), 30.0))
+        else:
+            raise RuntimeError(
+                f"provider still rate-limiting after {self.max_retries} attempts; "
+                f"last error: {last}"
+            ) from last
         choice = completion.choices[0].message
         calls: list[dict[str, Any]] = []
         for call in getattr(choice, "tool_calls", None) or []:
