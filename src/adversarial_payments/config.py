@@ -8,6 +8,24 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
+# Load .env before anything reads the environment.
+#
+# This has to happen at import time and above SETTINGS below, because Settings resolves
+# every switch through default_factory at construction -- a load_dotenv() call placed after
+# it would populate os.environ for nobody. python-dotenv was a declared dependency and the
+# README told people to create a .env, but nothing ever called this: a key pasted into the
+# file was silently invisible, and the failure surfaced as "LLM_API_KEY is empty" with the
+# key sitting right there on disk.
+#
+# override=False so a real environment variable still beats the file, which is what CI and
+# a shell-exported key both expect.
+try:  # pragma: no cover -- absence is a packaging problem, not a runtime path worth branching on
+    from dotenv import load_dotenv
+
+    load_dotenv(ROOT / ".env", override=False)
+except ImportError:
+    pass
+
 DATA_RAW = ROOT / "data" / "raw"
 DATA_INTERIM = ROOT / "data" / "interim"
 DATA_PROCESSED = ROOT / "data" / "processed"

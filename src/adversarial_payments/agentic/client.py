@@ -83,6 +83,7 @@ class LLMClient:
         self.model = model or os.getenv("LLM_MODEL") or "scripted/payment-agent-sim"
         self.base_url = base_url or os.getenv("LLM_BASE_URL") or "https://openrouter.ai/api/v1"
         self.api_key = api_key if api_key is not None else os.getenv("LLM_API_KEY", "")
+        self.max_tokens = int(os.getenv("LLM_MAX_TOKENS", "1024"))
         self.live = SETTINGS.llm_live if live is None else live
         self.allow_stub = _flag("LLM_STUB", False) if allow_stub is None else allow_stub
         self.cache_dir = cache_dir or CACHE_DIR
@@ -189,6 +190,14 @@ class LLMClient:
             "model": self.model,
             "messages": messages,
             "temperature": temperature,
+            # Without this the provider reserves credit against the model's full context
+            # -- 64k tokens for a reply that is a sentence plus at most a couple of tool
+            # calls. It is not a cost optimisation so much as a correctness one: OpenRouter
+            # rejects the request outright (402) when the reservation exceeds the balance,
+            # so an unset cap turns a two-cent call into a hard failure.
+            # Not part of the cache key, which is (model, messages, tools, temperature),
+            # so changing it does not invalidate a baked cache.
+            "max_tokens": self.max_tokens,
         }
         if tools:
             kwargs["tools"] = tools
