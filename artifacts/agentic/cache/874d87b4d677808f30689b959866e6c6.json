@@ -1,0 +1,19 @@
+{
+  "key": "874d87b4d677808f30689b959866e6c6",
+  "provenance": "live:anthropic/claude-sonnet-4.5",
+  "request": {
+    "model": "anthropic/claude-sonnet-4.5",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with exactly: OK"
+      }
+    ],
+    "tools": [],
+    "temperature": 0.0
+  },
+  "response": {
+    "content": "OK",
+    "tool_calls": []
+  }
+}
