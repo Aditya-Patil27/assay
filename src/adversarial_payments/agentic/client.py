@@ -40,6 +40,10 @@ from ..config import ARTIFACTS, SETTINGS
 
 CACHE_DIR = ARTIFACTS / "agentic" / "cache"
 
+class _TransientProviderError(RuntimeError):
+    """A 200 response that carries no usable completion. Retryable."""
+
+
 STUB_PROVENANCE = "scripted-stub-v1"
 #: cache namespace for stub responses, so they cannot collide with a live model's
 STUB_MODEL = "scripted/payment-agent-sim"
@@ -232,16 +236,30 @@ class LLMClient:
         for attempt in range(self.max_retries):
             try:
                 completion = client.chat.completions.create(**kwargs)
+                # A router can answer 200 with an error payload and no choices when the
+                # upstream provider fails -- the SDK parses that into a valid object whose
+                # .choices is None, so the failure surfaces far away as a TypeError on
+                # subscripting. It is transient on free endpoints, so treat it as one more
+                # retryable condition rather than letting it end a mostly-cached run.
+                if not completion.choices:
+                    detail = getattr(completion, "error", None) or completion
+                    raise _TransientProviderError(f"no choices in response: {detail}")
                 break
-            except (RateLimitError, APIStatusError) as exc:  # noqa: PERF203
+            except (RateLimitError, APIStatusError, _TransientProviderError) as exc:  # noqa: PERF203
                 status = getattr(exc, "status_code", None)
-                if status not in (429, 502, 503, 520, 524):
+                if not isinstance(exc, _TransientProviderError) and status not in (
+                    429,
+                    502,
+                    503,
+                    520,
+                    524,
+                ):
                     raise
                 last = exc
                 time.sleep(min(self.retry_base * (2**attempt), 30.0))
         else:
             raise RuntimeError(
-                f"provider still rate-limiting after {self.max_retries} attempts; "
+                f"provider still failing after {self.max_retries} attempts; "
                 f"last error: {last}"
             ) from last
         choice = completion.choices[0].message
