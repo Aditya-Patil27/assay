@@ -19,9 +19,10 @@
 
 > ## 🔑 One credential is now the highest-leverage item on the board
 >
-> There is **no `.env`** in the repo (verified). That was P3's blocker; with LLM-driven
-> orchestrators it now blocks **two tracks**, because the orchestrators need the same
-> OpenRouter/NIM key the agentic track has been waiting on.
+> **UPDATE 2026-08-30 midday:** `.env` now exists, gitignored, pre-filled with the base URL
+> and model. **It is still missing the key itself** — paste it into `LLM_API_KEY` and set
+> `LLM_LIVE=1`. Nothing else about this item has changed: it still blocks **two tracks**,
+> because the orchestrators need the same OpenRouter/NIM key the agentic track waits on.
 >
 > Consequences: the agentic exploit rates stay stub-sourced, the orchestrator reasoning
 > cannot be real, and **two of the six `[[PENDING]]` markers in the walkthrough close the
@@ -35,8 +36,48 @@ What is actually real right now, and what each person does next. Update your own
 when something lands; do not update anyone else's.
 
 The rule this board exists to enforce: **a number is real only when its artifact says
-`placeholder: false`.** Five of six still say `true`. Those are seed fixtures and must not
-be quoted in the deck, the notebook, or to a judge.
+`placeholder: false`.** As of 2026-08-30 midday **one of seven** still says `true` —
+`agentic/redteam.json`. That one is a seed fixture and must not be quoted in the deck, the
+notebook, or to a judge. The rest are real.
+
+---
+
+## 2026-08-30 midday — the tabular track is done, and the headline is not what we planned
+
+Landed on `main` and `ap` (`98f0ecd`, `96ef59b`, `80247df`, `ee5f584`, `ed35a34`, `96105e3`).
+**95 tests pass.**
+
+**1. ASR is 1.000 and does not fall.** Rounds 0, 1, 2 all evade 100% of 400 attempted
+transactions. Three rounds of adversarial retraining prevented nothing. What moves is
+attacker cost: mean L0 3.81 → 4.26 → 4.64, median queries 277 → 298 → 492. That is the
+result, and every doc, caption and slide promising a collapse has been corrected. Anyone
+still holding "attack success collapses" in a draft: it is wrong, fix it.
+
+**2. A third measurement error, and it decided the headline.** `task_score_detector` chose
+its threshold by maximising F1 **on the test split** — contradicting the policy
+`detect/evaluate.py` documents in its own opening comment, and fitting the operating point
+on the rows the attack is scored over. It lifted the bar to ~0.94 against a budget cut near
+0.23, and raised it further every round, so each round of "defence" handed the attacker an
+easier target. Now fixed: `choose_threshold` at `FPR_BUDGET` on a validation slice carved
+once from train. Threshold 0.937 → 0.436, recall 0.787 → 0.852. **Any ASR measured before
+`98f0ecd` is not comparable to one measured after it.** The honest part: fixing it made
+evasion harder and ASR stayed 1.000 anyway — the bug was not propping up the result.
+
+**3. The feasibility audit is published, and it is our strongest asset.** It was being
+computed every run, logged to stdout, and thrown away with the process. It is now an
+artifact kind. Both attackers report ASR 1.000 — but **99.5% of the unconstrained
+attacker's successes sit at a merchant that does not exist**, and 3.0% forged a frozen
+attribute. It also wins more cheaply (L0 1.76 vs our 3.82) because forging beats searching.
+This is on the dashboard as its own section, ahead of the scorecard, and in walkthrough §4.4.
+
+**4. The dashboard was arguing against its own data.** The `<h1>` read "An attack that
+works, then stops working"; the chart legend read "Attack success rate (collapses)"; the
+round-2 tile computed "−0%" and coloured it as a defensive win; the detection-cost tile read
+"−0.0%" when it meant "not measured". All corrected. The page rebuilds clean and the banner
+now names only `agentic/redteam`.
+
+**Still open, and none of it is code:** nobody has opened the page in a browser; nothing is
+deployed; nothing is submitted; and `.env` exists, pre-filled, waiting on a key.
 
 ---
 
@@ -45,14 +86,18 @@ be quoted in the deck, the notebook, or to a judge.
 | Artifact | Owner | `placeholder` | State |
 |---|---|---|---|
 | `artifacts/detect/rounds.json` | P1 | **`false`** | Real — round 0 only |
-| `artifacts/attack/rounds.json` | P2 | `true` | Seed fixture |
-| `artifacts/attack/examples.json` | P2 | `true` | Seed fixture |
-| `artifacts/agentic/redteam.json` | P3 | `true` | Seed fixture |
-| `artifacts/graph.json` | P2 | `true` | Seed fixture |
-| `artifacts/scorecard.json` | P2 + P3 | `true` | Seed fixture — **the terminal node, still empty** |
+| `artifacts/attack/rounds.json` | P2 | **`false`** | Real — 3 rounds, 400 attacks each |
+| `artifacts/attack/examples.json` | P2 | **`false`** | Real |
+| `artifacts/attack/feasibility.json` | P2 | **`false`** | Real — **new kind**, see below |
+| `artifacts/agentic/redteam.json` | P3 | `true` | Seed fixture — **the only one left** |
+| `artifacts/graph.json` | P2 | **`false`** | Real |
+| `artifacts/scorecard.json` | P2 + P3 | **`false`** | Real — one row; agentic row still absent |
 
-`pytest -q` → **all green. The count climbs as tests land** — last verified at 70, on
-`ba1d38b` plus the uncommitted working tree (2026-08-30).
+**Six of seven are real.** The run reproduced byte-for-byte on a second execution — only
+`created_at` and `git_sha` moved — which is the first determinism evidence we have.
+
+`pytest -q` → **all green. The count climbs as tests land** — last verified at 95, on
+`96105e3` with a clean tree (2026-08-30 midday).
 
 Do not hard-code a test count in any doc. It went stale twice in one afternoon (24 → 65 → 70)
 because three Claude sessions are working this tree concurrently, and a stale count reads
