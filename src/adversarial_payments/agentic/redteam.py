@@ -26,6 +26,7 @@ import argparse
 import json
 import sys
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Any, Iterable
 
 from .agent import AgentRun, PaymentAgent, Scenario
@@ -295,6 +296,57 @@ def attribution(trials: Iterable[Trial]) -> dict[str, int]:
     return counts
 
 
+# --- the artifact --------------------------------------------------------------------
+
+
+def write_artifact(results: dict[str, Any]) -> Path:
+    """Publish the before/after exploit rates as ``artifacts/agentic/redteam.json``.
+
+    ``placeholder`` is derived, never passed in. A trial whose response came from the
+    scripted stub did not measure a language model's behaviour, and a single such trial is
+    enough to make the aggregate not a result -- so mixed provenance is treated as stub,
+    not as partial credit.
+
+    This is the rule the whole agentic track is judged against: presenting scripted output
+    as live-model output is the one mistake that would legitimately sink the submission.
+    Deriving the flag from the trials means nobody can forget to set it.
+    """
+    from .. import artifacts as A
+    from ..artifacts import AgenticCategory
+    from .client import STUB_PROVENANCE
+    from .injections import CATEGORY_TITLES, INJECTIONS
+
+    before = results["trials"]["before"]
+    after = results["trials"]["after"]
+
+    stubbed = any(
+        t.provenance == STUB_PROVENANCE or not t.provenance for t in [*before, *after]
+    )
+
+    by_before = exploit_rate_by_category(before)
+    by_after = exploit_rate_by_category(after)
+
+    examples = {}
+    for injection in INJECTIONS:
+        examples.setdefault(injection.category, injection.payload)
+
+    rows = [
+        AgenticCategory(
+            # The human title, not the slug: this string is read off a dashboard and a
+            # .docx by someone who has never seen the corpus.
+            category=CATEGORY_TITLES.get(category, category),
+            owasp_id=row["owasp_id"],
+            attempts=row["attempts"],
+            success_before=row["successes"],
+            success_after=by_after.get(category, {}).get("successes", 0),
+            example_injection=examples.get(category, ""),
+        )
+        for category, row in sorted(by_before.items())
+    ]
+
+    return A.write("agentic_redteam", rows, placeholder=stubbed)
+
+
 # --- CLI -----------------------------------------------------------------------------
 
 CONFIGS: dict[str, DefenseConfig] = {
@@ -323,6 +375,11 @@ def main(argv: list[str] | None = None) -> int:
         help="allow the scripted stub to populate the cache (no network either way)",
     )
     parser.add_argument("--json", action="store_true", help="dump per-trial results as JSON")
+    parser.add_argument(
+        "--write",
+        action="store_true",
+        help="publish artifacts/agentic/redteam.json; placeholder is derived from provenance",
+    )
     args = parser.parse_args(argv)
 
     client = LLMClient(allow_stub=args.bake)
@@ -338,6 +395,18 @@ def main(argv: list[str] | None = None) -> int:
         for category, row in sorted(exploit_rate_by_category(rows).items()):
             print(f"  {category:24s} {row['successes']:3d}/{row['attempts']:<3d} {row['rate']:6.1%}")
     print(f"\ncache: {results['cache_stats']}")
+
+    if args.write:
+        dest = write_artifact(results)
+        flag = json.loads(dest.read_text(encoding="utf-8"))["placeholder"]
+        print()
+        print(f"wrote {dest}  placeholder={flag}")
+        if flag:
+            print(
+                "  ^ at least one trial came from the scripted stub rather than "
+                "a model, so this is NOT a quotable result. Re-run with "
+                "LLM_LIVE=1 and provider credits to make it one."
+            )
     return 0
 
 
