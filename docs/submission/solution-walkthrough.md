@@ -166,7 +166,7 @@ Two design decisions worth stating because they materially affect the number:
   Ranking by column count structurally biases the search toward the amount lever and hides
   the attacker's real options.
 
-### 3.4 Two errors worth reporting
+### 3.4 Three errors worth reporting
 
 An earlier version of our engine reported a 100% attack success rate. It achieved this by
 shrinking transactions to roughly 12% of their original value.
@@ -212,6 +212,40 @@ means the first. The fix was not a better default but the removal of the default
 is now nullable, absent rounds are drawn as absent, and the round table names them "not run"
 rather than letting them silently vanish. A point that quietly disappears still leaves the
 reader to guess.
+
+**The third error was the one that decided the headline number.**
+
+The unrolled loop chose its operating threshold by maximising F1 — on the test split. Two
+things were wrong with that at once. It contradicted the threshold policy our own detector
+module documents in its opening comment, which selects the lowest threshold holding the
+false-positive rate inside a fixed budget. And it fitted the operating point on the very rows
+the attack was then scored against.
+
+The consequence was not subtle. It lifted the decision threshold to roughly 0.94 against a
+budget-derived cut near 0.23. The attacker only ever had to push a score below a bar four
+times higher than the detector's real operating point, which made evasion close to free by
+construction. Worse, the bar moved *upward* every round as adversarial retraining shifted the
+score distribution, so each round of "defence" quietly handed the attacker an easier target
+than the one before it.
+
+The threshold is now selected at a fixed false-positive budget on a validation slice carved
+out of the training data before the loop begins — carved once, because adversarial rows are
+appended to the training set each round and a validation slice growing alongside them would
+move the operating point for reasons having nothing to do with the detector. Two properties
+follow, and the attack success rate in section 4.4 is only meaningful because of them: the
+operating point never sees the test rows, and every round is compared at the same
+false-positive cost. A fall in attack success would therefore be the detector improving,
+rather than the defender quietly widening the net to catch more.
+
+It is worth being precise about what this fix did and did not change. The corrected threshold
+made evasion genuinely harder — and the attack success rate stayed at 100% anyway. The bug
+was not what was propping up the result. Had we found it after publishing rather than before,
+the number would have survived; but we would have been quoting it for the wrong reason, and
+we could not have told the difference.
+
+That is the pattern in all three errors. Each was caught by asking what the number was
+measured *under* rather than whether it looked plausible. None of them would have been caught
+by a number that looked wrong, because in every case the number looked entirely reasonable.
 
 ---
 
@@ -270,14 +304,74 @@ amount relative to the card's running mean, and hour of day.
 
 ### 4.4 Adversarial results
 
-`[[PENDING — Attack Success Rate across rounds 0–2]]`
+The full three-round run has now been executed against the round-0 detector on 400,000 real
+Sparkov rows (train 196,001 / validation 84,000 / test 119,999), attacking 400 transactions
+per round. Every figure below is read from `artifacts/attack/rounds.json`, which carries
+`placeholder: false`.
 
-The corrected attack engine and the unrolled loop are implemented and tested. The full
-adversarial run across three rounds against the round-0 detector has not been executed at
-time of writing, so no attack success rate appears in this document. When it is produced it
-will be accompanied by attacker value retained, mean L0, and median model queries per
-success — the constraint economics alongside the headline number, for the reasons in
-section 3.4.
+| Round | Attack success rate | Mean L0 | Median queries per success |
+|---|---|---|---|
+| 0 | 100.0% | 3.81 | 277 |
+| 1 | 100.0% | 4.26 | 298 |
+| 2 | 100.0% | 4.64 | 492 |
+
+**The attack success rate does not fall.** It is 100% at every round. Three rounds of
+adversarial retraining did not prevent a single evasion, and we report that rather than
+tuning until a more flattering curve appeared.
+
+What the defence actually bought is measurable and it is not nothing: the attacker touches
+0.83 more features and spends 215 more model queries per success by round 2. That is a
+defence-in-depth economics result — the attack becomes more expensive, not impossible — and
+it is the same conclusion the project's own stated limitations predicted before the run
+existed.
+
+Two things follow that we would rather state than have asked.
+
+First, the dosage is modest by construction: 400 adversarial rows folded into a training set
+of 196,001 is roughly 0.2% of the data, unweighted. This experiment does not license any
+claim that adversarial retraining is ineffective in general; it shows that *this* dosage,
+against *this* attacker, moved cost and not outcome.
+
+Second, per-round PR-AUC is deliberately absent from the table. The loop does not write
+`artifacts/detect/rounds.json` — that artifact belongs to the detector track and holds a
+round-0 figure computed under a different split — so the loop's own per-round PR-AUC exists
+only in a run log and sits outside the provenance machinery described in section 2. We will
+not quote a number that our own audit cannot vouch for.
+
+**A worked example, round 0.** Transaction `txn_25311` scored 0.954 under the detector. The
+attacker changed exactly one feature — the hour, from 22:00 to 04:00 — and the score fell to
+0.000. No amount was altered, no merchant substituted, nothing frozen was forged. A single
+rescheduling, entirely within an attacker's control and entirely legal, was sufficient.
+
+**The audit that makes the number above worth reading.** Section 3.4 claims that an
+unconstrained attack success rate is not a number at all. That claim is now measured rather
+than asserted, on our own baseline, and published as its own artifact
+(`artifacts/attack/feasibility.json`).
+
+We ran a second attacker against the identical round-0 detector with the constraints removed
+— free to move any feature, including the victim's own attributes and the merchant's
+coordinates, subject only to observed value bounds.
+
+| | Constraint-aware | Unconstrained |
+|---|---|---|
+| Attack success rate | 100.0% | 100.0% |
+| Mean features touched (L0) | 3.82 | 1.76 |
+| Successes at a merchant absent from the network | 0.0% | **99.5%** |
+| Successes that forged a frozen victim attribute | 0.0% | 3.0% |
+
+The two attackers report the same headline. They are not describing the same thing.
+**99.5% of the unconstrained attacker's "evasions" are transactions that could not physically
+occur** — a merchant category paired with terminal coordinates that no merchant in the network
+occupies. It also reaches that result more cheaply, touching 1.76 features against our 3.82,
+because forging is cheaper than searching.
+
+Our zeroes in that table are zero by construction rather than by measurement: frozen columns
+are excluded from the search entirely, and merchant choice is drawn from the observed network,
+so an infeasible transaction cannot be produced in the first place.
+
+This is the single result we would most want a sceptical reader to take away. Had we reported
+the unconstrained figure, it would have been arithmetically correct, better-looking on cost,
+and describing something that does not exist.
 
 ### 4.5 The second attack surface
 
