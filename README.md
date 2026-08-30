@@ -2,12 +2,72 @@
 
 **Mastercard Innovation Challenge 2026 — AI red teaming for payment security**
 
-> ⚠️ **Status: the data is real, the results are not yet.** The pipeline is confirmed running
-> on the genuine Sparkov dataset (see [Provenance](#provenance)), but every *result* file in
-> `artifacts/` is still seed data (`placeholder: true`). The notebook and dashboard both
-> detect this and show a visible banner instead of a number. **Do not quote any figure from
-> this repo until that banner is gone.** This notice comes out only when the provenance audit
-> reports all six result artifacts real.
+> ## Status — 2026-08-30: five of six results are real
+>
+> The tabular track has been run end to end on the genuine Sparkov dataset
+> (see [Provenance](#provenance)). `attack/rounds`, `attack/examples`, `graph`, `scorecard`
+> and `detect/rounds` all carry `placeholder: false` and are safe to quote.
+>
+> **One artifact is still a fixture: `agentic/redteam.json`.** It is blocked on a single
+> missing API key, not on engineering. Until that lands, the dashboard banner names it, the
+> notebook substitutes `TK`, and the scorecard ships **one row instead of two**.
+>
+> ### Read this before quoting the headline
+>
+> **Attack success does not fall across rounds. It is 1.000 at every round.** Three rounds of
+> adversarial retraining did not stop a constraint-respecting attacker. What *does* move is
+> the attacker's cost, and that is the result we report:
+>
+> | Round | ASR | mean L0 | median queries |
+> |---|---|---|---|
+> | 0 | 1.000 | 3.81 | 277 |
+> | 1 | 1.000 | 4.26 | 298 |
+> | 2 | 1.000 | 4.64 | 492 |
+>
+> *400 attacked transactions per round, 400,000-row subsample, train 196,001 / val 84,000 /
+> test 119,999. Threshold fitted on val at `FPR_BUDGET = 0.001`, never on the test rows the
+> attack is scored over. Every figure above is read from
+> `artifacts/attack/rounds.json` (`placeholder: false`).*
+>
+> The defense buys **+0.83 coordinates and +215 median queries of attacker effort**, and does
+> not stop a single attempt. That is a defense-in-depth economics claim, not a solved problem,
+> and the repo says so everywhere rather than implying a collapse it did not measure.
+>
+> ⚠️ **Per-round PR-AUC is not yet quotable.** The loop does not write `detect/rounds.json`
+> (that file is the detector owner's, and holds a round-0 figure computed under a *different*
+> split). The loop's own per-round PR-AUC exists only in its run log, which puts it outside
+> the placeholder machinery — the same gap that applies to `latency.json`. Treat
+> "PR-AUC holds while attacker cost rises" as **unverified** until those rounds are published
+> through `artifacts.py`.
+
+---
+
+## Where the work stands
+
+For teammates picking this up mid-flight. The per-person board with full detail is
+[`docs/team/STATUS.md`](docs/team/STATUS.md); this is the one-screen version.
+
+| Area | State | Blocked on |
+|---|---|---|
+| Data + round-0 detector | ✅ real, 1.85M Sparkov rows | — |
+| Constraint engine + attack | ✅ real, 3 rounds run end to end | — |
+| Feasibility audit | ⚠️ **computed but never published** | needs an artifact kind |
+| Red/Blue orchestrators | ✅ landed, ❌ unwired | API key + a non-saturated baseline |
+| Agentic red team | ❌ fixture | **one API key** |
+| Dashboard | ✅ builds and serves | never deployed; nobody has opened it in a browser |
+| `.docx` walkthrough | 🟡 drafted, 4 `[[PENDING]]` | ASR marker is now fillable |
+| Submission | ❌ nothing submitted | all three artifacts, via Writeups |
+
+**The three things worth knowing before you touch anything:**
+
+1. **ASR is 1.000 and does not fall.** Any doc, chart caption or slide still promising a
+   collapse is now wrong. The honest headline is attacker *cost*, not attacker failure.
+2. **One missing API key blocks two tracks.** `.env` is present and pre-filled; it needs a
+   key pasted into `LLM_API_KEY` and `LLM_LIVE=1`. Five minutes, highest leverage in the repo.
+3. **The loop's threshold was fitted on the test split until 2026-08-30.** It maximised F1 on
+   the rows the attack was scored over, which lifted the bar to ~0.94 and made evasion free.
+   It now uses `choose_threshold` at a fixed FPR budget on a held-out validation slice. Any
+   ASR measured before that fix is not comparable to one measured after it.
 
 ---
 
@@ -100,7 +160,8 @@ cd web && npm install && npm run build   # writes web/out/, ~1 min
 ## Read the argument — `notebooks/submission.ipynb`
 
 The graded artifact. Narrative order: threat model → why Sparkov → the three projections →
-ASR collapse across rounds → agentic exploit rate before/after → the unified scorecard.
+ASR and attacker cost across rounds → agentic exploit rate before/after → the unified
+scorecard.
 
 It needs only the standard library plus `matplotlib`, because **it reads `artifacts/` and
 never trains**. Every number is pulled live from the artifact JSON at render time — nothing
@@ -185,9 +246,10 @@ Stated here rather than discovered later:
 
 - **The tabular attacker has white-box query access to a fixed model.** ASR is an upper bound
   on a strong attacker, not a forecast of live losses.
-- **Each round's detector was trained on the previous round's adversarial examples**, so the
-  ASR collapse partly measures memorisation of *this* attack rather than general robustness.
-  The honest generalisation test — a held-out attack the detector never saw — is roadmap.
+- **Each round's detector was trained on the previous round's adversarial examples.** At the
+  dosage we ran (400 adversarial rows into 196,001) this moved attacker cost but not ASR, so
+  there is no robustness claim here to over-read. The honest generalisation test — a held-out
+  attack, or a detector trained on a different dataset entirely — is roadmap.
 - **The attack becomes expensive, not impossible.** Mean L0 rises across rounds. That is the
   real result, and it is a defense-in-depth economics story, not a solved problem.
 - **Residual agentic exploit rate is above zero.** Prompt injection is not solved; a claimed
