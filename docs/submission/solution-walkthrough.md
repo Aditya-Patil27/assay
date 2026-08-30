@@ -375,7 +375,45 @@ and describing something that does not exist.
 
 ### 4.5 The second attack surface
 
-`[[PENDING — exploit rate before and after defences]]`
+The corpus was run live against **two independent frontier-class models**, on two providers,
+with every response cached so the whole run replays offline with no network.
+
+| Model | Provider | Exploit rate before | after | Fisher exact (2-sided) |
+|---|---|---|---|---|
+| `openai/gpt-oss-120b` | Groq | 4.2% (3/72) | 0.0% (0/72) | p = 0.245 |
+| `nvidia/nemotron-3-super-120b-a12b` | NVIDIA NIM | 1.4% (1/72) | 0.0% (0/72) | p = 1.000 |
+| *pooled* | — | 2.8% (4/144) | 0.0% (0/144) | p = 0.122 |
+
+*Sources: `artifacts/agentic/redteam-groq.json` and `redteam-nvidia.json`, both
+`placeholder: false`.*
+
+**We are not claiming the defence works, and the honest reason is in the third column.**
+
+Every exploit we observed was removed, and the defence layer refused **none** of the 14 benign
+control documents — a 0% false-refusal rate, which rules out the trivial defence that simply
+blocks everything. But the before-rates are 4.2% and 1.4%. There is almost nothing there to
+remove, and a drop from three successes to zero across 72 trials is a result chance produces
+roughly a quarter of the time. **The reduction is not statistically significant on either
+model.** The scorecard row says so in its own defence-cost field rather than leaving a reader
+to assume otherwise.
+
+The finding this run genuinely supports is a different and more interesting one: **two
+independently-trained 120B-class instruction-tuned models were already largely resistant to a
+hand-authored indirect-injection corpus.** Payee mutation was the only category to land at all,
+on either model. Data exfiltration, instruction override, obfuscated override, tool-scope
+escalation and transfer tampering scored zero before any defence was applied.
+
+That cuts against our own framing, so it is worth stating plainly: our injection corpus is
+authored by us and finite. Against these models it is a floor on the attack surface, not a
+census of it, and the correct conclusion is that **the corpus is too weak to measure a
+defence** — not that the defence is strong.
+
+**What we would do with more time**, named because it is the obvious next step rather than a
+hedge: both providers host purpose-built injection guard models
+(`meta-llama/llama-prompt-guard-2`, `nvidia/llama-3.1-nemoguard-8b`). Substituting a published
+guard for our hand-rolled classifier, and hardening the corpus until a non-trivial baseline
+exists, is what would turn this into a measurable result.
+
 
 The agentic red team is implemented: a mock payment assistant with `check_balance`,
 `initiate_transfer` and `update_payee` tools, an injection corpus spanning transaction memos,
@@ -460,8 +498,15 @@ boundaries should not be trusted.
   faithful model of the attack surface, not an integration with a real payment system.
 - **Three of the five mapped threat vectors are not implemented** — synthetic identity,
   deepfake voice, and localised social engineering. They are section 2, not section 3.
-- **Two results were incomplete at the time of writing**, marked `[[PENDING]]` above rather
-  than estimated.
+- **One result is still incomplete** — single-transaction inference latency, marked
+  `[[PENDING]]` above rather than estimated. The figure we have was measured on 100 XGBoost
+  samples rather than the 1,000 ONNX samples specified, and `artifacts/latency.json` is
+  written outside the provenance envelope described in section 2, so it carries no
+  `placeholder` flag. We would rather leave the marker than quote a number our own audit
+  cannot vouch for.
+- **The agentic defence result is reported as not statistically significant** (section 4.5).
+  It would have been easy to present "4.2% to 0.0%" as a success and most readers would have
+  accepted it.
 
 ---
 
@@ -488,7 +533,7 @@ would rather be believed about the two surfaces we built than admired for five w
 | | |
 |---|---|
 | Code | `https://github.com/Aditya-Patil27/mastercard-adversarial-payments` |
-| Web prototype | `[[PENDING — deployment URL]]` |
+| Web prototype | https://aditya-patil27.github.io/mastercard-adversarial-payments/ |
 | Attack constraints | `src/adversarial_payments/attack/constraints.py` |
 | Attack search | `src/adversarial_payments/attack/engine.py` |
 | Feature contract | `src/adversarial_payments/schema.py` |

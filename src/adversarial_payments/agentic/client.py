@@ -71,13 +71,13 @@ PROVIDERS: dict[str, Provider] = {
         name="nvidia",
         base_url="https://integrate.api.nvidia.com/v1",
         key_env="NVIDIA_API_KEY",
-        model="meta/llama-3.3-70b-instruct",
+        model="nvidia/nemotron-3-super-120b-a12b",
     ),
     "groq": Provider(
         name="groq",
         base_url="https://api.groq.com/openai/v1",
         key_env="GROQ_API_KEY",
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
     ),
 }
 

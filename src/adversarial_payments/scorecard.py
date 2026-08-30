@@ -45,6 +45,30 @@ def tabular_row(
     )
 
 
+def _fisher_two_sided(a: int, b: int, c: int, d: int) -> float:
+    """Two-sided Fisher exact p for the 2x2 table [[a, b], [c, d]].
+
+    Written out rather than pulled from scipy because it is twenty lines and scipy is not
+    a dependency. It exists because an exploit rate falling to zero over seventy-odd
+    trials looks conclusive and frequently is not: three successes going to none is a
+    result you would get by chance roughly a quarter of the time.
+    """
+    from math import comb
+
+    n = a + b + c + d
+    if n == 0 or (a + c) == 0:
+        return 1.0
+
+    def pr(x: int) -> float:
+        y, u, v = (a + b) - x, (a + c) - x, (c + d) - ((a + c) - x)
+        if min(x, y, u, v) < 0:
+            return 0.0
+        return comb(a + b, x) * comb(c + d, u) / comb(n, a + c)
+
+    observed = pr(a)
+    return min(1.0, sum(t for i in range(a + c + 1) if (t := pr(i)) <= observed + 1e-12))
+
+
 def agentic_row_from_artifact() -> ScorecardRow | None:
     """Derive P3's row from their own real artifact, or return None.
 
@@ -64,13 +88,29 @@ def agentic_row_from_artifact() -> ScorecardRow | None:
     if not attempts:
         return None
 
-    before = sum(int(r["success_before"]) for r in rows) / attempts
-    after = sum(int(r["success_after"]) for r in rows) / attempts
+    n_before = sum(int(r["success_before"]) for r in rows)
+    n_after = sum(int(r["success_after"]) for r in rows)
+    before = n_before / attempts
+    after = n_after / attempts
+
+    # Name the model. An exploit rate is a property of the model under test, and a row
+    # that omits it invites the reader to attach the number to whatever they assume.
+    models = sorted({str(r.get("model") or "") for r in rows} - {""})
+    model = "+".join(models) if models else "unspecified model"
+
+    p = _fisher_two_sided(n_before, attempts - n_before, n_after, attempts - n_after)
+    verdict = (
+        f"significant at p={p:.3f}"
+        if p < 0.05
+        else f"NOT significant (Fisher p={p:.3f}) -- {n_before}/{attempts} to "
+        f"{n_after}/{attempts} is within chance"
+    )
+
     return ScorecardRow(
         surface=AGENTIC_SURFACE,
         attack_success_before=round(before, 4),
         attack_success_after=round(after, 4),
-        defense_cost="(defense cost pending from P3)",
+        defense_cost=f"{verdict}; model {model}",
         primary_metric="Exploit rate (OWASP LLM Top 10)",
     )
 

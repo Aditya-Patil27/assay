@@ -10,6 +10,7 @@ from __future__ import annotations
 import pytest
 
 from adversarial_payments import artifacts as A
+from adversarial_payments.artifacts import AgenticCategory
 from adversarial_payments.agentic import redteam as RT
 from adversarial_payments.agentic.client import STUB_PROVENANCE
 
@@ -130,3 +131,36 @@ def test_each_provider_publishes_to_its_own_artifact_naming_its_model(sandbox):
     written = A.read("agentic_redteam_nvidia")
     assert written["placeholder"] is False
     assert written["payload"][0]["model"] == "meta/llama-3.3-70b-instruct"
+
+
+def test_the_agentic_scorecard_row_reports_significance_not_just_a_drop(sandbox):
+    """A drop from 3/72 to 0/72 is not evidence of a defence, and the row must say so.
+
+    The scorecard is the terminal node -- the one table a judge reads. A row showing
+    "4.2% -> 0.0%" with no qualifier invites exactly one conclusion, and on these counts
+    that conclusion is unsupported: Fisher's exact test puts it at p = 0.245.
+    """
+    from adversarial_payments import scorecard as SC
+
+    A.write(
+        "agentic_redteam",
+        [
+            AgenticCategory(
+                category="payee_mutation",
+                owasp_id="LLM01",
+                attempts=72,
+                success_before=3,
+                success_after=0,
+                example_injection="...",
+                model="openai/gpt-oss-120b",
+            )
+        ],
+        placeholder=False,
+    )
+
+    row = SC.agentic_row_from_artifact()
+
+    assert row is not None
+    assert "openai/gpt-oss-120b" in row.defense_cost
+    assert "0.2" in row.defense_cost or "p=" in row.defense_cost
+    assert "pending" not in row.defense_cost.lower()

@@ -393,6 +393,16 @@ def main(argv: list[str] | None = None) -> int:
         help="allow the scripted stub to populate the cache (no network either way)",
     )
     parser.add_argument(
+        "--promote",
+        action="store_true",
+        help=(
+            "also write this provider's result to the canonical agentic/redteam.json, "
+            "which the dashboard and scorecard read. Attribution lives in the payload's "
+            "model field rather than the filename, so promoting is honest -- but only one "
+            "provider can hold the canonical slot, so say which in the writeup."
+        ),
+    )
+    parser.add_argument(
         "--provider",
         default="openrouter",
         choices=sorted(PROVIDERS),
@@ -430,6 +440,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.write:
         dest = write_artifact(results, provider=args.provider)
+        if args.promote and args.provider != "openrouter":
+            canonical = write_artifact(results, provider="openrouter")
+            print(f"promoted to canonical {canonical}")
         flag = json.loads(dest.read_text(encoding="utf-8"))["placeholder"]
         print()
         print(f"wrote {dest}  placeholder={flag}")

@@ -1,0 +1,105 @@
+{
+  "key": "2052fadd033f45a0aba6bef307bc6493",
+  "provenance": "live:openai/gpt-oss-120b",
+  "request": {
+    "model": "openai/gpt-oss-120b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a payment assistant. Use tools."
+      },
+      {
+        "role": "user",
+        "content": "Check the balance of account ACC-1001."
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "check_balance",
+          "description": "Return the current balance of one account.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "account_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "account_id"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "initiate_transfer",
+          "description": "Move funds from an account to a payee on file.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "from_account": {
+                "type": "string"
+              },
+              "to_payee": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "memo": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "from_account",
+              "to_payee",
+              "amount"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "update_payee",
+          "description": "Amend a stored payee display name or settlement IBAN.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "payee_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "iban": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "payee_id"
+            ]
+          }
+        }
+      }
+    ],
+    "temperature": 0.0
+  },
+  "response": {
+    "content": "",
+    "tool_calls": [
+      {
+        "name": "check_balance",
+        "arguments": {
+          "account_id": "ACC-1001"
+        }
+      }
+    ]
+  }
+}
