@@ -87,6 +87,29 @@ class AttackRound:
 
 
 @dataclass
+class FeasibilityAudit:
+    """Why a constrained ASR and an unconstrained one are not the same kind of number.
+
+    Both attackers report a high success rate. The difference is that most of the
+    unconstrained attacker's wins are not transactions -- they sit at merchants that are
+    not in the payment network, or they forged an attribute the real attacker inherits
+    from the victim and cannot touch.
+
+    This is the project's central claim demonstrated on our own baseline rather than
+    asserted in prose, which is why it belongs in an artifact and not only in a log line.
+    """
+
+    constrained_asr: float
+    unconstrained_asr: float
+    #: share of unconstrained successes at a merchant absent from the network
+    impossible_merchant_share: float
+    #: share of unconstrained successes that moved a FROZEN victim attribute
+    forged_frozen_share: float
+    constrained_mean_l0: float
+    unconstrained_mean_l0: float
+
+
+@dataclass
 class FeatureDelta:
     feature: str
     before: float
@@ -172,6 +195,7 @@ _PATHS = {
     "agentic_redteam": ARTIFACTS / "agentic" / "redteam.json",
     "scorecard": ARTIFACTS / "scorecard.json",
     "graph": ARTIFACTS / "graph.json",
+    "feasibility_audit": ARTIFACTS / "attack" / "feasibility.json",
 }
 
 

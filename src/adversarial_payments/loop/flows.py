@@ -29,7 +29,7 @@ import pandas as pd
 
 from .. import artifacts as A
 from .. import scorecard as SC
-from ..artifacts import DetectRound, ShapFeature
+from ..artifacts import DetectRound, FeasibilityAudit, ShapFeature
 from ..config import SETTINGS, ensure_dirs
 from ..schema import FEATURES, TARGET, FeatureSchema
 from ..attack.constraints import ConstraintProjector
@@ -373,6 +373,25 @@ def write_artifacts(state: LoopState, *, real: bool, write_detect: bool = False)
         state.graph(agentic_status="done" if agentic_real else "pending"),
         placeholder=placeholder,
     )
+    # The audit only exists when the r0 unconstrained baseline was run. Writing a
+    # zeroed one when it was skipped would be inventing the very number this artifact
+    # exists to keep honest, so it is simply absent instead.
+    baseline = state.notes.get("unconstrained_baseline")
+    if baseline and state.attack_rounds:
+        r0 = state.attack_rounds[0]
+        A.write(
+            "feasibility_audit",
+            FeasibilityAudit(
+                constrained_asr=float(r0.asr),
+                unconstrained_asr=float(baseline["asr"]),
+                impossible_merchant_share=float(baseline["impossible_merchant_share"]),
+                forged_frozen_share=float(baseline["forged_frozen_share"]),
+                constrained_mean_l0=float(r0.mean_l0),
+                unconstrained_mean_l0=float(baseline["mean_l0"]),
+            ),
+            placeholder=placeholder,
+        )
+
     rows, notes = SC.write(
         state.attack_rounds, state.detect_rounds, placeholder=placeholder
     )

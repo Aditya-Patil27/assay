@@ -244,3 +244,48 @@ def test_operating_threshold_spends_the_fpr_budget_on_validation_data():
         f"threshold {det.threshold:.4f} leaves recall unclaimed: it declines only "
         f"{realised_fpr:.5f} of negatives against a budget of {FPR_BUDGET}"
     )
+
+
+# --- the feasibility audit ----------------------------------------------------------
+
+
+def test_write_artifacts_publishes_the_feasibility_audit(sandbox):
+    """The audit that justifies the constraints must survive the process that computed it.
+
+    ``feasibility_audit`` answers the one question an unconstrained ASR cannot: what
+    share of those "evasions" describe a transaction that could physically occur? It was
+    computed every run, logged to stdout and left in ``LoopState.notes`` -- which means it
+    died with the process and could never reach the dashboard or the writeup.
+    """
+    from adversarial_payments.artifacts import AttackRound, DetectRound
+
+    state = LoopState(n_rounds=1)
+    state.add_attack(
+        AttackRound(
+            round=0, asr=1.0, n_attempts=10, n_success=10, mean_l0=3.8,
+            mean_l2=3.4, median_queries=277, per_feature_freq={"amt": 10},
+        ),
+        [],
+    )
+    state.add_detect(
+        DetectRound(
+            round=0, pr_auc=0.9, roc_auc=0.99, threshold=0.44, precision=0.77,
+            recall=0.85, n_train=100, n_adversarial_added=0, top_shap=[],
+        )
+    )
+    state.notes["unconstrained_baseline"] = {
+        "asr": 1.0,
+        "mean_l0": 5.2,
+        "impossible_merchant_share": 0.995,
+        "forged_frozen_share": 0.03,
+    }
+
+    flows.write_artifacts(state, real=True)
+
+    audit = A.read("feasibility_audit")
+    assert audit["placeholder"] is False
+    payload = audit["payload"]
+    assert payload["impossible_merchant_share"] == pytest.approx(0.995)
+    assert payload["forged_frozen_share"] == pytest.approx(0.03)
+    assert payload["unconstrained_asr"] == pytest.approx(1.0)
+    assert payload["constrained_asr"] == pytest.approx(1.0)
