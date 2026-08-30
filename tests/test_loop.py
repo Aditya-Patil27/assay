@@ -204,3 +204,43 @@ def test_scorecard_merges_a_real_agentic_artifact(sandbox):
     assert rows[1].attack_success_before == 0.4
     assert rows[1].attack_success_after == 0.08
     assert not notes
+
+
+# --- the operating threshold --------------------------------------------------------
+
+
+def test_operating_threshold_spends_the_fpr_budget_on_validation_data():
+    """The threshold follows the policy ``detect/evaluate.py`` documents.
+
+    That policy is the lowest threshold whose false-positive rate stays within
+    ``FPR_BUDGET``, fitted on validation. Maximising F1 on the *test* split instead
+    does two wrong things at once: it contradicts the stated policy, and it fits the
+    operating point on the very rows the attack is scored over -- which lifts the
+    threshold far above the budget cut and hands the attacker a nearly free evasion.
+    """
+    from adversarial_payments.config import SEED
+    from adversarial_payments.detect.evaluate import FPR_BUDGET
+    from adversarial_payments.loop.fallback import synthetic_features
+    from adversarial_payments.schema import FEATURES, TARGET
+
+    df = synthetic_features(8000)
+    train, holdout = flows.task_split(df, seed=SEED)
+    val, test = flows.task_split(holdout, seed=SEED)
+    model = flows.fit_detector(train, seed=SEED)
+
+    det = flows.task_score_detector(
+        model, test, 0, val_df=val, n_train=len(train), n_adversarial_added=0
+    )
+
+    val_scores = model.predict_proba(val[list(FEATURES)])[:, 1]
+    negatives = val_scores[val[TARGET].to_numpy() == 0]
+    realised_fpr = float((negatives >= det.threshold).mean())
+
+    assert realised_fpr <= FPR_BUDGET * 1.5, (
+        f"threshold {det.threshold:.4f} exceeds the false-positive budget "
+        f"({realised_fpr:.5f} > {FPR_BUDGET})"
+    )
+    assert realised_fpr >= FPR_BUDGET * 0.4, (
+        f"threshold {det.threshold:.4f} leaves recall unclaimed: it declines only "
+        f"{realised_fpr:.5f} of negatives against a budget of {FPR_BUDGET}"
+    )

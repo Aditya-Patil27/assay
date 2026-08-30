@@ -138,36 +138,41 @@ def task_score_detector(
     test_df: pd.DataFrame,
     round_index: int,
     *,
+    val_df: pd.DataFrame,
     n_train: int,
     n_adversarial_added: int,
 ) -> DetectRound:
-    """PR-AUC, ROC-AUC and the operating threshold that maximises F1."""
-    from sklearn.metrics import (
-        average_precision_score,
-        precision_recall_curve,
-        roc_auc_score,
-    )
+    """PR-AUC, ROC-AUC and the operating threshold P1's policy defines.
+
+    The threshold is ``detect.evaluate.choose_threshold`` -- the lowest cut whose
+    false-positive rate stays inside ``FPR_BUDGET`` -- fitted on ``val_df``. Two
+    properties follow, and both are load-bearing for the ASR being meaningful:
+
+    * The operating point never sees the rows the attack is scored over.
+    * Every round is compared at the *same false-positive cost*, so a fall in ASR
+      is the detector improving rather than the defender quietly widening the net.
+
+    An earlier version maximised F1 on ``test_df``. That lifted the threshold to
+    ~0.94 against a budget cut near 0.23, which made evasion nearly free and pinned
+    ASR at 1.000 for every round.
+    """
+    from ..detect.evaluate import choose_threshold, metrics_at_threshold
 
     y = test_df[TARGET].to_numpy()
     proba = np.asarray(model.predict_proba(test_df[list(FEATURES)]))[:, 1]
 
-    precision, recall, thresholds = precision_recall_curve(y, proba)
-    f1 = np.divide(
-        2 * precision * recall,
-        precision + recall,
-        out=np.zeros_like(precision),
-        where=(precision + recall) > 0,
-    )
-    best = int(np.argmax(f1[:-1])) if len(thresholds) else 0
-    threshold = float(thresholds[best]) if len(thresholds) else 0.5
+    val_proba = np.asarray(model.predict_proba(val_df[list(FEATURES)]))[:, 1]
+    threshold = choose_threshold(val_df[TARGET].to_numpy(), val_proba)
+
+    ev = metrics_at_threshold(y, proba, threshold)
 
     return DetectRound(
         round=round_index,
-        pr_auc=float(round(average_precision_score(y, proba), 5)),
-        roc_auc=float(round(roc_auc_score(y, proba), 5)),
-        threshold=float(round(threshold, 5)),
-        precision=float(round(precision[best], 5)),
-        recall=float(round(recall[best], 5)),
+        pr_auc=float(round(ev.pr_auc, 5)),
+        roc_auc=float(round(ev.roc_auc, 5)),
+        threshold=float(round(ev.threshold, 5)),
+        precision=float(round(ev.precision, 5)),
+        recall=float(round(ev.recall, 5)),
         n_train=int(n_train),
         n_adversarial_added=int(n_adversarial_added),
         top_shap=_top_shap(model, test_df),
@@ -253,6 +258,13 @@ def run_loop(
         f"({'real' if real else 'SYNTHETIC FALLBACK'})")
 
     train_df, test_df = t["task_split"](df, seed=SETTINGS.seed)
+    # The operating threshold is fitted on this slice, never on the rows the attack
+    # is scored over. Carved once, before the loop: adversarial examples are appended
+    # to train every round, and a validation slice that grew with them would move the
+    # operating point for a reason that has nothing to do with the detector.
+    train_df, val_df = t["task_split"](train_df, seed=SETTINGS.seed)
+    log(f"[loop] split: train={len(train_df):,} val={len(val_df):,} test={len(test_df):,} "
+        f"(threshold fitted on val, attack scored on test)")
 
     state.started("schema")
     schema = FeatureSchema.fit(train_df)
@@ -272,7 +284,12 @@ def run_loop(
 
         state.started("score", r)
         det = t["task_score_detector"](
-            model, test_df, r, n_train=len(train_df), n_adversarial_added=n_added
+            model,
+            test_df,
+            r,
+            val_df=val_df,
+            n_train=len(train_df),
+            n_adversarial_added=n_added,
         )
         state.add_detect(det)
         state.finished("score", r)
