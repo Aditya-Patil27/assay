@@ -113,14 +113,14 @@ export function LiveScoreStream({ samples }: { samples: LiveSamples }) {
       <ol className="mt-4 space-y-1.5">
         {rows.length === 0
           ? Array.from({ length: VISIBLE }).map((_, i) => (
-              <li key={i} className="h-[30px] rounded-[5px] bg-night/60" aria-hidden="true" />
+              <li key={i} className="h-[30px] rounded-[5px] bg-figure-2" aria-hidden="true" />
             ))
           : rows.map((r, i) => {
               const isFlagged = r.p >= threshold;
               return (
                 <li
                   key={`${r.id}-${scored - i}`}
-                  className="flex items-center gap-3 rounded-[5px] bg-night/60 px-2.5 py-1.5 text-[0.75rem]"
+                  className="flex items-center gap-3 rounded-[5px] bg-figure-2 px-2.5 py-1.5 text-[0.75rem]"
                   style={{ opacity: 1 - i * 0.11 }}
                 >
                   <span className="w-[86px] shrink-0 truncate font-mono text-night-muted">
@@ -129,22 +129,22 @@ export function LiveScoreStream({ samples }: { samples: LiveSamples }) {
                   <span className="tnum w-[62px] shrink-0 text-right font-mono text-night-ink">
                     {money(r.amt)}
                   </span>
-                  <span className="h-1 flex-1 overflow-hidden rounded-[2px] bg-night">
+                  <span className="h-1 flex-1 overflow-hidden rounded-[2px] bg-rule">
                     <span
                       className={`block h-full ${isFlagged ? "bg-attack-fill" : "bg-defend-fill"}`}
                       style={{ width: `${Math.max(r.p * 100, 2)}%` }}
                     />
                   </span>
                   <span
-                    className={`tnum w-[46px] shrink-0 text-right font-mono ${isFlagged ? "text-attack-dim" : "text-night-muted"}`}
+                    className={`tnum w-[46px] shrink-0 text-right font-mono ${isFlagged ? "text-attack" : "text-muted"}`}
                   >
                     {r.p.toFixed(3)}
                   </span>
                   <span
                     className={`w-[52px] shrink-0 rounded-[3px] px-1.5 py-0.5 text-center text-[0.625rem] font-medium ${
                       isFlagged
-                        ? "bg-attack-fill/20 text-attack-dim"
-                        : "bg-defend-fill/15 text-defend-dim"
+                        ? "bg-attack-fill/20 text-attack"
+                        : "bg-defend-fill/15 text-defend"
                     }`}
                   >
                     {isFlagged ? "FLAG" : "PASS"}
@@ -160,11 +160,11 @@ export function LiveScoreStream({ samples }: { samples: LiveSamples }) {
           <dt className="text-[0.6875rem] text-night-muted">scored</dt>
         </div>
         <div>
-          <dd className="tnum display text-[1.25rem] text-attack-dim">{flagged}</dd>
+          <dd className="tnum display text-[1.25rem] text-attack">{flagged}</dd>
           <dt className="text-[0.6875rem] text-night-muted">flagged</dt>
         </div>
         <div>
-          <dd className="tnum display text-[1.25rem] text-defend-dim">{stream?.length ?? 0}</dd>
+          <dd className="tnum display text-[1.25rem] text-defend">{stream?.length ?? 0}</dd>
           <dt className="text-[0.6875rem] text-night-muted">real rows in rotation</dt>
         </div>
       </dl>

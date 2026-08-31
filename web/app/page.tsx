@@ -357,7 +357,7 @@ function CoevolutionSpark({
             cx={x(i)}
             cy={yEffort(r.mean_l0)}
             r="3.5"
-            fill="var(--color-night-2)"
+            fill="var(--color-figure)"
             stroke="var(--color-defend-fill)"
             strokeWidth="2"
           />
@@ -408,9 +408,9 @@ function CoevolutionSpark({
 function Cost({ value, label, delta }: { value: string; label: string; delta: string }) {
   return (
     <div>
-      <p className="tnum display text-[1.375rem] text-night-ink">{value}</p>
+      <p className="tnum display text-[1.375rem] text-ink">{value}</p>
       <p className="mt-1 text-[0.75rem] text-night-muted">{label}</p>
-      <p className="mt-1.5 text-[0.75rem] font-medium text-defend-dim">{delta}</p>
+      <p className="mt-1.5 text-[0.75rem] font-medium text-defend">{delta}</p>
     </div>
   );
 }

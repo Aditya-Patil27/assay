@@ -2,85 +2,80 @@
 
 @theme {
   /* ------------------------------------------------------------------------------
-   * Unit21's system, read off unit21.ai with a real browser rather than eyeballed.
+   * Unit21's type and accents, on paper.
    *
-   * Eight fraud platforms were surveyed for their computed styles. Seven read as SaaS;
-   * Unit21 reads as a security lab, which is what this project is. Its signature is
-   * three things nobody else does: cream type rather than white, a coral accent where
-   * everyone else reaches for blue, and a *serif* at 93px in weight 400.
+   * Their cream-on-black was reported as disturbing to read, which is fair -- a whole
+   * site at 17:1 inverted is a lot to sit in front of. So the ground is inverted and
+   * the parts that gave the reference its character are kept: a Baskerville display at
+   * weight 400, an entirely monospaced UI layer, and coral rather than SaaS blue.
    *
-   * The Attio palette this replaced was competent and completely anonymous -- flat
-   * grey, hairline rules, dense tables, blue accent. That is IBM Carbon's language,
-   * and it made a red-team tool look like an internal reporting console.
+   * The paper is warm ivory, not the cold grey this had before. That single choice is
+   * what separates it from IBM Carbon: Carbon is #f4f4f4 neutral with a blue accent,
+   * and every enterprise reporting console on earth looks like it.
    * ------------------------------------------------------------------------------ */
 
-  /* Surfaces. Not pure black: #000 under cream vibrates at large sizes. */
-  --color-paper: #0b0b0b;
-  --color-figure: #141414;
-  --color-figure-2: #1c1c1c;
-  --color-rule: #2f2f2d;
-  --color-rule-strong: #46433c;
+  --color-paper: #faf7ef; /* warm ivory -- the reference's cream, used as ground */
+  --color-figure: #ffffff; /* cards lift off the ivory without a heavy shadow */
+  --color-figure-2: #f2eee2;
+  --color-rule: #d6cdb8;
+  --color-rule-strong: #bfb6a0;
 
-  /* Cream, not white. The single most recognisable thing about the reference, and what
-     stops a dark site reading as a terminal. 17.89:1 on the page. */
-  --color-ink: #fff4ce;
-  --color-muted: #a8a291;
+  --color-ink: #17150f; /* warm near-black, 17.05:1 on paper */
+  --color-muted: #6b6558; /* 5.41:1 */
 
   /* ------------------------------------------------------------------------------
-   * Accents from Unit21's own ramp, mapped onto the red/blue-team story. All clear AA
-   * on both surfaces. The -fill variants are separate tokens because bars and strokes
-   * owe only 3:1 and may run brighter than text.
+   * Two variants per accent. The -fill values are the reference's own colours, used
+   * for bars, strokes and buttons, which owe 3:1 as graphics and carry black text.
+   * The plain values are darkened until small text clears 4.5:1 on the ivory --
+   * #ff6158 itself reads at 2.8:1 and must never be set as body copy.
    * ------------------------------------------------------------------------------ */
-  --color-attack: #ff6158; /* their coral -- the attacker */
-  --color-attack-fill: #ff6158;
-  --color-attack-dim: #ff9d97;
+  --color-attack: #c9372b; /* 4.83:1 -- deep vermilion */
+  --color-attack-fill: #ff6158; /* the reference's coral */
+  --color-attack-dim: #f5b3ad;
 
-  --color-defend: #46daff; /* their cyan -- the defence */
-  --color-defend-fill: #46daff;
-  --color-defend-dim: #a2ecff;
+  --color-defend: #007b9a; /* 4.56:1 */
+  --color-defend-fill: #46daff; /* the reference's cyan */
+  --color-defend-dim: #9adcee;
 
-  --color-warn: #d5bdff; /* their lilac -- provisional, placeholder, unroll */
-  --color-warn-fill: #d5bdff;
+  --color-warn: #8845ff; /* 4.52:1 */
+  --color-warn-fill: #a97cff;
 
-  --color-ok: #15be74;
-  --color-wash-defend: #12303a;
+  --color-ok: #0e814f; /* 4.59:1 */
+  --color-wash-defend: #e4f4fa;
 
-  /* Categorical ramp for the audit groups, drawn from the same hues so a group chip
-     never competes with the red and cyan that carry the argument. */
-  --color-g1: #46daff;
-  --color-g1-wash: #102c36;
-  --color-g2: #15be74;
-  --color-g2-wash: #0d2a1e;
-  --color-g3: #d5bdff;
-  --color-g3-wash: #221c30;
-  --color-g4: #ff9d97;
-  --color-g4-wash: #301a18;
-  --color-g5: #ffd47a;
-  --color-g5-wash: #2e2415;
-  --color-g6: #8fd3ff;
-  --color-g6-wash: #16262f;
-  --color-g7: #ff6158;
-  --color-g7-wash: #2c1513;
-  --color-g8: #a8a291;
-  --color-g8-wash: #232320;
+  /* Categorical ramp for the audit groups: text-safe on paper, washes behind them. */
+  --color-g1: #007b9a;
+  --color-g1-wash: #e4f4fa;
+  --color-g2: #0e814f;
+  --color-g2-wash: #e2f3ea;
+  --color-g3: #8845ff;
+  --color-g3-wash: #efe8ff;
+  --color-g4: #b8453a;
+  --color-g4-wash: #fdeae7;
+  --color-g5: #8a5a08;
+  --color-g5-wash: #fdf0d8;
+  --color-g6: #0f6d8c;
+  --color-g6-wash: #e6f1f6;
+  --color-g7: #c9372b;
+  --color-g7-wash: #fdeae7;
+  --color-g8: #5f5a4e;
+  --color-g8-wash: #efece2;
 
-  /* Dark-section aliases. The site is one register now, so these resolve to the same
-     surfaces -- kept because the hero and closing band still name them. */
-  --color-night: #0b0b0b;
-  --color-night-2: #141414;
-  --color-night-rule: #2f2f2d;
-  --color-night-ink: #fff4ce;
-  --color-night-muted: #a8a291;
+  /* The banded sections. Not dark any more -- a deeper tint of the same paper, so the
+     hero and the closing band read as separate without changing register. */
+  --color-night: #f2eee2;
+  --color-night-2: #ffffff;
+  --color-night-rule: #d6cdb8;
+  --color-night-ink: #17150f;
+  --color-night-muted: #6b6558;
 
   /* ------------------------------------------------------------------------------
-   * Three faces, matching the reference's three jobs.
+   * Three faces, unchanged -- this is the half of the reference that was working.
    *
-   *   Libre Baskerville  display. The Baskerville revival Unit21 sets its 93px
-   *                      headline in. A serif that large at weight 400 is the whole
-   *                      reason their hero does not look like every other vendor's.
-   *   Space Mono         the machine layer: eyebrows, buttons, labels, numbers. Their
-   *                      UI is entirely mono, which makes the page read as an
-   *                      instrument rather than a brochure.
+   *   Libre Baskerville  display, at weight 400. A serif this large is why the page
+   *                      does not look like every other fraud vendor's.
+   *   Space Mono         eyebrows, buttons, labels, numbers. A monospaced UI layer
+   *                      reads as an instrument rather than a brochure.
    *   DM Sans            running prose, where a serif at 16px would tire a reader.
    * ------------------------------------------------------------------------------ */
   --font-display: var(--font-baskerville), Baskerville, Georgia, serif;
@@ -92,7 +87,7 @@
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
@@ -103,10 +98,9 @@ body {
 }
 
 /* --------------------------------------------------------------------------------
- * Display type: big, light, tight, serif.
- *
- * -0.022em is the reference's -2px at 93px. Line-height 1.02 is theirs too: a serif
- * this large needs the leading pulled in or the headline falls apart into stripes.
+ * Display type: big, light, tight, serif. -0.022em is the reference's -2px at 93px,
+ * and the leading is pulled right in because a serif that large falls apart into
+ * stripes at normal line-height.
  * -------------------------------------------------------------------------------- */
 .display {
   font-family: var(--font-display);
@@ -115,7 +109,6 @@ body {
   line-height: 1.04;
 }
 
-/* The machine layer. Every eyebrow, button and small label on the site is mono. */
 .mono-label {
   font-family: var(--font-mono);
   letter-spacing: -0.01em;
@@ -155,11 +148,12 @@ body {
   color: var(--color-ink);
 }
 
-/* A card on black is a lighter panel with a hairline, not a shadow: a drop shadow on a
-   dark ground is invisible and only ever adds mud. */
+/* White on ivory needs only the faintest lift; a heavy shadow on a warm ground goes
+   muddy immediately. */
 .card {
   background: var(--color-figure);
   border-radius: var(--radius-card);
+  box-shadow: 0 1px 2px rgb(23 21 15 / 0.04);
 }
 
 table,
