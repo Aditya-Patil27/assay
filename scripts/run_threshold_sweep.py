@@ -37,6 +37,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from adversarial_payments.attack.constraints import ConstraintProjector  # noqa: E402
 from adversarial_payments.attack.engine import AttackConfig, attack_dataset  # noqa: E402
@@ -47,6 +48,7 @@ from adversarial_payments.detect.evaluate import (  # noqa: E402
     metrics_at_threshold,
 )
 from adversarial_payments.schema import FEATURES, TARGET, FeatureSchema  # noqa: E402
+from _sweep_common import fit_detector, scores, split_stratified  # noqa: E402
 
 OUT_PATH = ARTIFACTS / "attack" / "threshold_sweep.json"
 
@@ -75,33 +77,6 @@ class Arm:
     seconds: float
 
 
-def _split(df: pd.DataFrame, frac: float, seed: int) -> tuple[pd.DataFrame, pd.DataFrame]:
-    rng = np.random.default_rng(seed)
-    idx = np.arange(len(df))
-    y = df[TARGET].to_numpy()
-    held = np.zeros(len(df), dtype=bool)
-    for label in (0, 1):
-        rows = idx[y == label]
-        take = rng.choice(rows, size=max(int(frac * len(rows)), 1), replace=False)
-        held[take] = True
-    return df[~held].reset_index(drop=True), df[held].reset_index(drop=True)
-
-
-def _fit(train: pd.DataFrame, seed: int) -> Any:
-    from xgboost import XGBClassifier
-
-    y = train[TARGET].to_numpy()
-    pos = max(int(y.sum()), 1)
-    model = XGBClassifier(
-        n_estimators=300, max_depth=6, learning_rate=0.1, subsample=0.9,
-        colsample_bytree=0.9, reg_lambda=1.0,
-        scale_pos_weight=float((len(y) - pos) / pos),
-        tree_method="hist", eval_metric="aucpr", random_state=seed, n_jobs=-1,
-    )
-    model.fit(train[list(FEATURES)], y)
-    return model
-
-
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="run_threshold_sweep")
     ap.add_argument("--rows", type=int, default=400_000, help="0 uses the full dataset")
@@ -120,8 +95,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     print(f"loading {args.rows or 'all'} rows ...", flush=True)
     df = load_features(sample_rows=args.rows or None)
-    train, test = _split(df, 0.30, SEED)
-    train, val = _split(train, 0.30, SEED)
+    train, test = split_stratified(df, 0.30, seed=SEED)
+    train, val = split_stratified(train, 0.30, seed=SEED)
     print(f"  {len(df):,} rows | train={len(train):,} val={len(val):,} test={len(test):,}",
           flush=True)
 
@@ -129,7 +104,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     projector = ConstraintProjector.fit(df, schema)
 
     print("training one detector; every arm attacks this same model", flush=True)
-    model = _fit(train, SEED)
+    model = fit_detector(train, seed=SEED)
 
     y_val = val[TARGET].to_numpy()
     val_scores = np.asarray(model.predict_proba(val[list(FEATURES)]))[:, 1]

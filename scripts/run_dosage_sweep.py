@@ -47,6 +47,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from adversarial_payments.attack.constraints import ConstraintProjector  # noqa: E402
 from adversarial_payments.attack.engine import (  # noqa: E402
@@ -62,6 +63,7 @@ from adversarial_payments.detect.evaluate import (  # noqa: E402
     metrics_at_threshold,
 )
 from adversarial_payments.schema import FEATURES, TARGET, FeatureSchema  # noqa: E402
+from _sweep_common import fit_detector, scores, split_stratified  # noqa: E402
 
 OUT_PATH = ARTIFACTS / "attack" / "dosage_sweep.json"
 
@@ -91,41 +93,6 @@ class SweepArm:
     seconds: float = 0.0
 
 
-def _split(df: pd.DataFrame, frac: float, seed: int) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Stratified split, matching the loop's own so results stay comparable to it."""
-    rng = np.random.default_rng(seed)
-    idx = np.arange(len(df))
-    y = df[TARGET].to_numpy()
-    held = np.zeros(len(df), dtype=bool)
-    for label in (0, 1):
-        rows = idx[y == label]
-        take = rng.choice(rows, size=max(int(frac * len(rows)), 1), replace=False)
-        held[take] = True
-    return df[~held].reset_index(drop=True), df[held].reset_index(drop=True)
-
-
-def _fit(train: pd.DataFrame, weights: np.ndarray | None, seed: int) -> Any:
-    from xgboost import XGBClassifier
-
-    y = train[TARGET].to_numpy()
-    pos = max(int(y.sum()), 1)
-    model = XGBClassifier(
-        n_estimators=300,
-        max_depth=6,
-        learning_rate=0.1,
-        subsample=0.9,
-        colsample_bytree=0.9,
-        reg_lambda=1.0,
-        scale_pos_weight=float((len(y) - pos) / pos),
-        tree_method="hist",
-        eval_metric="aucpr",
-        random_state=seed,
-        n_jobs=-1,
-    )
-    model.fit(train[list(FEATURES)], y, sample_weight=weights)
-    return model
-
-
 def run_arm(
     weight: float,
     train0: pd.DataFrame,
@@ -146,7 +113,7 @@ def run_arm(
     n_adv = 0
 
     for r in range(n_rounds):
-        model = _fit(train, weights if weight != 1.0 else None, seed)
+        model = fit_detector(train, seed=SEED, weights=weights if weight != 1.0 else None)
 
         val_scores = np.asarray(model.predict_proba(val[list(FEATURES)]))[:, 1]
         threshold = choose_threshold(val[TARGET].to_numpy(), val_scores, FPR_BUDGET)
@@ -226,7 +193,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         help=(
             "sample_weight applied to adversarial rows in the next round's trainset. "
             "The range is deliberately wide enough to bracket the transition: at w=1 the "
-            "adversarial rows are 0.2% of the training mass and demonstrably do nothing, "
+            "adversarial rows are 0.2%% of the training mass and demonstrably do nothing, "
             "while at w=5000 they outweigh the entire legitimate trainset and must do "
             "something -- if only destroy PR-AUC. A sweep that does not contain the "
             "crossover cannot tell you where it is."
@@ -241,8 +208,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     df = load_features(sample_rows=args.rows or None)
     print(f"  {len(df):,} rows, {int(df[TARGET].sum()):,} fraud", flush=True)
 
-    train, holdout = _split(df, 0.30, SEED)
-    train, val = _split(train, 0.30, SEED)
+    train, holdout = split_stratified(df, 0.30, seed=SEED)
+    train, val = split_stratified(train, 0.30, seed=SEED)
     test = holdout
     print(f"  train={len(train):,} val={len(val):,} test={len(test):,}", flush=True)
 

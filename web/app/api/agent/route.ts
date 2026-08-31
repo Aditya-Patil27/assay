@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { NextResponse } from "next/server";
 
 import { exploited, runAgent, spliced, type ChatFn } from "@/lib/agent/run";
+import { checkLimit } from "@/lib/ratelimit";
 import type { AgentRuntime, DefenseConfig, Injection, Scenario } from "@/lib/agent/types";
 
 /**
@@ -99,6 +100,17 @@ function nextKey(): string | null {
 }
 
 export async function POST(request: Request) {
+  // Before anything that costs money. Unauthenticated by design -- a judge must be able to
+  // fire this without an account -- so the limit is what stands between the demo and one
+  // curl loop draining every provider key the deployment holds.
+  const limit = checkLimit(request);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: limit.error },
+      { status: limit.status, headers: { "retry-after": String(limit.retryAfter) } },
+    );
+  }
+
   const apiKey = nextKey();
   if (!apiKey) {
     return NextResponse.json(
@@ -118,7 +130,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "body must be JSON" }, { status: 400 });
   }
 
-  const rt = await loadRuntime();
+  let rt: AgentRuntime;
+  try {
+    rt = await loadRuntime();
+  } catch (e) {
+    console.error("[api/agent] runtime load failed", e);
+    return NextResponse.json({ error: "agent runtime unavailable" }, { status: 503 });
+  }
   const scenario: Scenario | undefined = rt.scenarios.find((s) => s.id === body.scenarioId);
   const injection: Injection | undefined = rt.injections.find((i) => i.id === body.injectionId);
 
@@ -163,8 +181,11 @@ export async function POST(request: Request) {
       payeesAfter: run.after.payees,
     });
   } catch (e) {
+    // Logged, not returned: provider errors carry account identifiers, routing detail and
+    // quota state, and a demo endpoint has no reason to hand those to a caller.
+    console.error("[api/agent] upstream failure", e);
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : String(e) },
+      { error: "The model provider call failed. The committed results on this page are unaffected." },
       { status: 502 },
     );
   }

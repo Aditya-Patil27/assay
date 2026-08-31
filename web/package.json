@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "deploy": "vercel deploy --prod --yes",
     "check:agent": "tsx scripts/check-agent-port.mjs",
-    "check:trees": "tsx scripts/check-tree-port.mjs"
+    "check:trees": "tsx scripts/check-tree-port.mjs",
+    "check:route": "tsx scripts/check-route-guards.mjs"
   },
   "dependencies": {
     "@xyflow/react": "^12.3.5",
