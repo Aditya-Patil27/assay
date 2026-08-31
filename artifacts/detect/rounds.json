@@ -2,50 +2,102 @@
   "kind": "detect_rounds",
   "placeholder": false,
   "schema_version": 1,
-  "created_at": "2026-08-29T18:28:04.494113+00:00",
-  "git_sha": "4e80c95",
+  "created_at": "2026-08-31T10:18:36.245721+00:00",
+  "git_sha": "6ca9dbd",
   "payload": [
     {
       "round": 0,
-      "pr_auc": 0.8286392292144641,
-      "roc_auc": 0.9781499321058308,
-      "threshold": 0.2330614238680185,
-      "precision": 0.7175572519083969,
-      "recall": 0.7966101694915254,
-      "n_train": 96000,
+      "pr_auc": 0.94717,
+      "roc_auc": 0.99888,
+      "threshold": 0.81995,
+      "precision": 0.81419,
+      "recall": 0.91572,
+      "n_train": 907675,
       "n_adversarial_added": 0,
       "top_shap": [
         {
           "feature": "amt",
-          "mean_abs_shap": 4.35883092880249
+          "mean_abs_shap": 4.276209831237793
         },
         {
           "feature": "category_enc",
-          "mean_abs_shap": 1.4979476928710938
-        },
-        {
-          "feature": "log_amt",
-          "mean_abs_shap": 1.3278902769088745
+          "mean_abs_shap": 1.5549700260162354
         },
         {
           "feature": "amt_ratio_to_card_mean",
-          "mean_abs_shap": 1.0828499794006348
-        },
-        {
-          "feature": "hour",
-          "mean_abs_shap": 1.0408421754837036
+          "mean_abs_shap": 0.9694700241088867
         },
         {
           "feature": "is_night",
-          "mean_abs_shap": 1.0076755285263062
+          "mean_abs_shap": 0.922029972076416
         },
         {
-          "feature": "age",
-          "mean_abs_shap": 0.8218925595283508
+          "feature": "hour",
+          "mean_abs_shap": 0.8837900161743164
+        }
+      ]
+    },
+    {
+      "round": 1,
+      "pr_auc": 0.93896,
+      "roc_auc": 0.99854,
+      "threshold": 0.89783,
+      "precision": 0.82638,
+      "recall": 0.89603,
+      "n_train": 908475,
+      "n_adversarial_added": 800,
+      "top_shap": [
+        {
+          "feature": "amt",
+          "mean_abs_shap": 3.8421599864959717
         },
         {
-          "feature": "hours_since_last_txn",
-          "mean_abs_shap": 0.7888861298561096
+          "feature": "category_enc",
+          "mean_abs_shap": 1.350119948387146
+        },
+        {
+          "feature": "amt_ratio_to_card_mean",
+          "mean_abs_shap": 1.0594300031661987
+        },
+        {
+          "feature": "is_night",
+          "mean_abs_shap": 0.9302499890327454
+        },
+        {
+          "feature": "hour",
+          "mean_abs_shap": 0.5452799797058105
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "pr_auc": 0.93178,
+      "roc_auc": 0.99824,
+      "threshold": 0.93272,
+      "precision": 0.82285,
+      "recall": 0.8905,
+      "n_train": 909275,
+      "n_adversarial_added": 800,
+      "top_shap": [
+        {
+          "feature": "amt",
+          "mean_abs_shap": 3.599760055541992
+        },
+        {
+          "feature": "category_enc",
+          "mean_abs_shap": 1.2479699850082397
+        },
+        {
+          "feature": "amt_ratio_to_card_mean",
+          "mean_abs_shap": 0.9101300239562988
+        },
+        {
+          "feature": "is_night",
+          "mean_abs_shap": 0.854960024356842
+        },
+        {
+          "feature": "hour",
+          "mean_abs_shap": 0.5851699709892273
         }
       ]
     }

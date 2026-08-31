@@ -17,12 +17,15 @@ import type { AttackRound } from "@/lib/types";
 const ROUND_FILL = ["var(--color-attack-fill)", "#d05f4b", "var(--color-attack-dim)"];
 
 /**
- * Which features the attacker actually reaches for, and how that shifts as the detector
- * learns.
+ * Which features each round's successful evasions actually touched.
  *
- * Counts are normalised by successful evasions in that round, because n_success falls by
- * an order of magnitude across rounds -- raw counts would show every feature "declining"
- * and say nothing about which ones the attacker abandoned.
+ * Shares, not raw counts: each bar is the fraction of that round's successes that moved a
+ * given feature. With attack success at 1.000 every round the denominator is constant, so
+ * here the normalisation only rescales -- it is kept because a round that ever failed some
+ * attempts would otherwise be compared against a different denominator without saying so.
+ *
+ * The movement across rounds is the search relocating under pressure. It is not the
+ * attacker being disarmed: every round still succeeds on every attempt.
  */
 export function FeatureFrequencyPanel({ rounds }: { rounds: AttackRound[] }) {
   const features = [...new Set(rounds.flatMap((r) => Object.keys(r.per_feature_freq)))];

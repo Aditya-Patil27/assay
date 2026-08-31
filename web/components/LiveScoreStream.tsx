@@ -29,6 +29,10 @@ interface Row {
 const TICK_MS = 420;
 const VISIBLE = 7;
 
+//: sessionStorage, not localStorage: the tally belongs to this visit. A counter
+//: resuming at four thousand a week later would be a stranger claim than restarting.
+const TALLY_KEY = "aps.livescore.tally";
+
 export function LiveScoreStream({ samples }: { samples: LiveSamples }) {
   const { threshold, stream } = samples;
 
@@ -41,6 +45,37 @@ export function LiveScoreStream({ samples }: { samples: LiveSamples }) {
 
   const cursor = useRef(0);
   const timings = useRef<number[]>([]);
+
+  // Carry the tally across navigation. Next unmounts this component when the visitor
+  // opens another page, so without this the counter restarts at zero every time they come
+  // back -- which reads as "nothing was really running" rather than as a live meter. The
+  // scores themselves are recomputed either way; only the running total is restored.
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(TALLY_KEY);
+      if (!saved) return;
+      const t = JSON.parse(saved) as { scored: number; flagged: number; cursor: number };
+      if (typeof t.scored !== "number" || typeof t.flagged !== "number") return;
+      setScored(t.scored);
+      setFlagged(t.flagged);
+      // Resume the rotation where it stopped, so returning does not replay the same rows.
+      cursor.current = typeof t.cursor === "number" ? t.cursor : 0;
+    } catch {
+      // Private windows and blocked site data throw on access. A missing tally is not a
+      // reason for the hero to fail, so start from zero and carry on.
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        TALLY_KEY,
+        JSON.stringify({ scored, flagged, cursor: cursor.current }),
+      );
+    } catch {
+      /* see above */
+    }
+  }, [scored, flagged]);
 
   useEffect(() => {
     let cancelled = false;

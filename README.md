@@ -21,17 +21,19 @@
 > disagreement is visible. See [§4.5](docs/submission/solution-walkthrough.md).
 
 ---|---|---|---|
-> | 0 | 1.000 | 3.81 | 277 |
-> | 1 | 1.000 | 4.26 | 298 |
-> | 2 | 1.000 | 4.64 | 492 |
+> | 0 | 1.000 | 4.12 | 275 |
+> | 1 | 1.000 | 4.00 | 291 |
+> | 2 | 1.000 | 4.03 | 391 |
 >
 > *400 attacked transactions per round, 400,000-row subsample, train 196,001 / val 84,000 /
 > test 119,999. Threshold fitted on val at `FPR_BUDGET = 0.001`, never on the test rows the
 > attack is scored over. Every figure above is read from
 > `artifacts/attack/rounds.json` (`placeholder: false`).*
 >
-> The defense buys **+0.83 coordinates and +215 median queries of attacker effort**, and does
-> not stop a single attempt. That is a defense-in-depth economics claim, not a solved problem,
+> The defense buys **+116 median queries of attacker effort** and does not stop a single
+> attempt. Mean features touched does *not* rise — 4.12 → 4.03, flat within noise. An earlier
+> revision claimed a rise on both axes from a 400,000-row subsample; the full run keeps only
+> the query cost. That is a defense-in-depth economics claim, not a solved problem,
 > and the repo says so everywhere rather than implying a collapse it did not measure.
 >
 > **The defence does detect the generated attacks — 68.9% of ones it has never seen**

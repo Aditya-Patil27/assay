@@ -26,7 +26,7 @@
     {
       "id": "s5",
       "seconds": 7.0,
-      "text": "Three rounds of adversarial retraining prevented zero evasions. What moved was the attacker's cost."
+      "text": "Three rounds of adversarial retraining prevented zero evasions. What moved was the attacker's cost: median queries per success rose from two hundred seventy five to three hundred ninety one."
     },
     {
       "id": "s6",
@@ -36,7 +36,7 @@
     {
       "id": "s7",
       "seconds": 11.2,
-      "text": "Here is why that hundred percent means something. An unconstrained attacker reports the same number. Ninety nine point five percent of its evasions sit at a merchant that does not exist."
+      "text": "Here is why that hundred percent means something. An unconstrained attacker reports the same number. Ninety nine point nine percent of its evasions sit at a merchant that does not exist."
     },
     {
       "id": "s8",

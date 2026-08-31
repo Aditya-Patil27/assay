@@ -59,7 +59,9 @@ export function AgenticPanel({ categories }: { categories: AgenticCategory[] }) 
 
               <p className="mt-3 font-mono text-[11px] text-muted">
                 {c.success_before}/{c.attempts} → {c.success_after}/{c.attempts} ·{" "}
-                <span className="font-semibold text-ink">−{(drop * 100).toFixed(0)}%</span>{" "}
+                <span className="font-semibold text-ink">
+                  {before === 0 ? "no exploits to remove" : `−${(drop * 100).toFixed(0)}%`}
+                </span>{" "}
                 exploit rate
               </p>
 

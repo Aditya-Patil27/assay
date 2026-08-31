@@ -40,15 +40,15 @@ independently and you have produced a transaction that cannot physically occur.
 
 | Round | Attack success rate | Mean features touched (L0) | Median queries per success |
 |---|---|---|---|
-| 0 | 100.0% | 3.81 | 277 |
-| 1 | 100.0% | 4.26 | 298 |
-| 2 | 100.0% | 4.64 | 492 |
+| 0 | 100.0% | 4.12 | 275 |
+| 1 | 100.0% | 4.00 | 291 |
+| 2 | 100.0% | 4.03 | 391 |
 
 *Source: `artifacts/attack/rounds.json`. 400 attacked transactions per round on a
 400,000-row subsample; train 196,001 / validation 84,000 / test 119,999.*
 
 Three rounds of adversarial retraining prevented **zero** evasions. What the defence bought
-is attacker *cost*: +0.83 features touched and +215 median queries by round 2.
+is attacker *cost*, and only on one axis: median queries per success rise 275 → 391 (+116). **Mean features touched does not climb** — 4.12 → 4.03, flat within noise. An earlier revision reported a rise on both axes from a 400,000-row subsample; the full dataset keeps the query cost and removes the L0 one.
 
 **How to say this to a judge.** "The defence makes the attack more expensive, not impossible
 — and we report that rather than tuning until a nicer curve appeared." That is a
@@ -68,13 +68,13 @@ We ran a second attacker against the identical detector with the constraints rem
 | | Constraint-aware | Unconstrained |
 |---|---|---|
 | Attack success rate | 100.0% | 100.0% |
-| Mean features touched | 3.82 | 1.76 |
-| Successes at a merchant that does not exist | 0.0% | **99.5%** |
-| Successes that forged a frozen victim attribute | 0.0% | 3.0% |
+| Mean features touched | 4.12 | 1.88 |
+| Successes at a merchant that does not exist | 0.0% | **99.9%** |
+| Successes that forged a frozen victim attribute | 0.0% | 6.0% |
 
 *Source: `artifacts/attack/feasibility.json`.*
 
-Both attackers report the same headline. **They are not describing the same thing.** 99.5% of
+Both attackers report the same headline. **They are not describing the same thing.** 99.9% of
 the unconstrained attacker's "evasions" are transactions that could not physically occur — a
 merchant category paired with terminal coordinates no merchant occupies. It also wins more
 cheaply, because forging is cheaper than searching.

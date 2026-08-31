@@ -46,11 +46,11 @@ independently and you have produced a transaction that cannot physically occur.
 | | Constraint-aware | Unconstrained |
 |---|---|---|
 | Attack success rate | 100.0% | 100.0% |
-| Mean features touched | 3.82 | 1.76 |
-| At a merchant that does not exist | 0.0% | **99.5%** |
-| Forged a frozen victim attribute | 0.0% | 3.0% |
+| Mean features touched | 4.12 | 1.88 |
+| At a merchant that does not exist | 0.0% | **99.9%** |
+| Forged a frozen victim attribute | 0.0% | 6.0% |
 
-Both attackers report the same headline. **99.5% of the unconstrained attacker's "evasions"
+Both attackers report the same headline. **99.9% of the unconstrained attacker's "evasions"
 are transactions that could not physically occur.** An attack success rate measured without
 constraints is not a hard number that happens to be high — it is not a number at all. This is
 the fidelity claim, demonstrated against our own baseline rather than asserted.
@@ -59,8 +59,8 @@ the fidelity claim, demonstrated against our own baseline rather than asserted.
 
 | Metric | Value |
 |---|---|
-| PR-AUC | 0.9457 |
-| Recall on real fraud | 0.911 |
+| PR-AUC | 0.9472 |
+| Recall on real fraud | 0.916 |
 | Legitimate declines per 100,000 | 114 |
 | **Recall on held-out generated attacks** | **68.9%** (from 0%) |
 | Single-transaction serving latency (ONNX, p50) | 0.035 ms |

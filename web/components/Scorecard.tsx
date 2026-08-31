@@ -6,9 +6,10 @@ const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
  * The terminal node both tracks feed.
  *
  * Strategy 5.2: this table is what converts "two projects in two tabs" into one framework
- * applied twice, so it is read top-to-bottom as a result rather than a dump -- the
- * reduction is the largest number in each row, and the before/after pair is drawn as a
- * bar so the collapse is visible before any digit is read.
+ * applied twice, so it is read top-to-bottom as a result rather than a dump. The
+ * before/after pair is drawn as a bar so each row's movement reads before any digit does --
+ * and on the tabular row there is no movement to read, because attack success is 1.000 both
+ * before and after. That row is a flat pair on purpose; only the agent row reduces.
  */
 export function Scorecard({ rows }: { rows: ScorecardRow[] }) {
   return (

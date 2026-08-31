@@ -347,16 +347,16 @@ per round. Every figure below is read from `artifacts/attack/rounds.json`, which
 
 | Round | Attack success rate | Mean L0 | Median queries per success |
 |---|---|---|---|
-| 0 | 100.0% | 3.81 | 277 |
-| 1 | 100.0% | 4.26 | 298 |
-| 2 | 100.0% | 4.64 | 492 |
+| 0 | 100.0% | 4.12 | 275 |
+| 1 | 100.0% | 4.00 | 291 |
+| 2 | 100.0% | 4.03 | 391 |
 
 **The attack success rate does not fall.** It is 100% at every round. Three rounds of
 adversarial retraining did not prevent a single evasion, and we report that rather than
 tuning until a more flattering curve appeared.
 
 What the defence actually bought is measurable and it is not nothing: the attacker touches
-0.83 more features and spends 215 more model queries per success by round 2. That is a
+116 more model queries per success by round 2, while mean features touched stays flat (4.12 → 4.03). That is a
 defence-in-depth economics result — the attack becomes more expensive, not impossible — and
 it is the same conclusion the project's own stated limitations predicted before the run
 existed.
@@ -512,14 +512,14 @@ coordinates, subject only to observed value bounds.
 | | Constraint-aware | Unconstrained |
 |---|---|---|
 | Attack success rate | 100.0% | 100.0% |
-| Mean features touched (L0) | 3.82 | 1.76 |
-| Successes at a merchant absent from the network | 0.0% | **99.5%** |
-| Successes that forged a frozen victim attribute | 0.0% | 3.0% |
+| Mean features touched (L0) | 4.12 | 1.88 |
+| Successes at a merchant absent from the network | 0.0% | **99.9%** |
+| Successes that forged a frozen victim attribute | 0.0% | 6.0% |
 
 The two attackers report the same headline. They are not describing the same thing.
-**99.5% of the unconstrained attacker's "evasions" are transactions that could not physically
+**99.9% of the unconstrained attacker's "evasions" are transactions that could not physically
 occur** — a merchant category paired with terminal coordinates that no merchant in the network
-occupies. It also reaches that result more cheaply, touching 1.76 features against our 3.82,
+occupies. It also reaches that result more cheaply, touching 1.88 features against our 4.12,
 because forging is cheaper than searching.
 
 Our zeroes in that table are zero by construction rather than by measurement: frozen columns

@@ -136,8 +136,7 @@
       <div class="bar"><div class="vl att">100%</div><div class="col" data-h="300"></div><div class="lb">round 1</div></div>
       <div class="bar"><div class="vl att">100%</div><div class="col" data-h="300"></div><div class="lb">round 2</div></div>
     </div>
-    <p class="sub">What moves is the attacker's <b>cost</b>: 3.81 &rarr; 4.64 features touched,
-      277 &rarr; 492 median queries.</p>
+    <p class="sub">What moves is the attacker's <b>cost</b>: 275 &rarr; 391 median queries (features touched stays flat at ~4.1).</p>
   </section>
 
   <section class="scene" id="s6">
@@ -160,8 +159,8 @@
     <h2>Same 100%. Different thing entirely.</h2>
     <div class="split"><div class="a" id="spa"></div><div class="b" id="spb"></div></div>
     <div class="legend">
-      <span><b class="att">99.5%</b> &nbsp;at a merchant that does not exist</span>
-      <span><b class="def">0.5%</b> &nbsp;physically possible</span>
+      <span><b class="att">99.9%</b> &nbsp;at a merchant that does not exist</span>
+      <span><b class="def">0.1%</b> &nbsp;physically possible</span>
     </div>
     <p class="sub">The unconstrained attacker reports the same headline — and almost all of it
       describes transactions that could never occur.</p>
@@ -200,7 +199,7 @@ const T = [
   ["s4", 10600, [[1800,()=>{ setScore(0.0); }],[3400,()=>fade("s4sub")]]],
   ["s5", 7000, [[400,()=>grow("rounds")]]],
   ["s6", 17200,[[400,()=>grow("sweep")]]],
-  ["s7", 11200, [[600,()=>{ el("spa").style.width="99.5%"; el("spb").style.width="0.5%"; }]]],
+  ["s7", 11200, [[600,()=>{ el("spa").style.width="99.9%"; el("spb").style.width="0.5%"; }]]],
   ["s8", 10200, []],
   ["s9", 5400, []],
 ];

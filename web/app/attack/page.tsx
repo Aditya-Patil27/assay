@@ -46,7 +46,7 @@ export default async function Attack() {
       >
         <Figure
           n={2}
-          caption="Share of successful evasions in each round that touched a given feature, normalised by that round's successes. Raw counts would show every feature declining, because n_success falls by an order of magnitude across rounds."
+          caption="Share of successful evasions in each round that touched a given feature, normalised by that round's successes. Every round succeeds on all 400 attempts, so the normalisation is a rescale rather than a correction here — it is kept so the panel stays readable if a future round ever fails some attempts. Read the movement as the search relocating under pressure, not as the attacker being disarmed."
         >
           <FeatureFrequencyPanel rounds={attack.payload} />
         </Figure>
