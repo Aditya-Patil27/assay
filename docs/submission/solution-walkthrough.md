@@ -312,28 +312,50 @@ the card's last transaction. Each is trivially computed in a way that lets a row
 own future, producing a model that scores superbly and generalises not at all.
 
 Every aggregate in our pipeline is computed causally — sorted by time, using only prior
-transactions for that card. The train/test split is temporal, never randomised.
+transactions for that card. That safeguard holds for every number in this document: features
+are built on the time-ordered frame before any split exists.
+
+**The split itself is where we have to be careful, and we are not fully clean.** Two splits
+appear in this project and they are not equivalent:
+
+- `scripts/run_detect_round0.py` splits **temporally** — later transactions are held out —
+  which is the correct evaluation for fraud and the one we would defend.
+- The unrolled loop splits **stratified at random**. A card's other transactions can then sit
+  on both sides of the split, so the model can learn card-specific behaviour it would not
+  have at deployment. Features are still past-only, so this is not label leakage; it is an
+  easier test set.
+
+The rounds published in section 4.3 come from the loop, so they carry the second, weaker
+split. We say so rather than letting the temporal claim cover both.
 
 **We treat a suspiciously high score as a bug report, not a success.** On this data, anything
-above roughly 0.95 PR-AUC indicates leakage.
+above roughly 0.95 PR-AUC indicates leakage — and the published round-0 figure below is
+0.9472, just under that line. We are reporting a number that sits against our own tripwire,
+on the split most likely to inflate it. Read it accordingly.
 
 ### 4.3 Results
 
-Round 0 detector, gradient-boosted trees, trained on `n_train = 96,000` (a subsample of the
-full corpus):
+Detector rounds from the unrolled loop, on the full 1,852,394-row corpus
+(`n_train = 907,675`, stratified split — see the caveat in 4.2):
 
-| Metric | Value |
-|---|---|
-| **PR-AUC** | **0.829** |
-| ROC-AUC | 0.978 |
-| Precision | 0.718 |
-| Recall | 0.797 |
-| Decision threshold | 0.233 |
+| Round | PR-AUC | ROC-AUC | Precision | Recall | Threshold | Adversarial rows |
+|---|---|---|---|---|---|---|
+| 0 | **0.9472** | 0.9989 | 0.814 | 0.916 | 0.8199 | — |
+| 1 | 0.9390 | 0.9985 | 0.826 | 0.896 | 0.8978 | +800 |
+| 2 | 0.9318 | 0.9982 | 0.823 | 0.890 | 0.9327 | +800 |
 
 PR-AUC is the headline rather than ROC-AUC deliberately. At a 0.521% positive rate, ROC-AUC
-flatters heavily — 0.978 sounds close to perfect and mostly reflects the ease of ranking the
+flatters heavily — 0.9989 sounds close to perfect and mostly reflects the ease of ranking the
 overwhelming negative majority. Precision-recall is the honest view of a needle-in-haystack
-problem, and 0.829 is a credible number rather than a suspicious one.
+problem.
+
+**An earlier revision of this section reported 0.829 at `n_train = 96,000`, from the
+temporally-split round-0 script.** That figure is not in any artifact now. The loop replaced
+it so that all three rounds could be published from one experiment, and the honest cost of
+that choice is the weaker split described above: part of the gap between 0.829 and 0.9472 is
+more training data, and part is a test set that shares cards with the training set. We are
+not able to say how much of each, and we would rather state that than pick the flattering
+reading.
 
 Top features by mean absolute SHAP: transaction amount, merchant category, log amount,
 amount relative to the card's running mean, and hour of day.
@@ -689,8 +711,11 @@ boundaries should not be trusted.
 
 - **The data is synthetic.** Sparkov is generated, not real transaction data. Fraud patterns
   are simpler and cleaner than production traffic.
-- **The detector is trained on a 96,000-row subsample**, not the full 1.85 million. PR-AUC
-  0.829 should be read with that qualifier attached.
+- **The published detector rounds use a stratified random split, not a temporal one.** A
+  card's transactions can appear on both sides, which makes the test set easier than
+  deployment would be. PR-AUC 0.9472 sits just under our own 0.95 leakage tripwire and should
+  be read with that attached. The temporally-split alternative scores 0.829; we publish the
+  loop's rounds because all three exist there, and we flag the trade rather than hiding it.
 - **The constraint model is a judgement call.** Which fields an attacker controls is our
   assessment, informed by how card-not-present fraud works, not a measurement. Different
   assumptions produce different success rates. We have made the assumptions explicit and
