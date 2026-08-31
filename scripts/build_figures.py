@@ -61,11 +61,16 @@ def load(*parts: str):
 
 
 def save(fig, name: str) -> None:
+    """Vector for LaTeX, raster for Word.
+
+    python-docx embeds raster only, and the .docx is the graded artifact -- so a figure
+    that exists solely as a PDF is a figure the judged document cannot show.
+    """
     OUT.mkdir(parents=True, exist_ok=True)
-    path = OUT / f"{name}.pdf"
-    fig.savefig(path)
+    fig.savefig(OUT / f"{name}.pdf")
+    fig.savefig(OUT / f"{name}.png", dpi=200)
     plt.close(fig)
-    print(f"  {name}.pdf")
+    print(f"  {name}.pdf + .png")
 
 
 def fig_coevolution() -> None:

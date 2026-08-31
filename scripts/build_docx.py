@@ -21,7 +21,7 @@ from pathlib import Path
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import Pt, RGBColor
+from docx.shared import Inches, Pt, RGBColor
 
 from adversarial_payments.config import ROOT
 
@@ -96,6 +96,9 @@ def _is_separator(cells: list[str]) -> bool:
     return all(set(c.strip()) <= {"-", ":"} and c.strip() for c in cells)
 
 
+_IMAGE_RE = re.compile(r"^!\[([^\]]*)\]\(([^)]+)\)$")
+
+
 def convert(md: str) -> Document:
     doc = Document()
     _style(doc)
@@ -127,6 +130,31 @@ def convert(md: str) -> Document:
             continue
 
         if stripped == "---":
+            i += 1
+            continue
+
+        # ![caption](figures/x.png) -- its own paragraph, never inline.
+        img = _IMAGE_RE.match(stripped)
+        if img:
+            caption, rel = img.group(1), img.group(2)
+            path = (ROOT / "docs" / "submission" / rel).resolve()
+            if path.exists():
+                doc.add_picture(str(path), width=Inches(6.0))
+                doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                if caption:
+                    cap = doc.add_paragraph()
+                    cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    run = cap.add_run(caption)
+                    run.italic = True
+                    run.font.size = Pt(9)
+                    run.font.color.rgb = RGBColor(0x6B, 0x65, 0x58)
+            else:
+                # A missing figure must be loud, exactly as an unresolved marker is.
+                warn = doc.add_paragraph()
+                r = warn.add_run(f"[MISSING FIGURE: {rel}]")
+                r.bold = True
+                r.font.color.rgb = RGBColor(0xC9, 0x37, 0x2B)
+                print(f"  WARNING: missing figure {rel}", file=sys.stderr)
             i += 1
             continue
 
