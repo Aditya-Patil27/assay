@@ -39,8 +39,29 @@ const LAYER_TONE: Record<string, string> = {
   hitl: "text-warn",
 };
 
+/**
+ * The pair the panel opens on.
+ *
+ * Not the first entry in the corpus. Only 7 of 144 injection/scenario pairs exploit
+ * `gpt-oss-120b` undefended -- the models are already largely resistant, which is itself a
+ * finding -- and the first entry, io-01 on a memo scenario, is not one of them. Opening
+ * there means a visitor runs both conditions, sees nothing happen in either, and concludes
+ * the demo is broken rather than that the model held.
+ *
+ * pm-01 on sc-inv-1 is a confirmed exploit: undefended, the agent rewrites a real
+ * supplier's IBAN to the attacker's, and the ledger diff shows it. Defended, the classifier
+ * redacts the payload and the transfer proceeds normally. The contrast is the whole point of
+ * the panel, so it is what the panel opens on.
+ */
+const OPENING_INJECTION = "pm-01";
+const OPENING_SCENARIO = "sc-inv-1";
+
 export function LiveAgent({ runtime }: { runtime: Pick<AgentRuntime, "scenarios" | "injections"> }) {
-  const [injectionId, setInjectionId] = useState(runtime.injections[0]?.id ?? "");
+  const [injectionId, setInjectionId] = useState(
+    runtime.injections.some((i) => i.id === OPENING_INJECTION)
+      ? OPENING_INJECTION
+      : (runtime.injections[0]?.id ?? ""),
+  );
   const injection = runtime.injections.find((i) => i.id === injectionId) as Injection | undefined;
 
   // Only scenarios that read the channel this injection is planted in; firing a memo
@@ -49,7 +70,9 @@ export function LiveAgent({ runtime }: { runtime: Pick<AgentRuntime, "scenarios"
     () => runtime.scenarios.filter((s) => s.channel === injection?.channel),
     [runtime.scenarios, injection?.channel],
   );
-  const [scenarioId, setScenarioId] = useState(scenarios[0]?.id ?? "");
+  const [scenarioId, setScenarioId] = useState(
+    scenarios.some((s) => s.id === OPENING_SCENARIO) ? OPENING_SCENARIO : (scenarios[0]?.id ?? ""),
+  );
   const scenario = scenarios.find((s) => s.id === scenarioId) ?? scenarios[0];
 
   const [busy, setBusy] = useState<"on" | "off" | null>(null);
