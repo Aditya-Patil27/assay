@@ -1,0 +1,41 @@
+{
+  "url": "https://aditya-patil27.github.io/mastercard-adversarial-payments/",
+  "note": "Scene order is deliberate. The feasibility audit comes second, not last: it is the only genuinely novel result and it lands in thirty seconds. Most teams open with an architecture diagram, which is the forgettable choice. Every number spoken here is read from a committed artifact carrying placeholder:false.",
+  "scenes": [
+    {
+      "id": "hero",
+      "selector": "header",
+      "narration": "This is a constraint aware red team, run against a payment fraud detector trained on one point eight five million real card transactions. Attack success is one hundred percent at every round. We are going to show you why that is the honest number, and not a failure."
+    },
+    {
+      "id": "feasibility",
+      "selector": "#feasibility",
+      "narration": "Here is the result we would most want you to remember. Two attackers, the same detector, the same headline: both report one hundred percent success. But ninety nine point five percent of the unconstrained attacker's evasions sit at a merchant that does not exist. A category paired with terminal coordinates no merchant occupies. Same number. Completely different thing."
+    },
+    {
+      "id": "tabular",
+      "selector": "#tabular",
+      "narration": "Our attacker moves only what a real fraudster controls. The victim's age, home city and job are frozen. Choosing a merchant moves category, terminal latitude, longitude and distance together, because those are four projections of one decision. Here, one transaction scored zero point nine five four. The attacker changed the hour from ten at night to four in the morning, nothing else, and the score fell to zero."
+    },
+    {
+      "id": "coevolution",
+      "selector": "#coevolution",
+      "narration": "Three rounds of adversarial retraining prevented zero evasions. What moved was the attacker's cost: features touched rose from three point eight to four point six, and median queries from two hundred seventy seven to four hundred ninety two. That is a defence in depth economics result, and we report it rather than tuning until a nicer curve appeared."
+    },
+    {
+      "id": "scorecard",
+      "selector": "#scorecard",
+      "narration": "The same loop applied to a second surface: indirect prompt injection against a payment agent. Two independent one hundred twenty billion parameter models, one hundred forty four trials each. Exploit rate fell from four point nine percent to zero, at Fisher p equals zero point zero one five, with zero false refusals on the benign controls. The scorecard row computes that p value itself."
+    },
+    {
+      "id": "graph",
+      "selector": "#graph",
+      "narration": "Attack, measure, defend, re-measure is a cycle, not a directed acyclic graph. It becomes acyclic only when unrolled over rounds, and the feedback edges are drawn dashed so the picture stays honest about that."
+    },
+    {
+      "id": "provenance",
+      "selector": "footer, #agentic",
+      "narration": "Every figure you have seen traces to a committed artifact carrying placeholder false. Nothing is typed into the page. A fake number cannot silently reach a reader, and where we have not measured something, the page says not measured rather than showing you a zero."
+    }
+  ]
+}

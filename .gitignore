@@ -39,3 +39,11 @@ web/.next/
 web/out/
 web/public/data/
 next-env.d.ts
+
+# Demo video: the pipeline is committed, its outputs are not. Regenerate with video/mux.sh.
+video/node_modules/
+video/raw/
+video/audio/
+video/offset.txt
+video/timeline.json
+video/*.mp4
