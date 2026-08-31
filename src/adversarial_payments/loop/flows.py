@@ -65,14 +65,22 @@ def load_frame(sample_rows: int | None = None) -> tuple[pd.DataFrame, bool]:
 
 
 def fit_detector(train_df: pd.DataFrame, *, seed: int) -> Any:
-    """Train a detector. Prefers P1's trainer; falls back to an equivalent XGBoost."""
-    try:
-        from ..detect.train import train_model  # type: ignore[attr-defined]
+    """Train the detector every published round in ``detect/rounds.json`` came from.
 
-        return train_model(train_df)
-    except Exception:  # noqa: BLE001
-        pass
+    This used to open with ``try: from ..detect.train import train_model``, falling through
+    to the configuration below on any failure. ``train_model`` does not exist -- that module
+    exports ``train_round`` -- so the import raised on every call and the fallback ran every
+    time, while the code read as though a different trainer were preferred.
 
+    Nothing was broken by it and no number is wrong because of it. What was wrong is that
+    the source could not tell you which model produced the results: a reader would have
+    concluded the published rounds came from ``detect/train.py`` at n_estimators=400,
+    max_depth=7, lr=0.08, and they came from the values below instead.
+
+    ``detect/train.py`` is still the trainer ``scripts/run_detect_round0.py`` uses, on a
+    temporal split. The two configurations coexist deliberately; what is removed here is the
+    silent try/except that made it impossible to say which one ran.
+    """
     from xgboost import XGBClassifier
 
     y = train_df[TARGET].to_numpy()

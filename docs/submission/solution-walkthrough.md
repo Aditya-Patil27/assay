@@ -258,6 +258,87 @@ Two design decisions worth stating because they materially affect the number:
   Ranking by column count structurally biases the search toward the amount lever and hides
   the attacker's real options.
 
+### 3.5 The red team, the blue team, and how each is initialised
+
+This is a red-team/blue-team challenge and the project is pitched as a closed loop, so this
+section names both teams explicitly, says how the blue team's model is constructed, and
+describes the orchestration layer that lets the two sides choose moves rather than follow a
+script.
+
+**The blue team is the detector plus its operating point.** An XGBoost gradient-boosted
+ensemble, and the
+exact configuration behind every round published in `artifacts/detect/rounds.json`:
+
+| | |
+|---|---|
+| Estimators | 300 |
+| Max depth | 6 |
+| Learning rate | 0.1 |
+| Subsample / colsample | 0.9 / 0.9 |
+| L2 (`reg_lambda`) | 1.0 |
+| `scale_pos_weight` | computed per fit as negatives / positives |
+| Tree method | `hist` |
+| Eval metric | `aucpr` |
+
+`scale_pos_weight` is computed rather than fixed because the positive rate changes as
+adversarial rows are folded in each round; pinning it would quietly re-weight the objective
+between rounds.
+
+The operating point is not part of the model and is chosen separately: the lowest threshold
+whose false-positive rate stays inside `FPR_BUDGET = 0.001`, fitted on a validation slice
+carved from training data before the loop starts. Section 4.2 covers why that slice is
+carved once and what the split costs us.
+
+**One caveat about the configuration above, because the repository contains two.**
+`detect/train.py` builds a detector at 400 estimators, depth 7, learning rate 0.08, and that
+is what `scripts/run_detect_round0.py` trains on a temporal split. The loop uses the values
+in the table. Until today `loop/flows.py` opened with a `try: from ..detect.train import
+train_model` that fell through to its own configuration on failure — and since that module
+exports `train_round` rather than `train_model`, the import raised on every call and the
+fallback ran every time. No number is wrong because of it, but the source implied the
+published rounds came from the other trainer. The dead branch is removed; both
+configurations remain, and which one produced which artifact is now readable.
+
+**The red team is the constraint-aware search of section 3.3**; the blue team's response is
+adversarial retraining, and on the agentic surface the layered controls of section 4.6. Both are measured in section 4.4, where the honest finding is that
+the blue response does not work at any dosage we can afford.
+
+#### The orchestration layer
+
+`src/adversarial_payments/orchestration/` — 697 lines across three modules — exists because
+"we retrained three times" is not co-evolution. Without it the question *"in what sense are
+there two adversaries here rather than one script?"* has no good answer.
+
+- **`repertoire.py`** — the moves each side can play. Six for red (`amount_probe`,
+  `merchant_pivot`, `timing_shift`, `velocity_pacing`, `combined_sweep`, `low_and_slow`) and
+  four for blue (`adversarial_retrain`, `targeted_retrain`, `threshold_tighten`,
+  `retrain_and_tighten`). A red play is a *restricted schema plus an attack config*, which
+  is why the attack engine needs no changes and no knowledge that strategies exist.
+- **`arena.py`** — runs the exchange and records each side's stated reasoning per round, so
+  the transcript shows an actual counter (red pivoting to timing *because* blue hardened
+  amount) rather than the writeup asserting adaptivity.
+- **`orchestrators.py`** — the two agents that select plays.
+
+**Three honesty guards are the point of it, more than the mechanics.**
+
+1. **Saturation.** If the attacker wins essentially every attempt, neither side has a signal
+   to adapt to, and a sequence of moves against a saturated target looks exactly like
+   adaptation without being it. The arena detects that regime and refuses to support an
+   adaptivity claim. **This matters here: attack success is 1.000, so the arena is in
+   precisely the regime it declines to draw conclusions from.**
+2. **Provenance.** A move chosen by the deterministic fallback is labelled `fallback` even
+   though it carries a written rationale. Presenting a rule's rationale as a model's
+   reasoning would be the same species of dishonesty as writing a placeholder into a result
+   file.
+3. A model returning a play that does not exist **falls back rather than being trusted.**
+
+**What we claim for it, and what we do not.** The package is strictly additive: it imports
+`attack/` and `loop/` and modifies neither, so the headline results stand whether or not it
+runs. It is not wired into the published rounds, and no number in section 4 comes from it.
+We report it because it is built and tested, and because the saturation guard is the reason
+we are *not* claiming co-evolution from a flat attack-success curve — a guard that refuses
+to support your own pitch is worth more than one that never fires.
+
 ### 3.4 Three errors worth reporting
 
 An earlier version of our engine reported a 100% attack success rate. It achieved this by
