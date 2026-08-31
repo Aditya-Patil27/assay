@@ -459,6 +459,42 @@ round-0 figure computed under a different split — so the loop's own per-round 
 only in a run log and sits outside the provenance machinery described in section 2. We will
 not quote a number that our own audit cannot vouch for.
 
+**Does the defence detect the generated attacks?** That is the question pillar III actually
+asks, and the loop above does not answer it. The loop asks something harder — after
+retraining, can a *fresh* constraint-aware search find *new* evasions — and the answer is
+always yes. Those are different questions, and conflating them undersells the defence.
+
+So we measured the pillar's question directly. Attack the round-0 detector, split the
+successful evasions in half, retrain on one half only, and score the half the model has never
+seen. The split is the load-bearing part: folding every adversarial row into training and then
+reporting recall on those same rows measures memorisation, which is the same species of error
+as fitting a threshold on the test split.
+
+| | Before retraining | After retraining |
+|---|---|---|
+| **Recall on held-out adversarial attacks** | 0.0% | **68.9%** |
+| Recall on the adversarial rows it trained on | — | 100.0% *(memorisation ceiling)* |
+| Recall on real fraud | 89.3% | 87.9% |
+| PR-AUC | 0.9291 | 0.9214 |
+| Legitimate declines per 100,000 | 114 | 94 |
+
+*Source: `artifacts/attack/adversarial_detection.json`. 566 successful evasions, split
+283 / 283.*
+
+**The defence detects 69% of generated attacks it has never seen, at a cost of 1.4 points of
+real-fraud recall — and it declines fewer legitimate payments than before, not more.** The
+100% figure on the rows it trained on is reported beside it deliberately: it is the ceiling
+memorisation would produce, and the gap between 100% and 68.9% is how much of the result is
+generalisation rather than recall of specific rows.
+
+**Both of these are true at once, and the pair is the finding.** Adversarial retraining
+generalises *within* the attack distribution — it learns something transferable about how
+these evasions are shaped. It does not survive an attacker who re-searches against the new
+model, which is why attack success returns to 1.000 in the loop. A defence can be genuinely
+effective against replayed and near-neighbour attacks while being worthless against an
+adaptive adversary, and a submission that reported only one of those numbers would be
+misleading in whichever direction it chose.
+
 **A worked example, round 0.** Transaction `txn_25311` scored 0.954 under the detector. The
 attacker changed exactly one feature — the hour, from 22:00 to 04:00 — and the score fell to
 0.000. No amount was altered, no merchant substituted, nothing frozen was forged. A single
