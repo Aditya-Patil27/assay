@@ -356,35 +356,47 @@ Two things follow that we would rather state than have asked.
 
 **We tested the dosage explanation, and it is wrong.**
 
-The obvious objection to the table above is that 400 adversarial rows in 196,001 is a 0.2%
-dosage, too small to expect anything. We swept it rather than asserting it: each arm reruns
-the loop with adversarial rows carrying `sample_weight = w`, over a range wide enough that
-at the top the adversarial rows outweigh the entire legitimate training set.
+The obvious objection to the table above is that a few hundred adversarial rows against a
+training set of that size is a fraction of a percent, too small a dosage to expect anything.
+We swept it rather than asserting it. Each arm reruns the loop with adversarial rows carrying
+`sample_weight = w`, over a range wide enough that at the top they outweigh the entire
+legitimate training set, and the sweep runs on the **full 1,852,394-row dataset** — train
+907,675 / validation 389,002 / test 555,717, 800 attacked transactions per round.
 
-| Adversarial weight | Final ASR | Final PR-AUC |
-|---|---|---|
-| 1 | **0.982** | 0.9256 |
-| 10 | 1.000 | 0.9051 |
-| 50 | 0.995 | 0.8964 |
-| 200 | 1.000 | 0.8825 |
-| 1000 | 0.998 | 0.8667 |
-| 5000 | 0.996 | 0.8524 |
+| Adversarial weight | Final ASR | Final PR-AUC | Final recall |
+|---|---|---|---|
+| — (round 0, no defence) | 1.000 | 0.9457 | 0.911 |
+| 1 | 1.000 | 0.9304 | 0.883 |
+| 10 | 1.000 | 0.9020 | 0.844 |
+| 50 | 1.000 | 0.8753 | 0.809 |
+| 200 | 1.000 | 0.8357 | 0.764 |
+| 1000 | 1.000 | 0.8078 | 0.706 |
+| 5000 | 1.000 | 0.7343 | 0.609 |
 
-*Source: `artifacts/attack/dosage_sweep.json`. 800 attacked transactions per round, three
-rounds per arm, 400,000 rows.*
+*Source: `artifacts/attack/dosage_sweep.json`. Round 0 is shared across arms by construction —
+the weight only applies from round 1 — which is why every arm starts from the same detector.*
 
-Raising the dosage by a factor of **5000 changed attack success from 1.000 to 0.996 and cost
-8.1% of PR-AUC.** The lowest attack success in the whole sweep, 0.982, occurs at weight 1 —
-the *smallest* dosage tested. Dosage and defence are not merely uncorrelated here; across the
-range they run in opposite directions, because heavier weighting degrades the detector faster
-than it teaches it.
+**Attack success is 1.000 in every arm and every round. Not one of the eighteen measurements
+moved.** Raising the dosage by a factor of 5000 bought exactly nothing, and cost **22.3% of
+PR-AUC and a third of recall** — 0.911 down to 0.609. The detector is being destroyed at a
+rate the attacker never notices.
+
+The mechanism is visible in the threshold column of the artifact. At weight 5000 the
+operating threshold is driven to 0.99966: weighting the adversarial rows that heavily makes
+the model so confident on everything else that the fixed false-positive budget has almost
+nowhere to sit. We degraded the detector into uselessness and the attacker still won every
+attempt.
 
 So the explanation we offered in an earlier revision of this document — that the defence
 looked ineffective only because the dosage was small — is refuted by our own experiment. The
 supportable claim is narrower and less comfortable: **against a constraint-aware attacker
 that re-searches after every retrain, adversarial retraining does not work at any dosage we
-can afford.** Retraining on a few hundred specific evasions cannot cover the feasible region
-the attacker searches next round; it can only overfit to the points it was given.
+can afford.** Retraining on a bounded set of specific evasions cannot cover the feasible
+region the attacker searches next round; it can only overfit to the points it was given.
+
+*An earlier revision of this section reported this sweep on a 400,000-row subsample, where
+one arm dipped to 0.982. That dip does not survive the full dataset, and we report the full
+run rather than the subsample that happened to contain a more interesting number.*
 
 That is a real result about adversarial retraining under an adaptive threat model, and it is
 worth more to a reader than the falling curve we set out to produce.

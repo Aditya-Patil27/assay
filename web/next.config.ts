@@ -15,14 +15,14 @@ import type { NextConfig } from "next";
  *
  * assetPrefix and basePath are gone with it: those existed for GitHub Pages' subpath, and
  * this deploys to a domain root.
+ *
+ * The tabular detector no longer needs a WASM runtime either: lib/trees.ts walks the
+ * exported ensemble directly, so the browser downloads 174KB of model instead of 3.2MB
+ * of onnxruntime plus a graph.
  */
 const nextConfig: NextConfig = {
   // Pin the workspace root; without it Turbopack walks up and finds a stray lockfile.
   turbopack: { root: path.join(__dirname) },
-  // onnxruntime-web ships .wasm binaries that must not be parsed as modules.
-  outputFileTracingIncludes: {
-    "/**": ["./public/models/**"],
-  },
 };
 
 export default nextConfig;

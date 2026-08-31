@@ -36,9 +36,9 @@
 >
 > **The dosage explanation was tested and refuted.** A sweep of the adversarial training
 > weight () shows that raising the dosage 5000x moves
-> attack success from 1.000 to 0.996 while costing 8.1% of PR-AUC. The lowest ASR in the
-> sweep, 0.982, is at the *smallest* dosage. Adversarial retraining does not beat this
-> attacker at any dosage we can afford.
+> attack success **not at all** — it is 1.000 in every arm and every round across the full
+> 1.85M-row dataset — while costing 22.3% of PR-AUC and a third of recall (0.911 to 0.609).
+> Adversarial retraining does not beat this attacker at any dosage we can afford.
 >
 > ⚠️ **Per-round PR-AUC is not yet quotable.** The loop does not write `detect/rounds.json`
 > (that file is the detector owner's, and holds a round-0 figure computed under a *different*

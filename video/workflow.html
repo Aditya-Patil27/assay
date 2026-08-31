@@ -144,15 +144,15 @@
     <div class="kicker">We tested our own excuse</div>
     <h2>“The dosage was too small” — refuted</h2>
     <div class="bars" id="sweep">
-      <div class="bar"><div class="vl def">0.9256</div><div class="col" data-h="316" style="background:var(--defend)"></div><div class="lb">w=1</div></div>
-      <div class="bar"><div class="vl def">0.9051</div><div class="col" data-h="309" style="background:var(--defend)"></div><div class="lb">w=10</div></div>
-      <div class="bar"><div class="vl def">0.8964</div><div class="col" data-h="306" style="background:var(--defend)"></div><div class="lb">w=50</div></div>
-      <div class="bar"><div class="vl def">0.8825</div><div class="col" data-h="301" style="background:var(--defend)"></div><div class="lb">w=200</div></div>
-      <div class="bar"><div class="vl def">0.8667</div><div class="col" data-h="296" style="background:var(--defend)"></div><div class="lb">w=1000</div></div>
-      <div class="bar"><div class="vl def">0.8524</div><div class="col" data-h="291" style="background:var(--defend)"></div><div class="lb">w=5000</div></div>
+      <div class="bar"><div class="vl def">0.9457</div><div class="col" data-h="320" style="background:var(--defend)"></div><div class="lb">none</div></div>
+      <div class="bar"><div class="vl def">0.9304</div><div class="col" data-h="315" style="background:var(--defend)"></div><div class="lb">w=1</div></div>
+      <div class="bar"><div class="vl def">0.9020</div><div class="col" data-h="305" style="background:var(--defend)"></div><div class="lb">w=10</div></div>
+      <div class="bar"><div class="vl def">0.8753</div><div class="col" data-h="296" style="background:var(--defend)"></div><div class="lb">w=50</div></div>
+      <div class="bar"><div class="vl def">0.8357</div><div class="col" data-h="283" style="background:var(--warn)"></div><div class="lb">w=200</div></div>
+      <div class="bar"><div class="vl def">0.8078</div><div class="col" data-h="273" style="background:var(--warn)"></div><div class="lb">w=1000</div></div>
+      <div class="bar"><div class="vl att">0.7343</div><div class="col" data-h="248" style="background:var(--attack)"></div><div class="lb">w=5000</div></div>
     </div>
-    <p class="sub">5000&times; the dosage: attack success 1.000 &rarr; 0.996,
-      PR-AUC <span class="att">&minus;8.1%</span>. Heavier weighting breaks the detector faster than it teaches it.</p>
+    <p class="sub">5000&times; the dosage bought <b class="att">nothing</b> — attack success stayed 1.000 in all 18 measurements — and cost <span class="att">22.3% of PR-AUC</span> and a third of recall. Full 1.85M dataset.</p>
   </section>
 
   <section class="scene" id="s7">
@@ -199,7 +199,7 @@ const T = [
   ["s3", 11600, []],
   ["s4", 10600, [[1800,()=>{ setScore(0.0); }],[3400,()=>fade("s4sub")]]],
   ["s5", 7000, [[400,()=>grow("rounds")]]],
-  ["s6", 13900,[[400,()=>grow("sweep")]]],
+  ["s6", 17200,[[400,()=>grow("sweep")]]],
   ["s7", 11200, [[600,()=>{ el("spa").style.width="99.5%"; el("spb").style.width="0.5%"; }]]],
   ["s8", 10200, []],
   ["s9", 5400, []],

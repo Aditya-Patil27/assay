@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { scoreRow, type TreeModel } from "@/lib/trees";
 import type { FeatureSchema, LiveSamples } from "@/lib/types";
 
 /**
@@ -18,8 +19,6 @@ import type { FeatureSchema, LiveSamples } from "@/lib/types";
  * observed band, keep the single change that drops p(fraud) most, and repeat until the
  * score falls under the operating threshold or the sparsity budget runs out.
  */
-
-type Ort = typeof import("onnxruntime-web/wasm");
 
 /** Mirrors AttackConfig: a 9-point sweep per feature and an L0 budget. */
 const GRID = 9;
@@ -50,8 +49,7 @@ export function LiveDetector({
   const [steps, setSteps] = useState<Step[]>([]);
   const [running, setRunning] = useState(false);
 
-  const sessionRef = useRef<import("onnxruntime-web").InferenceSession | null>(null);
-  const ortRef = useRef<Ort | null>(null);
+  const modelRef = useRef<TreeModel | null>(null);
 
   const frozen = useMemo(() => new Set(schema.frozen), [schema.frozen]);
   const coupled = useMemo(() => new Set(schema.coupled_groups.flat()), [schema.coupled_groups]);
@@ -64,61 +62,28 @@ export function LiveDetector({
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      try {
-        const ort = await import("onnxruntime-web/wasm");
-        // Served from public/ort, not a CDN -- a judged demo must not depend on a third
-        // party being reachable from the venue's network.
-        ort.env.wasm.wasmPaths = "/ort/";
-        ort.env.wasm.numThreads = 1;
-        const session = await ort.InferenceSession.create("/models/detector_round0.onnx", {
-          executionProviders: ["wasm"],
-        });
+    fetch("/data/detector_trees.json")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d) => {
         if (cancelled) return;
-        ortRef.current = ort;
-        sessionRef.current = session;
+        modelRef.current = d.payload as TreeModel;
         setReady(true);
-      } catch (e) {
+      })
+      .catch((e) => {
         if (!cancelled) setError(e instanceof Error ? e.message : String(e));
-      }
-    })();
+      });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  /** One forward pass. Returns p(fraud). */
+  /** One forward pass. Synchronous now -- it is 400 tree walks, not a runtime call. */
   const score = useCallback(
     async (v: Record<string, number>): Promise<number> => {
-      const session = sessionRef.current;
-      const ort = ortRef.current;
-      if (!session || !ort) return Number.NaN;
-
-      const input = new ort.Tensor(
-        "float32",
-        Float32Array.from(features.map((f) => v[f] ?? 0)),
-        [1, features.length],
-      );
-      const out = await session.run({ [session.inputNames[0]]: input });
-
-      // The exporter emits a ZipMap, so probabilities arrive either as a sequence of maps
-      // or as a plain [1,2] tensor depending on the runtime build. Handle both rather
-      // than assuming one and silently reading the label instead of the score.
-      for (const name of session.outputNames) {
-        const o = out[name] as unknown;
-        if (Array.isArray(o) && o.length && o[0] instanceof Map) {
-          const m = o[0] as Map<number, number>;
-          const got = m.get(1);
-          if (typeof got === "number") return got;
-        }
-        const t = o as { data?: ArrayLike<number>; dims?: readonly number[] };
-        if (t?.data && t.dims && t.dims[t.dims.length - 1] === 2) {
-          return Number(t.data[1]);
-        }
-      }
-      return Number.NaN;
+      const m = modelRef.current;
+      return m ? scoreRow(m, v) : Number.NaN;
     },
-    [features],
+    [],
   );
 
   // Rescore whenever the transaction changes.
@@ -282,7 +247,7 @@ export function LiveDetector({
         <div className="card border border-rule p-5">
           <p className="text-[0.8125rem] text-muted">Detector score</p>
           {!ready ? (
-            <p className="mt-3 font-mono text-sm text-muted">loading the ONNX graph…</p>
+            <p className="mt-3 font-mono text-sm text-muted">loading the detector…</p>
           ) : (
             <>
               <p

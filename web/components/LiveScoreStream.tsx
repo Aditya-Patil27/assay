@@ -2,21 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { scoreRow, type TreeModel } from "@/lib/trees";
 import type { LiveSamples } from "@/lib/types";
 
 /**
  * The hero, scoring real transactions in front of the reader.
  *
- * The site's problem was never that it was inaccurate -- it was that it was inert. Every
- * page rendered a run that had already finished, so the first thing a visitor met was a
- * picture of a result. This is the result happening: real rows out of the corpus, scored
- * by models/detector_round0.onnx running on WASM in this tab, at the latency /system
- * reports.
+ * The site's problem was never accuracy, it was that it was inert: every route rendered a
+ * run that had already finished, so the first thing a visitor met was a picture of a
+ * result. This is the result happening -- real rows from the held-out split, scored by the
+ * trained detector, in this tab.
  *
- * Nothing here is simulated. The rows come from the chronological test split with their
- * true labels, the scores are the model's, and the timing is measured with
- * performance.now() on the actual forward passes -- which is why the throughput figure
- * settles near the p50 on the system page rather than at a number chosen to look good.
+ * It used to load onnxruntime-web to do this, which meant 3.2MB of WASM on the wire before
+ * the landing page could show anything. The model is 400 boosted trees; lib/trees.ts walks
+ * them directly in 174KB, synchronously, and check_tree_port.py proves the answers are the
+ * ONNX graph's to within 1.7e-7.
  */
 
 interface Row {
@@ -24,120 +24,73 @@ interface Row {
   amt: number;
   isFraud: boolean;
   p: number;
-  ms: number;
 }
 
 const TICK_MS = 420;
 const VISIBLE = 7;
 
 export function LiveScoreStream({ samples }: { samples: LiveSamples }) {
-  const { threshold, features, stream } = samples;
+  const { threshold, stream } = samples;
 
+  const [model, setModel] = useState<TreeModel | null>(null);
+  const [failed, setFailed] = useState(false);
   const [rows, setRows] = useState<Row[]>([]);
   const [scored, setScored] = useState(0);
   const [flagged, setFlagged] = useState(0);
-  const [medianMs, setMedianMs] = useState<number | null>(null);
-  const [ready, setReady] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [medianUs, setMedianUs] = useState<number | null>(null);
 
-  const sessionRef = useRef<import("onnxruntime-web").InferenceSession | null>(null);
-  const ortRef = useRef<typeof import("onnxruntime-web/wasm") | null>(null);
   const cursor = useRef(0);
   const timings = useRef<number[]>([]);
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      try {
-        const ort = await import("onnxruntime-web/wasm");
-        ort.env.wasm.wasmPaths = "/ort/";
-        ort.env.wasm.numThreads = 1;
-        const session = await ort.InferenceSession.create("/models/detector_round0.onnx", {
-          executionProviders: ["wasm"],
-        });
-        if (cancelled) return;
-        ortRef.current = ort;
-        sessionRef.current = session;
-        setReady(true);
-      } catch {
-        // The hero must never be the reason the page looks broken. If WASM will not load
-        // -- an old browser, a blocked binary -- the panel quietly shows the corpus
-        // instead of pretending to score it.
+    fetch("/data/detector_trees.json")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d) => {
+        if (!cancelled) setModel(d.payload as TreeModel);
+      })
+      .catch(() => {
+        // The hero must never be why the page looks broken.
         if (!cancelled) setFailed(true);
-      }
-    })();
+      });
     return () => {
       cancelled = true;
     };
   }, []);
 
   useEffect(() => {
-    if (!ready || !stream?.length) return;
-    // Honour the reader's motion preference: a hero that animates against an explicit
-    // system setting is not a good hero.
-    const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (!model || !stream?.length) return;
 
-    let stopped = false;
-
-    const scoreOne = async () => {
-      const session = sessionRef.current;
-      const ort = ortRef.current;
-      if (!session || !ort || stopped) return;
-
+    const tick = () => {
       const txn = stream[cursor.current % stream.length];
       cursor.current += 1;
 
-      const input = new ort.Tensor(
-        "float32",
-        Float32Array.from(features.map((f) => txn.values[f] ?? 0)),
-        [1, features.length],
-      );
-
       const t0 = performance.now();
-      const out = await session.run({ [session.inputNames[0]]: input });
-      const ms = performance.now() - t0;
+      const p = scoreRow(model, txn.values);
+      const us = (performance.now() - t0) * 1000;
 
-      let p = Number.NaN;
-      for (const name of session.outputNames) {
-        const o = out[name] as unknown;
-        if (Array.isArray(o) && o.length && o[0] instanceof Map) {
-          const got = (o[0] as Map<number, number>).get(1);
-          if (typeof got === "number") p = got;
-        }
-        const t = o as { data?: ArrayLike<number>; dims?: readonly number[] };
-        if (Number.isNaN(p) && t?.data && t.dims && t.dims[t.dims.length - 1] === 2) {
-          p = Number(t.data[1]);
-        }
-      }
-      if (stopped) return;
-
-      timings.current.push(ms);
+      timings.current.push(us);
       if (timings.current.length > 200) timings.current.shift();
       const sorted = [...timings.current].sort((a, b) => a - b);
-      setMedianMs(sorted[Math.floor(sorted.length / 2)]);
+      setMedianUs(sorted[Math.floor(sorted.length / 2)]);
 
-      setRows((r) => [{ id: txn.id, amt: txn.amt, isFraud: !!txn.is_fraud, p, ms }, ...r].slice(0, VISIBLE));
+      setRows((r) =>
+        [{ id: txn.id, amt: txn.amt, isFraud: !!txn.is_fraud, p }, ...r].slice(0, VISIBLE),
+      );
       setScored((n) => n + 1);
       if (p >= threshold) setFlagged((n) => n + 1);
     };
 
-    if (still) {
-      // Reduced motion: fill the panel once and stop, so it is still a real result.
-      (async () => {
-        for (let i = 0; i < VISIBLE; i += 1) await scoreOne();
-      })();
-      return () => {
-        stopped = true;
-      };
+    // Honour the reader's motion preference: fill once and hold, still a real result.
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      for (let i = 0; i < VISIBLE; i += 1) tick();
+      return;
     }
 
-    void scoreOne();
-    const id = setInterval(scoreOne, TICK_MS);
-    return () => {
-      stopped = true;
-      clearInterval(id);
-    };
-  }, [ready, stream, features, threshold]);
+    tick();
+    const id = setInterval(tick, TICK_MS);
+    return () => clearInterval(id);
+  }, [model, stream, threshold]);
 
   const money = (n: number) =>
     n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -147,21 +100,17 @@ export function LiveScoreStream({ samples }: { samples: LiveSamples }) {
       <div className="flex items-baseline justify-between gap-3">
         <p className="flex items-center gap-2 text-[0.75rem] font-medium text-night-muted">
           <span
-            className={`inline-block h-1.5 w-1.5 rounded-full ${ready ? "animate-pulse bg-defend-fill" : "bg-night-rule"}`}
+            className={`inline-block h-1.5 w-1.5 rounded-full ${model ? "animate-pulse bg-defend-fill" : "bg-night-rule"}`}
             aria-hidden="true"
           />
-          {failed
-            ? "Detector unavailable in this browser"
-            : ready
-              ? "Scoring live in your browser"
-              : "Loading the detector…"}
+          {failed ? "Detector unavailable" : model ? "Scoring live in your browser" : "Loading…"}
         </p>
         <p className="tnum font-mono text-[0.6875rem] text-night-muted">
-          {medianMs !== null ? `${medianMs.toFixed(3)} ms median` : "—"}
+          {medianUs !== null ? `${medianUs.toFixed(0)} µs median` : "—"}
         </p>
       </div>
 
-      <ol className="mt-4 space-y-1.5" aria-live="off">
+      <ol className="mt-4 space-y-1.5">
         {rows.length === 0
           ? Array.from({ length: VISIBLE }).map((_, i) => (
               <li key={i} className="h-[30px] rounded-[5px] bg-night/60" aria-hidden="true" />
@@ -193,7 +142,9 @@ export function LiveScoreStream({ samples }: { samples: LiveSamples }) {
                   </span>
                   <span
                     className={`w-[52px] shrink-0 rounded-[3px] px-1.5 py-0.5 text-center text-[0.625rem] font-medium ${
-                      isFlagged ? "bg-attack-fill/20 text-attack-dim" : "bg-defend-fill/15 text-defend-dim"
+                      isFlagged
+                        ? "bg-attack-fill/20 text-attack-dim"
+                        : "bg-defend-fill/15 text-defend-dim"
                     }`}
                   >
                     {isFlagged ? "FLAG" : "PASS"}
@@ -213,16 +164,14 @@ export function LiveScoreStream({ samples }: { samples: LiveSamples }) {
           <dt className="text-[0.6875rem] text-night-muted">flagged</dt>
         </div>
         <div>
-          <dd className="tnum display text-[1.25rem] text-defend-dim">
-            {stream?.length ?? 0}
-          </dd>
+          <dd className="tnum display text-[1.25rem] text-defend-dim">{stream?.length ?? 0}</dd>
           <dt className="text-[0.6875rem] text-night-muted">real rows in rotation</dt>
         </div>
       </dl>
 
       <p className="mt-3 text-[0.6875rem] leading-relaxed text-night-muted">
-        Real transactions from the held-out split, scored by the exported ONNX graph on WASM.
-        No server, no mock — the timing above is measured on these forward passes.
+        Real transactions from the held-out split, scored by the trained detector walking its
+        own 400 trees — no server and no inference runtime. Timing measured on these calls.
       </p>
     </div>
   );
