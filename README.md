@@ -35,7 +35,7 @@
 > and the repo says so everywhere rather than implying a collapse it did not measure.
 >
 > **The defence does detect the generated attacks — 68.9% of ones it has never seen**
-> (), at a cost of 1.4 points of real-fraud
+> (`artifacts/attack/adversarial_detection.json`), at a cost of 1.4 points of real-fraud
 > recall and *fewer* false positives than before. That sits alongside the ASR result rather
 > than contradicting it: adversarial retraining generalises within the attack distribution,
 > and still does not survive an attacker who re-searches against the new model.
