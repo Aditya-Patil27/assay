@@ -1,0 +1,52 @@
+{
+  "note": "Durations mirror the timeline in workflow.html. Lines are written SHORT on purpose: a synthetic voice grates in proportion to how long it talks, and the animation already carries the detail on screen. Each clip is padded or trimmed to its scene length so audio and video cannot drift.",
+  "voice": "Microsoft Zira Desktop",
+  "rate": 1,
+  "scenes": [
+    {
+      "id": "s1",
+      "seconds": 4.2,
+      "text": "A constraint aware red team against a payment fraud detector."
+    },
+    {
+      "id": "s2",
+      "seconds": 11.4,
+      "text": "One loop. Train a detector. Attack it. Retrain on the evasions. Repeat. Round two's detector is what round three's attacker faces."
+    },
+    {
+      "id": "s3",
+      "seconds": 11.6,
+      "text": "The attacker moves only what a real fraudster controls. The victim's attributes are frozen. Merchant choice moves four features at once. Amount and timing are the real levers."
+    },
+    {
+      "id": "s4",
+      "seconds": 10.6,
+      "text": "One transaction scored zero point nine five four. Change the hour from ten at night to four in the morning. Nothing else. The score falls to zero."
+    },
+    {
+      "id": "s5",
+      "seconds": 7.0,
+      "text": "Three rounds of adversarial retraining prevented zero evasions. What moved was the attacker's cost."
+    },
+    {
+      "id": "s6",
+      "seconds": 13.9,
+      "text": "We tested our own excuse. Five thousand times the dosage moved attack success from one point zero zero zero to zero point nine nine six, and cost eight percent of detection quality. The dosage explanation is refuted."
+    },
+    {
+      "id": "s7",
+      "seconds": 11.2,
+      "text": "Here is why that hundred percent means something. An unconstrained attacker reports the same number. Ninety nine point five percent of its evasions sit at a merchant that does not exist."
+    },
+    {
+      "id": "s8",
+      "seconds": 10.2,
+      "text": "Two attack surfaces, one scorecard. On the payment agent, exploit rate fell to zero, significant at p equals zero point zero one five."
+    },
+    {
+      "id": "s9",
+      "seconds": 5.4,
+      "text": "Every number traces to a committed artifact. Nothing here is typed in."
+    }
+  ]
+}

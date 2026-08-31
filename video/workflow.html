@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Adversarial Payments — workflow</title>
+<style>
+  /* Every figure below is read from a committed artifact carrying placeholder:false.
+     Nothing here is illustrative. If a number changes, this file changes with it. */
+  :root{
+    --bg:#080a0f; --panel:#11151f; --line:#232a39;
+    --text:#e8edf7; --muted:#8b97ad;
+    --attack:#ff4d5e; --defend:#22d3a6; --warn:#f5b544;
+    --mono:'Cascadia Code','SF Mono',Consolas,monospace;
+    --sans:'Segoe UI',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans)}
+  .stage{position:relative;width:1920px;height:1080px}
+
+  .scene{position:absolute;inset:0;opacity:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:0 140px}
+  .scene.on{opacity:1}
+
+  .kicker{font-family:var(--mono);font-size:20px;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:26px}
+  h1{font-size:104px;font-weight:700;letter-spacing:-.03em;line-height:1.02;text-align:center}
+  h2{font-size:64px;font-weight:650;letter-spacing:-.02em;text-align:center;line-height:1.1}
+  .sub{margin-top:26px;font-size:30px;color:var(--muted);text-align:center;max-width:1250px;line-height:1.45}
+  .big{font-family:var(--mono);font-size:150px;font-weight:700;letter-spacing:-.04em}
+  .att{color:var(--attack)} .def{color:var(--defend)} .wrn{color:var(--warn)}
+
+  /* pipeline */
+  .pipe{display:flex;align-items:center;gap:34px;margin-top:70px}
+  .node{background:var(--panel);border:2px solid var(--line);border-radius:18px;
+    padding:30px 40px;text-align:center;min-width:250px;transform:scale(.9);opacity:.25}
+  .node .t{font-size:27px;font-weight:650}
+  .node .s{font-family:var(--mono);font-size:19px;color:var(--muted);margin-top:10px}
+  .node.lit{opacity:1;transform:scale(1);border-color:var(--defend);
+    box-shadow:0 0 60px -12px var(--defend)}
+  .node.hot{opacity:1;transform:scale(1);border-color:var(--attack);
+    box-shadow:0 0 60px -12px var(--attack)}
+  .arrow{font-size:40px;color:var(--line)}
+  .arrow.lit{color:var(--defend)}
+
+  /* feature tiers */
+  .tiers{display:flex;gap:30px;margin-top:64px}
+  .tier{background:var(--panel);border:2px solid var(--line);border-radius:18px;padding:34px 40px;width:490px}
+  .tier h3{font-family:var(--mono);font-size:22px;letter-spacing:.12em;margin-bottom:20px}
+  .tier li{list-style:none;font-family:var(--mono);font-size:23px;color:var(--muted);
+    padding:8px 0;border-bottom:1px solid var(--line)}
+  .tier li:last-child{border:0}
+  .lock{color:var(--attack)} .grp{color:var(--warn)} .mut{color:var(--defend)}
+
+  /* score meter */
+  .meter{width:1100px;height:34px;background:var(--panel);border:2px solid var(--line);
+    border-radius:999px;overflow:hidden;margin-top:54px}
+  .fill{height:100%;background:linear-gradient(90deg,var(--defend),var(--attack));width:95.4%}
+  .readout{font-family:var(--mono);font-size:64px;margin-top:32px}
+
+  /* bars */
+  .bars{display:flex;align-items:flex-end;gap:26px;height:340px;margin-top:60px}
+  .bar{width:150px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+  .bar .col{width:100%;background:var(--attack);border-radius:10px 10px 0 0;height:0}
+  .bar .lb{font-family:var(--mono);font-size:20px;color:var(--muted);margin-top:14px}
+  .bar .vl{font-family:var(--mono);font-size:22px;margin-bottom:10px}
+
+  /* split bar */
+  .split{width:1250px;height:74px;display:flex;border-radius:14px;overflow:hidden;margin-top:56px;border:2px solid var(--line)}
+  .split .a{background:var(--attack);width:0}
+  .split .b{background:var(--defend);width:0}
+  .legend{display:flex;gap:60px;margin-top:30px;font-family:var(--mono);font-size:25px;color:var(--muted)}
+
+  /* scorecard */
+  table{margin-top:56px;border-collapse:collapse;font-size:29px}
+  th,td{padding:22px 40px;border-bottom:1px solid var(--line);text-align:left}
+  th{font-family:var(--mono);font-size:20px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+  td.m{font-family:var(--mono)}
+
+  .foot{position:absolute;bottom:52px;font-family:var(--mono);font-size:19px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <section class="scene" id="s1">
+    <div class="kicker">Mastercard Innovation Challenge 2026</div>
+    <h1>Adversarial Payments<br/>Framework</h1>
+    <p class="sub">A constraint-aware red team against a payment fraud detector —
+      and an audit that says which attack numbers are real.</p>
+  </section>
+
+  <section class="scene" id="s2">
+    <div class="kicker">The pipeline</div>
+    <h2>One loop, unrolled over rounds</h2>
+    <div class="pipe">
+      <div class="node" id="n1"><div class="t">Transactions</div><div class="s">1,852,394 real</div></div>
+      <div class="arrow" id="a1">&rarr;</div>
+      <div class="node" id="n2"><div class="t">Detector</div><div class="s">XGBoost · PR-AUC 0.93</div></div>
+      <div class="arrow" id="a2">&rarr;</div>
+      <div class="node" id="n3"><div class="t">Red team</div><div class="s">constrained search</div></div>
+      <div class="arrow" id="a3">&rarr;</div>
+      <div class="node" id="n4"><div class="t">Retrain</div><div class="s">on the evasions</div></div>
+    </div>
+    <p class="sub" id="s2sub" style="opacity:0">…and the output of Retrain becomes the next round's Detector.</p>
+  </section>
+
+  <section class="scene" id="s3">
+    <div class="kicker">The constraint contract</div>
+    <h2>Move only what an attacker controls</h2>
+    <div class="tiers">
+      <div class="tier"><h3 class="lock">FROZEN</h3>
+        <li>age, gender</li><li>home_lat, home_long</li><li>job, city_pop</li>
+        <li style="color:var(--attack)">inherited from the victim</li></div>
+      <div class="tier"><h3 class="grp">COUPLED</h3>
+        <li>category_enc</li><li>merch_lat, merch_long</li><li>distance_km</li>
+        <li style="color:var(--warn)">one merchant = one move</li></div>
+      <div class="tier"><h3 class="mut">MUTABLE</h3>
+        <li>amt, log_amt</li><li>hour, day_of_week</li><li>txn_count_1h / 24h</li>
+        <li style="color:var(--defend)">the real levers</li></div>
+    </div>
+  </section>
+
+  <section class="scene" id="s4">
+    <div class="kicker">One transaction · txn_25311</div>
+    <h2 id="s4h">Change the hour. Nothing else.</h2>
+    <div class="meter"><div class="fill" id="fill"></div></div>
+    <div class="readout">fraud score <span id="score" class="att">0.954</span></div>
+    <p class="sub" id="s4sub" style="opacity:0">22:00 &rarr; 04:00. No amount altered. No merchant substituted. Nothing frozen forged.</p>
+  </section>
+
+  <section class="scene" id="s5">
+    <div class="kicker">Three rounds of adversarial retraining</div>
+    <h2>Attack success does not fall</h2>
+    <div class="bars" id="rounds">
+      <div class="bar"><div class="vl att">100%</div><div class="col" data-h="300"></div><div class="lb">round 0</div></div>
+      <div class="bar"><div class="vl att">100%</div><div class="col" data-h="300"></div><div class="lb">round 1</div></div>
+      <div class="bar"><div class="vl att">100%</div><div class="col" data-h="300"></div><div class="lb">round 2</div></div>
+    </div>
+    <p class="sub">What moves is the attacker's <b>cost</b>: 3.81 &rarr; 4.64 features touched,
+      277 &rarr; 492 median queries.</p>
+  </section>
+
+  <section class="scene" id="s6">
+    <div class="kicker">We tested our own excuse</div>
+    <h2>“The dosage was too small” — refuted</h2>
+    <div class="bars" id="sweep">
+      <div class="bar"><div class="vl def">0.9256</div><div class="col" data-h="316" style="background:var(--defend)"></div><div class="lb">w=1</div></div>
+      <div class="bar"><div class="vl def">0.9051</div><div class="col" data-h="309" style="background:var(--defend)"></div><div class="lb">w=10</div></div>
+      <div class="bar"><div class="vl def">0.8964</div><div class="col" data-h="306" style="background:var(--defend)"></div><div class="lb">w=50</div></div>
+      <div class="bar"><div class="vl def">0.8825</div><div class="col" data-h="301" style="background:var(--defend)"></div><div class="lb">w=200</div></div>
+      <div class="bar"><div class="vl def">0.8667</div><div class="col" data-h="296" style="background:var(--defend)"></div><div class="lb">w=1000</div></div>
+      <div class="bar"><div class="vl def">0.8524</div><div class="col" data-h="291" style="background:var(--defend)"></div><div class="lb">w=5000</div></div>
+    </div>
+    <p class="sub">5000&times; the dosage: attack success 1.000 &rarr; 0.996,
+      PR-AUC <span class="att">&minus;8.1%</span>. Heavier weighting breaks the detector faster than it teaches it.</p>
+  </section>
+
+  <section class="scene" id="s7">
+    <div class="kicker">The audit that makes an ASR mean something</div>
+    <h2>Same 100%. Different thing entirely.</h2>
+    <div class="split"><div class="a" id="spa"></div><div class="b" id="spb"></div></div>
+    <div class="legend">
+      <span><b class="att">99.5%</b> &nbsp;at a merchant that does not exist</span>
+      <span><b class="def">0.5%</b> &nbsp;physically possible</span>
+    </div>
+    <p class="sub">The unconstrained attacker reports the same headline — and almost all of it
+      describes transactions that could never occur.</p>
+  </section>
+
+  <section class="scene" id="s8">
+    <div class="kicker">Terminal node</div>
+    <h2>Two surfaces. One scorecard.</h2>
+    <table>
+      <tr><th>Surface</th><th>Before</th><th>After</th><th>Verdict</th></tr>
+      <tr><td>Tabular detector</td><td class="m att">1.000</td><td class="m att">1.000</td>
+          <td class="m">cost &uarr;, not success &darr;</td></tr>
+      <tr><td>Payment agent</td><td class="m att">4.9%</td><td class="m def">0.0%</td>
+          <td class="m def">significant, p = 0.015</td></tr>
+    </table>
+  </section>
+
+  <section class="scene" id="s9">
+    <h1>Every number here<br/>traces to an artifact.</h1>
+    <p class="sub">Nothing is typed into the page. Where we did not measure, it says
+      <span style="font-family:var(--mono)">not measured</span> — never zero.</p>
+  </section>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+// A fixed, declarative timeline. Recording must be deterministic: anything driven by
+// wall-clock jitter would desync from the narration, and re-running would not reproduce
+// the same frames.
+const T = [
+  ["s1", 4200, []],
+  ["s2", 11400, [[600,()=>lit("n1","a1")],[1500,()=>lit("n2","a2")],[2400,()=>hot("n3")],
+                [2500,()=>lit("a3")],[3300,()=>lit("n4")],[5200,()=>fade("s2sub")]]],
+  ["s3", 11600, []],
+  ["s4", 10600, [[1800,()=>{ setScore(0.0); }],[3400,()=>fade("s4sub")]]],
+  ["s5", 7000, [[400,()=>grow("rounds")]]],
+  ["s6", 13900,[[400,()=>grow("sweep")]]],
+  ["s7", 11200, [[600,()=>{ el("spa").style.width="99.5%"; el("spb").style.width="0.5%"; }]]],
+  ["s8", 10200, []],
+  ["s9", 5400, []],
+];
+
+const el = id => document.getElementById(id);
+const lit = (...ids) => ids.forEach(i => el(i).classList.add("lit"));
+const hot = (...ids) => ids.forEach(i => el(i).classList.add("hot"));
+const fade = id => { el(id).style.transition="opacity .8s ease"; el(id).style.opacity=1; };
+const grow = id => [...el(id).querySelectorAll(".col")].forEach((c,k)=>
+  setTimeout(()=>{ c.style.transition="height .9s cubic-bezier(.2,.8,.2,1)";
+                   c.style.height=c.dataset.h+"px"; }, k*150));
+
+function setScore(to){
+  const node = el("score"), fill = el("fill");
+  const from = 0.954, ms = 1400, t0 = performance.now();
+  fill.style.transition = `width ${ms}ms cubic-bezier(.4,0,.2,1)`;
+  fill.style.width = (to*100).toFixed(1)+"%";
+  (function step(now){
+    const p = Math.min((now-t0)/ms, 1);
+    const v = from + (to-from)*(1-Math.pow(1-p,3));
+    node.textContent = v.toFixed(3);
+    node.className = v < 0.5 ? "def" : "att";
+    if (p < 1) requestAnimationFrame(step);
+    else el("s4h").textContent = "Score: 0.954 → 0.000";
+  })(t0);
+}
+
+// Cross-fades are CSS; the switch is scripted so total runtime is exactly the sum above.
+let at = 0;
+T.forEach(([id, dur, beats]) => {
+  setTimeout(() => {
+    document.querySelectorAll(".scene").forEach(s => s.classList.remove("on"));
+    el(id).style.transition = "opacity .55s ease";
+    el(id).classList.add("on");
+    el("foot").textContent = "artifacts/ · placeholder: false · " + id.toUpperCase();
+    beats.forEach(([d, fn]) => setTimeout(fn, d));
+  }, at);
+  at += dur;
+});
+window.TOTAL_MS = at;
+</script>
+</body>
+</html>
