@@ -24,12 +24,21 @@ Nobody scores them against an attacker who adapts.
 
 We built that attacker, and then we built the loop that trains against it. Our system
 attacks a payment fraud detector under realistic constraints, measures how often the attack
-succeeds, retrains the detector on those successful attacks, and attacks again. The result
-is a curve: attack success falling round over round while detection quality holds.
+succeeds, retrains the detector on those successful attacks, and attacks again.
 
-We then applied the same method to a structurally different target — an AI payment assistant
-with the ability to move money — to demonstrate that this is a reusable evaluation method
-rather than a single experiment.
+**The result is not the curve we expected, and reporting it accurately is the point of the
+submission.** Attack success does not fall. It is 100% at every round — and it stays at 100%
+when we raise the adversarial training dosage five-thousand-fold, and when we tighten the
+decision threshold to the point of declining one legitimate transaction in ten. Both defences
+available at the model layer are measured, priced, and shown not to work against an attacker
+that re-searches after every change.
+
+That is a more useful finding than a falling curve, because it is actionable: it says where
+model-layer defence runs out, and what you would have paid to discover that in production
+instead. We then applied the same method to a structurally different target — an AI payment
+assistant with the ability to move money — where the defence is *layered* rather than
+model-internal, and there the reduction is statistically significant. The contrast between
+the two surfaces is the result we would most want carried away.
 
 **What is genuinely novel here is not that we attack a classifier.** Adversarial machine
 learning is a mature field. It is that our attacker is constrained to the things a real
