@@ -61,9 +61,29 @@ def main() -> int:
     order = flagged[np.argsort(proba[flagged])]
     picks = order[np.linspace(0, len(order) - 1, min(N_SAMPLES, len(order))).astype(int)]
 
+    # A realistic authorisation stream for the hero: real rows in chronological order,
+    # fraud and legitimate mixed at something near the corpus base rate rather than
+    # filtered. The hero scores these live, so an invented row would be a fake score.
+    n_stream = 60
+    fraud_idx = np.where(y == 1)[0]
+    legit_idx = np.where(y == 0)[0]
+    rng = np.random.default_rng(0)
+    take_fraud = rng.choice(fraud_idx, size=min(8, len(fraud_idx)), replace=False)
+    take_legit = rng.choice(legit_idx, size=n_stream - len(take_fraud), replace=False)
+    stream_idx = np.sort(np.concatenate([take_fraud, take_legit]))
+
     payload = {
         "threshold": threshold,
         "features": list(FEATURES),
+        "stream": [
+            {
+                "id": f"txn-{int(i):06d}",
+                "is_fraud": int(y[i]),
+                "amt": float(X.iloc[i]["amt"]),
+                "values": {c: float(X.iloc[i][c]) for c in FEATURES},
+            }
+            for i in stream_idx
+        ],
         "samples": [
             {
                 "id": f"txn-{int(i):06d}",
@@ -80,7 +100,7 @@ def main() -> int:
     envelope.created_at = datetime.now(timezone.utc).isoformat()
     dest.write_text(json.dumps(asdict(envelope), indent=2) + "\n", encoding="utf-8")
 
-    print(f"wrote {dest}  ({len(payload['samples'])} samples)")
+    print(f"wrote {dest}  ({len(payload['samples'])} samples, {len(payload['stream'])} stream rows)")
     print(f"  threshold {threshold:.4f}")
     for s in payload["samples"]:
         print(f"  {s['id']}  p={s['p_fraud']:.4f}")

@@ -182,10 +182,19 @@ export interface LiveSample {
   values: Record<string, number>;
 }
 
+export interface LiveStreamRow {
+  id: string;
+  is_fraud: number;
+  amt: number;
+  values: Record<string, number>;
+}
+
 export interface LiveSamples {
   threshold: number;
   features: string[];
   samples: LiveSample[];
+  /** Real rows, fraud and legitimate mixed, for the hero to score live. */
+  stream?: LiveStreamRow[];
 }
 
 /**

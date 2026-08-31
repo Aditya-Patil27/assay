@@ -1,11 +1,14 @@
 import Link from "next/link";
 
+import { LiveScoreStream } from "@/components/LiveScoreStream";
+
 import {
   loadArtifacts,
   loadBackendAudit,
   loadDataProvenance,
   loadFeatureSchema,
   loadLatency,
+  loadLiveSamples,
   loadProviderRedteams,
 } from "@/lib/load";
 
@@ -75,14 +78,16 @@ const CAPABILITIES = [
 ];
 
 export default async function Home() {
-  const [{ attack, agentic }, latency, corpus, schema, audit, providers] = await Promise.all([
-    loadArtifacts(),
-    loadLatency(),
-    loadDataProvenance(),
-    loadFeatureSchema(),
-    loadBackendAudit(),
-    loadProviderRedteams(),
-  ]);
+  const [{ attack, agentic }, latency, corpus, schema, audit, providers, live] =
+    await Promise.all([
+      loadArtifacts(),
+      loadLatency(),
+      loadDataProvenance(),
+      loadFeatureSchema(),
+      loadBackendAudit(),
+      loadProviderRedteams(),
+      loadLiveSamples(),
+    ]);
 
   const rounds = attack.payload;
   const first = rounds[0];
@@ -187,12 +192,17 @@ export default async function Home() {
             </p>
           </div>
 
-          <CoevolutionSpark rounds={rounds} l0Pct={l0Pct} qPct={qPct} />
+          <div className="space-y-4">
+            {live?.payload.stream?.length ? (
+              <LiveScoreStream samples={live.payload} />
+            ) : null}
+            <CoevolutionSpark rounds={rounds} l0Pct={l0Pct} qPct={qPct} />
+          </div>
         </div>
       </section>
 
       {/* ---- Bento statistics ---------------------------------------------------- */}
-      <section className="wrap py-14">
+      <section className="wrap reveal py-14">
         <h2 className="text-[0.8125rem] font-medium text-muted">Measured, end to end</h2>
         <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {stats.map((s) => (
@@ -210,7 +220,7 @@ export default async function Home() {
       </section>
 
       {/* ---- Capabilities -------------------------------------------------------- */}
-      <section className="wrap pb-14">
+      <section className="wrap reveal pb-14">
         <h2 className="display text-[1.75rem] md:text-[2rem]">
           Two attack surfaces, one loop, both of them live
         </h2>
