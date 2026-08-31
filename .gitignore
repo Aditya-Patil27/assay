@@ -56,3 +56,6 @@ video/workflow_ms.txt
 *.tsbuildinfo
 # Ruff's cache, present on disk and previously neither tracked nor ignored.
 .ruff_cache/
+# Word lock files, created while a .docx is open. Transient, and committing one would
+# tell every later reader the document is checked out by someone who has since closed it.
+~$*
