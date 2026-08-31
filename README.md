@@ -66,19 +66,20 @@ For teammates picking this up mid-flight. The per-person board with full detail 
 |---|---|---|
 | Data + round-0 detector | ✅ real, 1.85M Sparkov rows | — |
 | Constraint engine + attack | ✅ real, 3 rounds run end to end | — |
-| Feasibility audit | ⚠️ **computed but never published** | needs an artifact kind |
-| Red/Blue orchestrators | ✅ landed, ❌ unwired | API key + a non-saturated baseline |
-| Agentic red team | ❌ fixture | **one API key** |
-| Dashboard | ✅ builds and serves | never deployed; nobody has opened it in a browser |
-| `.docx` walkthrough | 🟡 drafted, 4 `[[PENDING]]` | ASR marker is now fillable |
+| Feasibility audit | ✅ published, `placeholder: false` | — |
+| Red/Blue orchestrators | ✅ landed; loop runs end to end | baseline stays saturated at ASR 1.000 |
+| Agentic red team | ✅ real, 144 trials/arm on two vendors | — |
+| Dashboard | ✅ [deployed and live](https://adversarial-payments.vercel.app) | — |
+| `.docx` walkthrough | ✅ complete, 0 `[[PENDING]]` markers | — |
 | Submission | ❌ nothing submitted | all three artifacts, via Writeups |
 
 **The three things worth knowing before you touch anything:**
 
 1. **ASR is 1.000 and does not fall.** Any doc, chart caption or slide still promising a
    collapse is now wrong. The honest headline is attacker *cost*, not attacker failure.
-2. **One missing API key blocks two tracks.** `.env` is present and pre-filled; it needs a
-   key pasted into `LLM_API_KEY` and `LLM_LIVE=1`. Five minutes, highest leverage in the repo.
+2. **Both provider keys are present and both agentic arms have been run.** The corpus was
+   fired at `gpt-oss-120b` (Groq) and `nemotron-3-super-120b` (NVIDIA NIM), 144 trials each.
+   `/agent` on the live site fires a single injection against a real model on demand.
 3. **The loop's threshold was fitted on the test split until 2026-08-30.** It maximised F1 on
    the rows the attack was scored over, which lifted the bar to ~0.94 and made evasion free.
    It now uses `choose_threshold` at a fixed FPR budget on a held-out validation slice. Any
@@ -304,13 +305,17 @@ Directories are assigned so five people rarely touch the same file.
   promoted from insurance to **the notebook default** — the plain-loop path executes identical
   tasks with no server. Prefect still drives the dashboard's graph, where the 29 seconds is
   paid once at build time and never during judging.
-- **Day 2** — first real ASR number exists. ⏳ Outstanding.
+- **Day 2** — first real ASR number exists. ✅ Passed. All 14 enveloped artifacts carry
+  `placeholder: false`; attack success is published for three rounds on the full
+  1,852,394-row corpus.
 - **Day 3 midday** — code freeze; comms only after.
 
 ## Docs
 
 - [Design spec](docs/superpowers/specs/2026-08-29-adversarial-payments-design.md) — current, authoritative
-- [Submission requirements](docs/2026-08-29-submission-requirements.md) — ⚠️ **all five open questions unresolved; a human must check the challenge portal**
+- [Submission requirements](docs/2026-08-29-submission-requirements.md) — resolved from the
+  live portal: deadline, deliverable formats, judging criteria and data policy. Three
+  artifacts are required (this repository, a `.docx` walkthrough, a working web prototype).
 - [Deck outline + demo storyboard](docs/2026-08-31-deck-outline.md)
 - [Strategy](docs/2026-08-22-challenge-strategy.md) — threat taxonomy and approach analysis
 - `GenAI Payment Fraud Challenge.pdf` — our own background research. **Not a rules document

@@ -93,7 +93,9 @@ attack surfaces that share one contract and one scorecard.
         \AdvHoldoutN{} adversarial examples the retrained model never saw, recall goes
         \AdvHoldoutBefore\% $\to$ \AdvHoldoutAfter\%, while real-fraud recall holds
         (\AdvRealBefore\% $\to$ \AdvRealAfter\%) and legitimate declines fall from
-        \AdvDeclinesBefore{} to \AdvDeclinesAfter{} per 100k.
+        \AdvDeclinesBefore{} to \AdvDeclinesAfter{} per 100k. \emph{Measured on a
+        \AdvRows-row subsample}, not the full corpus the bullets above use --- the two are
+        separate runs and are not a single experiment.
 \end{itemize}
 
 \noindent
@@ -231,7 +233,8 @@ Adversarial retraining is not worthless, and the distinction is precise.
   \caption{Recall on \AdvHoldoutN{} adversarial examples the retrained model never saw:
   \AdvHoldoutBefore\% $\to$ \AdvHoldoutAfter\%. Recall on adversarial rows it \emph{did} see
   is \AdvTrainAfter\%, which is the memorisation ceiling and is why the held-out figure is
-  the only honest one. Real-fraud recall holds and legitimate declines fall.}
+  the only honest one. Real-fraud recall holds and legitimate declines fall. Measured on a
+  \AdvRows-row subsample; the co-evolution and sweep figures use the full corpus.}
   \label{fig:advdet}
 \end{figure}
 

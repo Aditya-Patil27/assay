@@ -328,6 +328,9 @@ def build_numbers() -> None:
         "AdvDeclinesBefore": f"{r['legit_fpr_before'] * 100000:.0f}",
         "AdvDeclinesAfter": f"{r['legit_declines_per_100k_after']:.0f}",
         "AdvHoldoutN": str(r["n_adversarial_holdout"]),
+        # The adversarial-detection run is a subsample, not the full corpus. Quoting
+        # its recall beside the full-run PR-AUC without saying so reads as one experiment.
+        "AdvRows": f"{ad['rows']:,}",
         # Feasibility audit
         "ImpossibleShare": pct(feas["impossible_merchant_share"], 1),
         # Serving (SERVER-side ONNX -- not the browser walker)
