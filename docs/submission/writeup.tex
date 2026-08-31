@@ -177,6 +177,19 @@ The detector behind this loop reports PR-AUC \LoopPrAuc{} at
 $n_{\text{train}}=\text{\LoopNTrain}$. Detection quality and attack success are measured on
 different axes and are never combined into a single score.
 
+\paragraph{What that number is measured on, because it is not our cleanest split.}
+Every aggregate feature in the pipeline is computed causally --- sorted by time, using only
+a card's prior transactions --- so none of these results carries label leakage. The
+\emph{split} is a separate question and we are not fully clean on it. The unrolled loop
+splits stratified at random, which lets a card's other transactions sit on both sides, so
+the model can learn card-specific behaviour it would not have at deployment. That is an
+easier test set, not leakage, and the rounds above carry it.
+
+We treat a suspiciously high score as a bug report rather than a success. On this data
+anything above roughly \(0.95\) PR-AUC suggests leakage, and \LoopPrAuc{} sits just under
+that line, on the split most likely to inflate it. \claim{We report it with the caveat
+attached rather than quoting the number alone.}
+
 \subsection{We refuted our own excuse}
 
 The obvious objection to Figure~\ref{fig:coevolution} is that we simply did not retrain hard
