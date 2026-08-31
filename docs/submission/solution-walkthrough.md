@@ -604,6 +604,24 @@ one-row DataFrame per call; that overhead, not the tree evaluation, was almost a
 Quoting the training-time path as a serving cost would have overstated inference by two
 orders of magnitude in our own disfavour.
 
+**A note on which path this figure describes, because the live demo uses a different one.**
+The 0.035 ms above is the server-side serving path: the exported graph under ONNX Runtime,
+which is what a payment network would actually deploy. The interactive demo scores in the
+visitor's browser instead, and it does not use ONNX — shipping `onnxruntime-web` cost 3.2 MB
+of WASM on the wire and 8.8 seconds to a first score on a 4 Mbps connection, to do what is
+ultimately 400 walks down a binary tree comparing a float to a threshold. The browser now
+walks the trees directly from a 174 KB export.
+
+These are two execution paths for **one model**, not two models. `npm run check:trees` scores
+a fixture through ONNX and through the JavaScript walker and fails on any disagreement:
+68 rows, worst delta **1.71e-07**. The same discipline covers the agent — `npm run check:agent`
+confirms the TypeScript defence port agrees with the Python one on all 144 documents and 360
+spans, because a browser demo that quietly disagreed with the measured results would be
+evidence for nothing.
+
+So read 0.035 ms as the deployable serving cost, not as the latency of the web demo. We are
+not quoting a browser measurement as a production one.
+
 **Attack generation is offline and does not need to be fast.** It runs in evaluation, not in
 the authorisation path.
 
