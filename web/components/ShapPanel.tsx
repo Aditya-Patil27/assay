@@ -50,7 +50,7 @@ export function ShapPanel({ rounds }: { rounds: DetectRound[] }) {
                     </div>
                     <div className="mt-1 h-1.5 w-full overflow-hidden bg-figure-2">
                       <div
-                        className={`h-full ${isNew ? "bg-warn" : "bg-defend"}`}
+                        className={`h-full ${isNew ? "bg-warn-fill" : "bg-defend-fill"}`}
                         style={{ width: `${(f.mean_abs_shap / max) * 100}%` }}
                       />
                     </div>

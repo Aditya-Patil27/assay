@@ -81,7 +81,7 @@ function MiniBar({ value, tone }: { value: number; tone: "attack" | "defend" }) 
   return (
     <span className="mt-2 block h-1.5 w-24 overflow-hidden bg-figure-2 ring-1 ring-rule">
       <span
-        className={`block h-full ${tone === "attack" ? "bg-attack" : "bg-defend"}`}
+        className={`block h-full ${tone === "attack" ? "bg-attack-fill" : "bg-defend-fill"}`}
         style={{ width: `${Math.max(value * 100, value > 0 ? 2 : 0)}%` }}
       />
     </span>

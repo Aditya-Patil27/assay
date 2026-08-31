@@ -15,9 +15,20 @@ const source = join(here, "..", "..", "artifacts");
 const dest = join(here, "..", "public", "data");
 
 if (!existsSync(source)) {
+  // On a host that only received web/, the repo root is not there to copy from -- but
+  // public/data was uploaded already synced, so there is nothing to do and nothing wrong.
+  // Failing here would mean the site could only ever build from a full checkout.
+  const already = existsSync(dest) && (await readdir(dest)).length > 0;
+  if (already) {
+    console.log(`no artifacts/ at ${source}; public/data already populated, skipping`);
+    process.exit(0);
+  }
   console.error(
-    `\n  No artifacts/ found at ${source}\n` +
-      `  Run:  python scripts/seed_artifacts.py   (from the repo root)\n`,
+    `
+  No artifacts/ found at ${source} and public/data is empty
+` +
+      `  Run:  python scripts/seed_artifacts.py   (from the repo root)
+`,
   );
   process.exit(1);
 }

@@ -14,9 +14,9 @@ import {
 import type { Graph, NodeStatus, Track } from "@/lib/types";
 
 const TRACK: Record<Track, { color: string; label: string }> = {
-  tabular: { color: "var(--color-attack)", label: "Tabular detector" },
-  shared: { color: "var(--color-defend)", label: "Shared / contract" },
-  agentic: { color: "var(--color-warn)", label: "Payment agent" },
+  tabular: { color: "var(--color-attack-fill)", label: "Tabular detector" },
+  shared: { color: "var(--color-defend-fill)", label: "Shared / contract" },
+  agentic: { color: "var(--color-warn-fill)", label: "Payment agent" },
 };
 
 /** Status is carried by a glyph, not only by opacity -- colour alone would not survive a projector. */
@@ -168,7 +168,7 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
 
     const rfEdges: Edge[] = edgeList.map((e, i) => {
       const unroll = e.kind === "unroll";
-      const stroke = unroll ? "var(--color-warn)" : "var(--color-rule)";
+      const stroke = unroll ? "var(--color-warn-fill)" : "var(--color-rule)";
       return {
         id: `${e.source}->${e.target}-${i}`,
         source: e.source,
@@ -176,7 +176,7 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
         animated: unroll,
         label: unroll ? "unroll r→r+1" : undefined,
         labelStyle: {
-          fill: "var(--color-warn)",
+          fill: "var(--color-warn-fill)",
           fontSize: 10,
           fontFamily: "var(--font-mono)",
         },
@@ -245,7 +245,7 @@ function GraphLegend() {
             y1="5"
             x2="30"
             y2="5"
-            stroke="var(--color-warn)"
+            stroke="var(--color-warn-fill)"
             strokeWidth="2.5"
             strokeDasharray="6 4"
           />

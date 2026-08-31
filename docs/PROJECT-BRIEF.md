@@ -206,7 +206,7 @@ to `main` that touches `web/` or `artifacts/`.
 Then push, or trigger **Actions → Deploy dashboard → Run workflow**. The URL will be:
 
 ```
-https://aditya-patil27.github.io/mastercard-adversarial-payments/
+https://adversarial-payments.vercel.app
 ```
 
 Paste that into walkthrough section 7 and into the Kaggle writeup.

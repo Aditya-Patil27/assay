@@ -24,7 +24,7 @@ export function FeasibilityPanel({
   return (
     <div className="grid gap-4">
       {placeholder && (
-        <p className="border border-attack/40 bg-attack/5 px-3 py-2 text-[11px] text-attack">
+        <p className="border border-attack/40 bg-attack-fill/5 px-3 py-2 text-[11px] text-attack">
           Fixture data — this audit has not been computed from a real run.
         </p>
       )}
@@ -48,8 +48,8 @@ export function FeasibilityPanel({
               role="img"
               aria-label={`${pct(impossible)} of successes are physically impossible, ${pct(plausible)} are plausible`}
             >
-              <div className="bg-attack" style={{ width: `${impossible * 100}%` }} />
-              <div className="bg-defend" style={{ width: `${plausible * 100}%` }} />
+              <div className="bg-attack-fill" style={{ width: `${impossible * 100}%` }} />
+              <div className="bg-defend-fill" style={{ width: `${plausible * 100}%` }} />
             </div>
             <dl className="mt-3 space-y-1.5 text-sm">
               <div className="flex items-baseline justify-between gap-3">
@@ -83,7 +83,7 @@ export function FeasibilityPanel({
               role="img"
               aria-label="Every success is a transaction that could occur"
             >
-              <div className="w-full bg-defend" />
+              <div className="w-full bg-defend-fill" />
             </div>
             <dl className="mt-3 space-y-1.5 text-sm">
               <div className="flex items-baseline justify-between gap-3">

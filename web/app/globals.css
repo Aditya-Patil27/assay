@@ -2,53 +2,101 @@
 
 @theme {
   /* ------------------------------------------------------------------------------
-   * Printing inks on paper stock.
+   * Attio's system, read off attio.com's own stylesheets rather than eyeballed.
    *
-   * This is not a UI palette, it is a press palette: one paper, one black, two inks
-   * (an attack vermilion and a defense prussian) and an ochre for anything
-   * provisional. The page is a report someone could have printed, so the colours are
-   * the ones a two-colour print job would have bought.
-   *
-   * Nothing here is a framework default. The previous accent was Tailwind's teal-400
-   * (#2dd4bf) verbatim, which is a rename rather than a decision.
+   * Their neutral and surface ramps are used verbatim. The accents are not: Attio is a
+   * CRM and has no red/blue-team story to tell, so its palette carries one blue and no
+   * strong red. The attack red and the ochre below were derived by rotating the hue of
+   * their primary blue (#266df0, H219 S.87 L.55) and holding saturation and lightness,
+   * so the three accents are siblings rather than three unrelated brand colours.
    * ------------------------------------------------------------------------------ */
-  --color-paper: #f4f4f1;
-  --color-figure: #eaeae5;
-  --color-figure-2: #e0e0d9;
-  --color-rule: #c6c6bc;
-  --color-rule-strong: #a6a69c;
-  --color-ink: #1a1a17;
-  --color-muted: #62625b;
 
-  /* Red team / blue team. The whole story is one turning into the other. */
-  --color-attack: #c3341f;
-  --color-attack-dim: #dd8a79;
-  --color-defend: #1f5673;
-  --color-defend-dim: #8aa9bb;
-  /* Ochre, darkened until small text on paper clears 4.5:1 -- it labels placeholder
-     data and unroll edges, both of which are read at 10-11px. */
-  --color-warn: #8a5a08;
+  /* Surfaces -- Attio's white ramp. The page is off-white and cards are pure white,
+     which is what produces their "paper resting on a surface" look. */
+  --color-paper: #fafafb;
+  --color-figure: #ffffff;
+  --color-figure-2: #f3f4f6;
+  --color-rule: #e4e7ec;
+  --color-rule-strong: #d3d8df;
+
+  /* Text -- Attio's black ramp. */
+  --color-ink: #1c1d1f;
+  --color-muted: #6f7988;
 
   /* ------------------------------------------------------------------------------
-   * Three faces, each with a job.
+   * Two variants per accent, because one colour cannot do both jobs.
    *
-   *   Newsreader     prose. A screen-first text serif with a display cut, so the
-   *                  headline and the body are the same voice at two sizes.
-   *   IBM Plex Sans  the machine layer: captions, table headers, axis labels.
-   *   IBM Plex Mono  anything that is a measurement.
-   *
-   * Plex is the pair to Newsreader rather than Inter because it was drawn as an
-   * engineering type system and its mono is the same skeleton as its sans -- so a
-   * figure's caption and the numbers inside it read as one object.
+   * The -fill values are vivid and used for bars, strokes and dots, which only need
+   * 3:1 as non-text graphics. The plain values are darkened until small text clears
+   * 4.5:1 on the off-white page. Attio's own primary is a fill, not a text colour --
+   * #266df0 reads at 4.45:1, which is why their body copy never uses it.
    * ------------------------------------------------------------------------------ */
-  --font-serif: var(--font-newsreader), Charter, "Bitstream Charter", Georgia, serif;
-  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, Menlo, monospace;
+  --color-attack: #e5101e; /* 4.55:1 */
+  --color-attack-fill: #f02633;
+  --color-attack-dim: #f7a6ac;
 
-  /* A radius scale, applied on purpose. Figures and rules are square; only genuinely
-     soft affordances (chips, bar caps) get the 2px. */
-  --radius-card: 0px;
-  --radius-chip: 2px;
+  --color-defend: #245bc2; /* 6.01:1 -- Attio's blue-600 */
+  --color-defend-fill: #266df0; /* Attio's primary */
+  --color-defend-dim: #94b9ff; /* Attio's blue-300 */
+
+  --color-warn: #a7640c; /* 4.50:1 */
+  --color-warn-fill: #f09826;
+
+  --color-wash-defend: #e8f0ff; /* Attio's blue-100 */
+
+  /* ------------------------------------------------------------------------------
+   * A categorical ramp for the backend groups.
+   *
+   * Attio ships exactly this kind of pastel set for record-type pills (#fff3cc,
+   * #feecf3, #e5eeff and friends are in their stylesheet). Each pair is a wash for the
+   * chip background and a solid for its text and bar, so a group is identifiable by
+   * colour without any of them competing with the attack red or the defend blue that
+   * carry the actual argument.
+   * ------------------------------------------------------------------------------ */
+  --color-g1: #245bc2;
+  --color-g1-wash: #e5eeff;
+  --color-g2: #0f7a5a;
+  --color-g2-wash: #d8f3e8;
+  --color-g3: #a7640c;
+  --color-g3-wash: #fff3cc;
+  --color-g4: #a32d6b;
+  --color-g4-wash: #fdddea;
+  --color-g5: #5b3fb8;
+  --color-g5-wash: #eae5ff;
+  --color-g6: #0d6f7a;
+  --color-g6-wash: #d6f0f3;
+  --color-g7: #9c3a2a;
+  --color-g7-wash: #fde4dd;
+  --color-g8: #4a5568;
+  --color-g8-wash: #e8ebef;
+
+  /* ------------------------------------------------------------------------------
+   * Dark sections.
+   *
+   * Every enterprise fraud platform (Feedzai, Forter, Riskified) opens on a dark hero
+   * and alternates dark bands down the page, because a wall of white reads as a
+   * document and they are selling a control room. The rhythm is worth taking; their
+   * atmospheric glow is not -- an unprompted neon bloom on dark is the single most
+   * recognisable AI-generated tell. These are flat, using Attio's own black ramp.
+   * ------------------------------------------------------------------------------ */
+  --color-night: #16181c;
+  --color-night-2: #202329;
+  --color-night-rule: #31353d;
+  --color-night-ink: #f3f4f6;
+  --color-night-muted: #9aa4b2;
+
+  /* ------------------------------------------------------------------------------
+   * Two faces. Attio ships Inter, Inter Display and JetBrains Mono (plus Tiempos, a
+   * licensed serif we do not fake). Inter's variable optical-size axis gives the
+   * Display cut without a second download -- headings set `opsz` high, which tightens
+   * the spacing and thins the joins the way a display cut should.
+   * ------------------------------------------------------------------------------ */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, Menlo, monospace;
+
+  /* Attio's radii sit at 5-9px, not the 12-16px that reads as generic SaaS. */
+  --radius-card: 8px;
+  --radius-chip: 5px;
 }
 
 html {
@@ -60,19 +108,28 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  letter-spacing: -0.011em;
 }
 
 /* --------------------------------------------------------------------------------
- * The report grid.
+ * Display type.
  *
- * One reading column, one margin. Figures are allowed to break the column and run to
- * the full measure; prose never is. This is the whole layout system -- there is no
- * card, and no three-up feature grid, because the document is read top to bottom.
+ * `opsz` is Inter's optical-size axis; 32 is the Display cut. -0.015em is the tracking
+ * Attio uses on headings, and it is the single most recognisable thing about their
+ * type -- without it Inter at large sizes reads loose and generic.
+ * -------------------------------------------------------------------------------- */
+.display {
+  font-variation-settings: "opsz" 32;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------------
+ * The layout. One measure for prose, one full width for figures.
  * -------------------------------------------------------------------------------- */
 .wrap {
   width: 100%;
-  max-width: 74rem;
+  max-width: 76rem;
   margin-inline: auto;
   padding-inline: 1.25rem;
 }
@@ -82,41 +139,45 @@ body {
   }
 }
 
-/* The measure. 68ch is the long end of comfortable for a serif at this size; prose
-   wider than this is the single fastest way to make a report unreadable. */
 .col {
   max-width: 68ch;
 }
 
 .prose {
-  font-family: var(--font-serif);
-  font-size: 1.0625rem;
-  line-height: 1.65;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-muted);
 }
 @media (min-width: 768px) {
   .prose {
-    font-size: 1.125rem;
+    font-size: 1.0625rem;
   }
 }
 .prose strong {
   font-weight: 600;
+  color: var(--color-ink);
 }
 
-/* Old-style figures in running prose, lining figures in tables -- Newsreader carries
-   both, and the tabular sets are what keep a column of numbers aligned. */
-.prose {
-  font-variant-numeric: oldstyle-nums proportional-nums;
+/* Attio's card: white, tight radius, and a two-layer shadow so faint it reads as a
+   lift rather than a drop. Copied exactly -- it is their signature surface. */
+.card {
+  background: var(--color-figure);
+  border-radius: var(--radius-card);
+  box-shadow:
+    0 1px 3px #0000000a,
+    0 0 2px #1c28402e;
 }
+
 table,
 .tnum {
   font-variant-numeric: tabular-nums lining-nums;
 }
 
 /* --------------------------------------------------------------------------------
- * React Flow renders its own surface; keep it on the paper.
+ * React Flow renders its own surface; keep it on the page's palette.
  * -------------------------------------------------------------------------------- */
 .react-flow__background {
-  background: var(--color-paper);
+  background: var(--color-figure-2);
 }
 .react-flow__attribution {
   display: none;
@@ -127,6 +188,6 @@ table,
 }
 .react-flow__controls-button {
   border-color: var(--color-rule) !important;
-  background: var(--color-paper) !important;
+  background: var(--color-figure) !important;
   fill: var(--color-ink) !important;
 }

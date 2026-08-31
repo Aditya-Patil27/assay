@@ -1,0 +1,505 @@
+{
+  "kind": "backend_audit",
+  "placeholder": false,
+  "schema_version": 1,
+  "created_at": "2026-08-31T06:33:54.314052+00:00",
+  "git_sha": "dfe6af9",
+  "payload": {
+    "groups": [
+      {
+        "key": "core",
+        "title": "Contracts",
+        "blurb": "Schema, artifact envelopes, config and the scorecard.",
+        "modules": [
+          {
+            "path": "src/adversarial_payments/artifacts.py",
+            "module": "artifacts",
+            "loc": 163,
+            "summary": "The pipeline -> frontend contract.",
+            "api": [
+              "Envelope",
+              "ShapFeature",
+              "DetectRound",
+              "AttackRound",
+              "FeasibilityAudit",
+              "FeatureDelta",
+              "AttackExample",
+              "AgenticCategory",
+              "ScorecardRow",
+              "GraphNode",
+              "GraphEdge",
+              "Graph",
+              "path_for",
+              "write",
+              "read"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/config.py",
+            "module": "config",
+            "loc": 40,
+            "summary": "Shared settings. Owned jointly; change only with a heads-up to the team.",
+            "api": [
+              "Settings",
+              "ensure_dirs"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/schema.py",
+            "module": "schema",
+            "loc": 142,
+            "summary": "The P1 -> P2 contract.",
+            "api": [
+              "SchemaViolation",
+              "FeatureSchema"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/scorecard.py",
+            "module": "scorecard",
+            "loc": 122,
+            "summary": "The terminal node: one table both attack surfaces feed.",
+            "api": [
+              "tabular_row",
+              "agentic_row_from_artifact",
+              "build",
+              "write"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "data",
+        "title": "Corpus",
+        "blurb": "Loading, feature engineering and the chronological split.",
+        "modules": [
+          {
+            "path": "src/adversarial_payments/data/features.py",
+            "module": "features",
+            "loc": 143,
+            "summary": "Raw Sparkov columns -> the frozen feature contract in ``schema.py``.",
+            "api": [
+              "to_epoch_seconds",
+              "haversine_km",
+              "ordinal_encode",
+              "build_features"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/data/load.py",
+            "module": "load",
+            "loc": 180,
+            "summary": "Dataset acquisition and the single entry point the rest of the pipeline calls.",
+            "api": [
+              "DatasetUnavailable",
+              "download_kaggle",
+              "ensure_dataset",
+              "read_provenance",
+              "is_synthetic",
+              "load_raw",
+              "load_features",
+              "time_split",
+              "feature_matrix",
+              "labels"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/data/synthetic.py",
+            "module": "synthetic",
+            "loc": 342,
+            "summary": "Deterministic Sparkov-*shaped* transaction generator.",
+            "api": [
+              "generate_synthetic_sparkov"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "detect",
+        "title": "Detector",
+        "blurb": "Training, evaluation and SHAP attribution for the blue team.",
+        "modules": [
+          {
+            "path": "src/adversarial_payments/detect/evaluate.py",
+            "module": "evaluate",
+            "loc": 96,
+            "summary": "Detector metrics, and the one honest way to pick an operating threshold.",
+            "api": [
+              "EvalResult",
+              "predict_scores",
+              "choose_threshold",
+              "metrics_at_threshold",
+              "evaluate"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/detect/explain.py",
+            "module": "explain",
+            "loc": 52,
+            "summary": "SHAP attribution for the detector.",
+            "api": [
+              "shap_values",
+              "top_shap_features",
+              "shap_table"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/detect/train.py",
+            "module": "train",
+            "loc": 229,
+            "summary": "Training one blue-team round. This module is the P1 -> P2 runtime interface.",
+            "api": [
+              "BackendUnavailable",
+              "Detector",
+              "meta_path",
+              "load_model",
+              "train_round"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "attack",
+        "title": "Red team",
+        "blurb": "The constraint projector, the search engine and its metrics.",
+        "modules": [
+          {
+            "path": "src/adversarial_payments/attack/constraints.py",
+            "module": "constraints",
+            "loc": 319,
+            "summary": "The three projections, straight out of ``schema.py``.",
+            "api": [
+              "ConstraintViolation",
+              "haversine_km",
+              "MerchantBank",
+              "ConstraintProjector"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/attack/engine.py",
+            "module": "engine",
+            "loc": 285,
+            "summary": "Greedy coordinate descent with random restarts -- spec section 4.4.",
+            "api": [
+              "SupportsPredictProba",
+              "AttackConfig",
+              "AttackResult",
+              "attack_one",
+              "select_targets",
+              "attack_dataset",
+              "adversarial_frame"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/attack/metrics.py",
+            "module": "metrics",
+            "loc": 111,
+            "summary": "Turn raw attack results into the contracted artifact shapes.",
+            "api": [
+              "summarize_round",
+              "pick_examples",
+              "feasibility_audit"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "agentic",
+        "title": "Agent surface",
+        "blurb": "Payment agent, tools, injection corpus and the defense stack.",
+        "modules": [
+          {
+            "path": "src/adversarial_payments/agentic/agent.py",
+            "module": "agent",
+            "loc": 148,
+            "summary": "The mock payment assistant, and the untrusted channels it ingests.",
+            "api": [
+              "Scenario",
+              "AgentRun",
+              "build_messages",
+              "PaymentAgent"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/agentic/client.py",
+            "module": "client",
+            "loc": 436,
+            "summary": "One OpenAI-compatible LLM client, with a cache that makes the demo reproducible.",
+            "api": [
+              "Provider",
+              "resolve_provider",
+              "CacheMissError",
+              "ChatResponse",
+              "LLMClient",
+              "normalise",
+              "injected_calls",
+              "scripted_response"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/agentic/defenses.py",
+            "module": "defenses",
+            "loc": 275,
+            "summary": "Three independently toggleable defense layers, per spec section 4.6.",
+            "api": [
+              "DefenseConfig",
+              "DefenseEvent",
+              "ClassifierVerdict",
+              "InjectionClassifier",
+              "ToolScope",
+              "HITLPolicy",
+              "Authorisation",
+              "DefenseStack"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/agentic/injections.py",
+            "module": "injections",
+            "loc": 496,
+            "summary": "The indirect-injection corpus, and the benign scenarios it is spliced into.",
+            "api": [
+              "Injection",
+              "by_category",
+              "scenarios_for"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/agentic/redteam.py",
+            "module": "redteam",
+            "loc": 368,
+            "summary": "Run the corpus against the agent and decide success from *observed behaviour*.",
+            "api": [
+              "exploited",
+              "Trial",
+              "BenignTrial",
+              "run_trial",
+              "run_corpus",
+              "run_benign",
+              "exploit_rate_by_category",
+              "overall_rate",
+              "attribution",
+              "write_artifact",
+              "run_all",
+              "main"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/agentic/tools.py",
+            "module": "tools",
+            "loc": 241,
+            "summary": "Mock payment tools with real signatures and real side effects.",
+            "api": [
+              "ToolError",
+              "Account",
+              "Payee",
+              "Transfer",
+              "ToolCall",
+              "PaymentState",
+              "fresh_state",
+              "check_balance",
+              "initiate_transfer",
+              "update_payee",
+              "tool_specs",
+              "invoke",
+              "record_blocked"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "loop",
+        "title": "Orchestration",
+        "blurb": "The round loop, its state machine and the offline fallback.",
+        "modules": [
+          {
+            "path": "src/adversarial_payments/loop/fallback.py",
+            "module": "fallback",
+            "loc": 89,
+            "summary": "Sparkov-shaped synthetic transactions, for when P1's loader is not on disk yet.",
+            "api": [
+              "synthetic_features"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/loop/flows.py",
+            "module": "flows",
+            "loc": 373,
+            "summary": "The unrolled red/blue loop -- spec section 4.5.",
+            "api": [
+              "load_frame",
+              "fit_detector",
+              "task_split",
+              "task_train_detector",
+              "task_score_detector",
+              "task_generate_attacks",
+              "task_augment",
+              "run_loop",
+              "write_artifacts",
+              "report_existing",
+              "main"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/loop/state.py",
+            "module": "state",
+            "loc": 132,
+            "summary": "Plain state dict for the unrolled loop, plus the DAG the dashboard draws.",
+            "api": [
+              "node_id",
+              "LoopState"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "orchestration",
+        "title": "Arena",
+        "blurb": "Multi-strategy scheduling and the attack repertoire.",
+        "modules": [
+          {
+            "path": "src/adversarial_payments/orchestration/arena.py",
+            "module": "arena",
+            "loc": 175,
+            "summary": "The Red/Blue exchange.",
+            "api": [
+              "Exchange",
+              "ArenaResult",
+              "run_arena"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/orchestration/orchestrators.py",
+            "module": "orchestrators",
+            "loc": 183,
+            "summary": "Red and Blue orchestrators.",
+            "api": [
+              "Move",
+              "RoundOutcome",
+              "Orchestrator",
+              "RedOrchestrator",
+              "BlueOrchestrator"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/orchestration/repertoire.py",
+            "module": "repertoire",
+            "loc": 187,
+            "summary": "The moves each orchestrator can play.",
+            "api": [
+              "RedPlay",
+              "BluePlay",
+              "red_play",
+              "blue_play",
+              "catalogue"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "serving",
+        "title": "Serving",
+        "blurb": "ONNX export and the latency harness.",
+        "modules": [
+          {
+            "path": "src/adversarial_payments/serving/latency.py",
+            "module": "latency",
+            "loc": 76,
+            "summary": "Single-transaction inference latency.",
+            "api": [
+              "LatencyReport",
+              "measure_latency",
+              "write_latency"
+            ]
+          },
+          {
+            "path": "src/adversarial_payments/serving/onnx_backend.py",
+            "module": "onnx_backend",
+            "loc": 51,
+            "summary": "The detector as it would actually be served: ONNX Runtime, not the training library.",
+            "api": [
+              "export_onnx",
+              "OnnxDetector"
+            ]
+          }
+        ]
+      }
+    ],
+    "tests": [
+      {
+        "path": "tests/test_agentic.py",
+        "cases": 9,
+        "summary": "The agentic track's artifact, and the one rule that matters for it."
+      },
+      {
+        "path": "tests/test_artifacts.py",
+        "cases": 7,
+        "summary": "Keep the Python writers and the TypeScript readers describing the same thing."
+      },
+      {
+        "path": "tests/test_attack.py",
+        "cases": 28,
+        "summary": "The constraint projections are the submission's central claim, so they get the tests."
+      },
+      {
+        "path": "tests/test_loop.py",
+        "cases": 21,
+        "summary": "The unrolled loop, its graph, and the scorecard."
+      },
+      {
+        "path": "tests/test_orchestration.py",
+        "cases": 18,
+        "summary": "Tests for the Red/Blue exchange."
+      },
+      {
+        "path": "tests/test_schema.py",
+        "cases": 9,
+        "summary": "The contract guard is the plan's highest-risk interface, so it gets tests first."
+      }
+    ],
+    "scripts": [
+      {
+        "path": "scripts/build_docx.py",
+        "summary": "Render the solution walkthrough to .docx."
+      },
+      {
+        "path": "scripts/check_prefect_offline.py",
+        "summary": "Day-1 gate: Prefect 3 must run in-process, with no server and no network."
+      },
+      {
+        "path": "scripts/export_backend_audit.py",
+        "summary": "Inventory the Python backend so the site can show it instead of asserting it."
+      },
+      {
+        "path": "scripts/export_live_samples.py",
+        "summary": "Export a handful of real flagged transactions for the in-browser demo."
+      },
+      {
+        "path": "scripts/fetch_data.py",
+        "summary": "Acquire the transaction dataset, honestly."
+      },
+      {
+        "path": "scripts/make_kaggle_bundle.py",
+        "summary": "Package the code the Kaggle sweep needs into an uploadable zip."
+      },
+      {
+        "path": "scripts/run_detect_round0.py",
+        "summary": "Train, evaluate and publish the round-0 detector -- the blue team's baseline."
+      },
+      {
+        "path": "scripts/run_dosage_sweep.py",
+        "summary": "Does adversarial retraining ever beat this attacker, and what does it cost?"
+      },
+      {
+        "path": "scripts/seed_artifacts.py",
+        "summary": "Emit placeholder artifacts so P4 can build the dashboard before the pipeline exists."
+      }
+    ],
+    "totals": {
+      "modules": 27,
+      "loc": 5454,
+      "test_files": 6,
+      "test_cases": 92,
+      "scripts": 9
+    }
+  }
+}

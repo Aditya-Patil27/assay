@@ -77,8 +77,8 @@ export function CoevolutionChart({
               yAxisId="left"
               domain={[0, 100]}
               ticks={[0, 25, 50, 75, 100]}
-              stroke="var(--color-attack)"
-              tick={{ fontSize: 12, fontFamily: "var(--font-mono)", fill: "var(--color-attack)" }}
+              stroke="var(--color-attack-fill)"
+              tick={{ fontSize: 12, fontFamily: "var(--font-mono)", fill: "var(--color-attack-fill)" }}
               tickLine={false}
               axisLine={false}
               width={52}
@@ -89,8 +89,8 @@ export function CoevolutionChart({
               orientation="right"
               domain={[0, 100]}
               ticks={[0, 25, 50, 75, 100]}
-              stroke="var(--color-defend)"
-              tick={{ fontSize: 12, fontFamily: "var(--font-mono)", fill: "var(--color-defend)" }}
+              stroke="var(--color-defend-fill)"
+              tick={{ fontSize: 12, fontFamily: "var(--font-mono)", fill: "var(--color-defend-fill)" }}
               tickLine={false}
               axisLine={false}
               width={52}
@@ -108,10 +108,10 @@ export function CoevolutionChart({
               type="monotone"
               dataKey="prAuc"
               name="Detector PR-AUC"
-              stroke="var(--color-defend)"
+              stroke="var(--color-defend-fill)"
               strokeWidth={2.5}
               strokeDasharray="7 4"
-              dot={{ r: 5, fill: "var(--color-paper)", stroke: "var(--color-defend)", strokeWidth: 2.5 }}
+              dot={{ r: 5, fill: "var(--color-paper)", stroke: "var(--color-defend-fill)", strokeWidth: 2.5 }}
               activeDot={{ r: 7 }}
               isAnimationActive={false}
             >
@@ -124,7 +124,7 @@ export function CoevolutionChart({
                 offset={10}
                 formatter={(v: React.ReactNode) => `${v}%`}
                 style={{
-                  fill: "var(--color-defend)",
+                  fill: "var(--color-defend-fill)",
                   fontFamily: "var(--font-mono)",
                   fontSize: 12,
                 }}
@@ -135,9 +135,9 @@ export function CoevolutionChart({
               type="monotone"
               dataKey="asr"
               name="Attack success rate"
-              stroke="var(--color-attack)"
+              stroke="var(--color-attack-fill)"
               strokeWidth={3.5}
-              dot={{ r: 5, fill: "var(--color-attack)" }}
+              dot={{ r: 5, fill: "var(--color-attack-fill)" }}
               activeDot={{ r: 8 }}
               isAnimationActive={false}
             >
@@ -147,7 +147,7 @@ export function CoevolutionChart({
                 offset={12}
                 formatter={(v: React.ReactNode) => `${v}%`}
                 style={{
-                  fill: "var(--color-attack)",
+                  fill: "var(--color-attack-fill)",
                   fontFamily: "var(--font-mono)",
                   fontSize: 14,
                   fontWeight: 600,

@@ -3,17 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "sync": "node scripts/sync-artifacts.mjs",
+    "sync": "node scripts/sync-artifacts.mjs && node scripts/sync-runtime.mjs",
     "dev": "npm run sync && next dev",
     "prebuild": "npm run sync",
     "build": "next build",
-    "start": "npx serve out",
+    "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "deploy": "vercel deploy --prod --yes",
+    "check:agent": "tsx scripts/check-agent-port.mjs"
   },
   "dependencies": {
     "@xyflow/react": "^12.3.5",
     "next": "^16.3.3",
+    "onnxruntime-web": "^1.29.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "recharts": "^3.1.0"
@@ -24,6 +27,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "tailwindcss": "^4.0.0",
+    "tsx": "^4.23.13",
     "typescript": "^5.7.0"
   }
 }

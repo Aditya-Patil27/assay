@@ -1,60 +1,66 @@
 import type { PlaceholderSource } from "@/lib/load";
 
 /**
- * The document primitives.
+ * Page primitives.
  *
- * This page is a report, so the primitives are a report's: a numbered section, a numbered
- * figure with a caption, a key-result list. There is deliberately no card. The previous
- * version rendered six identical `eyebrow -> heading -> lede -> bordered rounded panel`
- * blocks, which gave every section the same visual weight and made the page read as a
- * dashboard of equals rather than as an argument with a shape.
+ * These were built for a single scrolling document and carried a section number in the
+ * margin. They are now shared across real routes, so the numbering is gone: a reader who
+ * lands on /agent from a link has no idea what "§6" is counting, and it was only ever
+ * counting scroll position anyway. Figures are still numbered, but per page.
  */
 
-/**
- * A numbered section.
- *
- * The number lives in the margin on wide screens and inline on narrow ones. It is the
- * only thing that replaces the old uppercase-mono eyebrow, and it does the job better,
- * because it is also what the contents list and the figure captions refer back to.
- */
-export function Section({
-  id,
-  n,
+/** The top of a route: title, standfirst, and the rule that starts the content. */
+export function PageHeader({
+  eyebrow,
   title,
   lede,
   children,
 }: {
-  id: string;
-  n: number;
+  eyebrow?: string;
+  title: string;
+  lede?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <header className="wrap pb-10 pt-12 md:pt-16">
+      {eyebrow ? (
+        <p className="text-[0.8125rem] font-medium text-defend">{eyebrow}</p>
+      ) : null}
+      <h1
+        className={`display max-w-[22ch] text-[2rem] leading-[1.1] sm:text-[2.5rem] md:text-[3rem] ${eyebrow ? "mt-2" : ""}`}
+      >
+        {title}
+      </h1>
+      {lede ? <p className="prose col mt-5">{lede}</p> : null}
+      {children}
+    </header>
+  );
+}
+
+/** A titled block within a page. */
+export function Block({
+  id,
+  title,
+  lede,
+  children,
+}: {
+  id?: string;
   title: string;
   lede?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-8 border-t border-rule-strong py-12 md:py-16">
-      <div className="wrap grid gap-x-8 gap-y-2 lg:grid-cols-[4.5rem_minmax(0,1fr)]">
-        <p aria-hidden="true" className="font-mono text-sm text-muted lg:pt-2 lg:text-right">
-          &sect;{n}
-        </p>
-
-        <div>
-          <h2 className="col font-serif text-[1.75rem] leading-[1.15] tracking-[-0.015em] md:text-[2.25rem]">
-            {title}
-          </h2>
-          {lede ? <p className="prose col mt-4 text-muted">{lede}</p> : null}
-          <div className="mt-9">{children}</div>
-        </div>
-      </div>
+    <section id={id} className="wrap scroll-mt-20 py-10 md:py-12">
+      <h2 className="display col text-[1.5rem] leading-tight md:text-[1.75rem]">{title}</h2>
+      {lede ? <p className="prose col mt-3">{lede}</p> : null}
+      <div className="mt-7">{children}</div>
     </section>
   );
 }
 
 /**
- * A numbered figure.
- *
- * The caption sits below the artwork and carries the reading, so the surrounding prose
- * never has to repeat what the chart shows. Figures are the only element allowed to break
- * out of the 68ch measure, which is what makes the break mean something.
+ * A numbered figure with its reading in the caption, so the surrounding prose never has
+ * to repeat what the chart shows.
  */
 export function Figure({
   n,
@@ -69,20 +75,15 @@ export function Figure({
 }) {
   return (
     <figure className={className}>
-      <div className="border-y border-rule bg-figure px-3 py-5 sm:px-5">{children}</div>
-      <figcaption className="mt-3 max-w-[62ch] text-[0.8125rem] leading-relaxed text-muted">
-        <span className="font-medium text-ink">Figure {n}.</span> {caption}
+      <div className="card border border-rule px-3 py-5 sm:px-5">{children}</div>
+      <figcaption className="mt-3 max-w-[64ch] text-[0.8125rem] leading-relaxed text-muted">
+        <span className="font-medium text-ink">Fig. {n}</span> — {caption}
       </figcaption>
     </figure>
   );
 }
 
-/**
- * A flat inset. Not a card: square corners, one hairline, paper-adjacent fill.
- *
- * Kept as a primitive because several panels genuinely are grouped sub-units of one
- * figure (one per round, one per OWASP category) rather than sections of their own.
- */
+/** Attio's card: white, 8px radius, two-layer shadow so faint it reads as a lift. */
 export function Panel({
   children,
   className = "",
@@ -90,15 +91,14 @@ export function Panel({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <div className={`border border-rule bg-paper p-4 sm:p-5 ${className}`}>{children}</div>;
+  return <div className={`card border border-rule p-4 sm:p-5 ${className}`}>{children}</div>;
 }
 
 /**
  * One headline number, as a row in a results list rather than a tile in a grid.
  *
- * A 4-up grid of bordered tiles says all four numbers matter equally. They do not: the
- * first two are the finding, the second two are what the finding cost. Rows in a
- * rule-separated list carry an order; tiles in a grid do not.
+ * A grid of tiles says every number matters equally. They do not: the finding comes
+ * first, what it cost comes second. Rows carry that order; a grid cannot.
  */
 export function KeyResult({
   label,
@@ -113,10 +113,17 @@ export function KeyResult({
 }) {
   const toneClass =
     tone === "attack" ? "text-attack" : tone === "defend" ? "text-defend" : "text-ink";
+  // A word like "not measured" is not a measurement and must not be set at measurement
+  // size -- at 1.75rem it wrapped and broke out of its column. Long values step down.
+  const long = value.length > 8;
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-6 border-t border-rule py-4 sm:grid-cols-[13rem_7rem_minmax(0,1fr)]">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-6 border-t border-rule py-4 sm:grid-cols-[13rem_minmax(7rem,auto)_minmax(0,1fr)]">
       <dt className="text-sm text-muted">{label}</dt>
-      <dd className={`tnum font-mono text-2xl sm:text-[1.75rem] ${toneClass}`}>{value}</dd>
+      <dd
+        className={`tnum display whitespace-nowrap ${long ? "text-base sm:text-lg" : "text-2xl sm:text-[1.75rem]"} ${toneClass}`}
+      >
+        {value}
+      </dd>
       {sub ? (
         <p className="col-span-2 text-[0.8125rem] leading-relaxed text-muted sm:col-span-1">
           {sub}
@@ -132,18 +139,18 @@ export function KeyResult({
  * The correctness feature, not decoration.
  *
  * Spec 4.3: seeded fixtures ship `placeholder: true` and the page must say so while any
- * remain. It is deliberately the loudest element on the page, sticks to the top through
- * the whole scroll, and names the exact files -- a judge should never have to wonder
- * which number on screen is real, and a teammate should be able to go straight to the
- * writer that still owes output. Colour is not load-bearing: the word PLACEHOLDER, the
- * warning glyph and the file list all carry the meaning on their own.
+ * remain. It is deliberately the loudest element on the site, sits above the header on
+ * every route, and names the exact files -- a judge should never have to wonder which
+ * number on screen is real, and a teammate should be able to go straight to the writer
+ * that still owes output. Colour is not load-bearing: the word, the glyph and the file
+ * list all carry the meaning on their own.
  */
 export function PlaceholderBanner({ sources }: { sources: PlaceholderSource[] }) {
   if (sources.length === 0) return null;
   return (
-    <div role="alert" className="sticky top-0 z-50 bg-warn text-paper">
-      <div className="wrap flex flex-col gap-2 py-3 sm:flex-row sm:items-baseline sm:gap-4">
-        <p className="shrink-0 font-mono text-sm font-semibold uppercase tracking-[0.08em]">
+    <div role="alert" className="bg-warn text-white">
+      <div className="wrap flex flex-col gap-2 py-2.5 sm:flex-row sm:items-baseline sm:gap-4">
+        <p className="shrink-0 font-mono text-[0.8125rem] font-semibold uppercase tracking-[0.06em]">
           <span aria-hidden="true">&#9650; </span>
           Placeholder data
         </p>
@@ -151,8 +158,6 @@ export function PlaceholderBanner({ sources }: { sources: PlaceholderSource[] })
           {sources.length} of 6 artifacts are seeded fixtures, not pipeline output &mdash; every
           figure drawn from them is fabricated. Still placeholder:{" "}
           <span className="font-mono font-medium">{sources.map((s) => s.file).join(", ")}</span>.
-          This banner clears when those writers emit{" "}
-          <span className="font-mono font-medium">placeholder=false</span>.
         </p>
       </div>
     </div>
@@ -165,47 +170,33 @@ export function PlaceholderBanner({ sources }: { sources: PlaceholderSource[] })
  * `git_sha` + `created_at` off the envelope, so a judge can tie the numbers on screen to
  * exactly one run of the pipeline.
  */
-export function Provenance({
-  shas,
-  newest,
-  children,
-}: {
-  shas: string[];
-  newest: string;
-  children?: React.ReactNode;
-}) {
+export function Provenance({ shas, newest }: { shas: string[]; newest: string }) {
   return (
-    <footer className="border-t border-rule-strong py-10">
-      <div className="wrap">
-        <p className="text-sm font-medium">Colophon</p>
-        <dl className="mt-4 grid gap-x-8 gap-y-4 text-[0.8125rem] sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <dt className="text-muted">commit</dt>
-            <dd className="mt-1 break-all font-mono">
-              {shas.join(" · ")}
-              {shas.length > 1 ? (
-                <span className="ml-2 text-warn">mixed &mdash; artifacts span commits</span>
-              ) : null}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-muted">artifacts written</dt>
-            <dd className="mt-1 font-mono">
-              <time dateTime={newest}>{newest.replace("T", " ").slice(0, 19)} UTC</time>
-            </dd>
-          </div>
-          <div>
-            <dt className="text-muted">pipeline</dt>
-            <dd className="mt-1">Sparkov &middot; XGBoost &middot; coordinate descent</dd>
-          </div>
-          <div>
-            <dt className="text-muted">this page</dt>
-            <dd className="mt-1">static export &middot; reads JSON, never trains</dd>
-          </div>
-        </dl>
-        {children}
+    <dl className="mt-10 grid gap-x-8 gap-y-4 border-t border-rule pt-6 text-[0.8125rem] sm:grid-cols-2 lg:grid-cols-4">
+      <div>
+        <dt className="text-muted">commit</dt>
+        <dd className="mt-1 break-all font-mono">
+          {shas.join(" · ")}
+          {shas.length > 1 ? (
+            <span className="ml-2 text-warn">mixed &mdash; artifacts span commits</span>
+          ) : null}
+        </dd>
       </div>
-    </footer>
+      <div>
+        <dt className="text-muted">artifacts written</dt>
+        <dd className="mt-1 font-mono">
+          <time dateTime={newest}>{newest.replace("T", " ").slice(0, 19)} UTC</time>
+        </dd>
+      </div>
+      <div>
+        <dt className="text-muted">pipeline</dt>
+        <dd className="mt-1">Sparkov &middot; XGBoost &middot; coordinate descent</dd>
+      </div>
+      <div>
+        <dt className="text-muted">this site</dt>
+        <dd className="mt-1">reads committed JSON &middot; never trains</dd>
+      </div>
+    </dl>
   );
 }
 

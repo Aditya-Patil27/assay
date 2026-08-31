@@ -2,22 +2,27 @@ import path from "node:path";
 
 import type { NextConfig } from "next";
 
-const basePath = process.env.BASE_PATH || undefined;
-
+/**
+ * A running Next application, not a static export.
+ *
+ * This used to be `output: "export"`. That made the deliverable a folder of HTML you
+ * could zip and mail, which is a real virtue -- but it also meant the site could never do
+ * anything. No route can hold an API key, so the agentic prompt-injection demo had no way
+ * to reach a model, and the whole page was a rendering of a run that had already
+ * finished. Dropping the export buys server routes; the tabular detector still runs
+ * entirely in the browser via WASM, so the expensive half of the demo costs nothing to
+ * serve and cannot fail in front of a judge on a cold start.
+ *
+ * assetPrefix and basePath are gone with it: those existed for GitHub Pages' subpath, and
+ * this deploys to a domain root.
+ */
 const nextConfig: NextConfig = {
-  // Fully static export: the judged demo is a URL, not a running server.
-  output: "export",
-  images: { unoptimized: true },
   // Pin the workspace root; without it Turbopack walks up and finds a stray lockfile.
   turbopack: { root: path.join(__dirname) },
-  // GitHub Pages serves from a subpath; Vercel does not. Set BASE_PATH for the former.
-  basePath,
-  // Without this the export emits absolute /_next/... URLs, which resolve to the
-  // filesystem root under file:// and leave a judge staring at unstyled HTML. Every page
-  // lands at the top level of out/, so a document-relative prefix is safe -- and it means
-  // the folder can be zipped, mailed, and double-clicked with no server at all. A
-  // BASE_PATH deploy keeps the absolute form, which is what a subpath host needs.
-  assetPrefix: basePath ?? ".",
+  // onnxruntime-web ships .wasm binaries that must not be parsed as modules.
+  outputFileTracingIncludes: {
+    "/**": ["./public/models/**"],
+  },
 };
 
 export default nextConfig;

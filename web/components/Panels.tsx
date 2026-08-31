@@ -86,7 +86,7 @@ function Bar({
   value: number;
   tone: "attack" | "defend";
 }) {
-  const color = tone === "attack" ? "bg-attack" : "bg-defend";
+  const color = tone === "attack" ? "bg-attack-fill" : "bg-defend-fill";
   const text = tone === "attack" ? "text-attack" : "text-defend";
   return (
     <div className="flex items-center gap-3">

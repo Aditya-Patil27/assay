@@ -14,7 +14,7 @@ import {
 import type { AttackRound } from "@/lib/types";
 
 /** One bar shade per round -- attack red, walked from bright to dim as rounds advance. */
-const ROUND_FILL = ["var(--color-attack)", "#d05f4b", "var(--color-attack-dim)"];
+const ROUND_FILL = ["var(--color-attack-fill)", "#d05f4b", "var(--color-attack-dim)"];
 
 /**
  * Which features the attacker actually reaches for, and how that shifts as the detector

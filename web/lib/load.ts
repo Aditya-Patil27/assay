@@ -8,14 +8,20 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import type { AgentRuntime } from "./agent/types";
 import type {
   AgenticCategory,
   AttackExample,
   AttackRound,
+  BackendAudit,
+  DataProvenance,
   DetectRound,
   Envelope,
   FeasibilityAudit,
+  FeatureSchema,
   Graph,
+  LatencyStats,
+  LiveSamples,
   ScorecardRow,
 } from "./types";
 import { SCHEMA_VERSION } from "./types";
@@ -134,3 +140,66 @@ export function provenance(artifacts: Artifacts): { shas: string[]; newest: stri
     .at(-1)!;
   return { shas, newest };
 }
+
+/* ---------------------------------------------------------------------------------------
+ * The system artifacts.
+ *
+ * These describe the machine that produced the numbers above rather than the numbers
+ * themselves, and every one of them is optional: a clone that has never run the pipeline
+ * still builds, and the page simply omits what it does not have. That is the same rule
+ * loadFeasibility follows -- omit, never invent.
+ * ------------------------------------------------------------------------------------- */
+
+/** null when the file is absent; any other failure still throws. */
+async function optional<T>(read: () => Promise<T>): Promise<T | null> {
+  try {
+    return await read();
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException)?.code === "ENOENT") return null;
+    throw err;
+  }
+}
+
+/**
+ * Read a bare artifact -- one the writer emits without an Envelope.
+ *
+ * feature_schema.json and data_provenance.json predate the envelope contract and carry no
+ * schema_version, so `load` would reject them on a version mismatch that does not exist.
+ * They are read unwrapped rather than given a fake envelope, because a fabricated
+ * `placeholder: false` is exactly the claim this codebase refuses to make on data's behalf.
+ */
+async function loadBare<T>(...segments: string[]): Promise<T> {
+  return JSON.parse(await readFile(join(DATA, ...segments), "utf8")) as T;
+}
+
+export const loadLatency = () =>
+  optional(() => load<LatencyStats>("latency.json"));
+
+export const loadFeatureSchema = () =>
+  optional(() => loadBare<FeatureSchema>("feature_schema.json"));
+
+export const loadDataProvenance = () =>
+  optional(() => loadBare<DataProvenance>("data_provenance.json"));
+
+/**
+ * The per-provider red-team runs behind the pooled agentic result.
+ *
+ * An exploit rate is a property of one model, so the pooled figure alone invites the
+ * reading that the defense was validated once. Loading the providers separately lets the
+ * page show that it was measured twice, on two vendors, and say plainly where the result
+ * is significant and where it is not.
+ */
+export async function loadProviderRedteams(): Promise<Envelope<AgenticCategory[]>[]> {
+  const files = ["redteam-groq.json", "redteam-nvidia.json"];
+  const loaded = await Promise.all(
+    files.map((f) => optional(() => load<AgenticCategory[]>("agentic", f))),
+  );
+  return loaded.filter((e): e is Envelope<AgenticCategory[]> => e !== null);
+}
+
+export const loadLiveSamples = () => optional(() => load<LiveSamples>("live_samples.json"));
+
+export const loadBackendAudit = () => optional(() => load<BackendAudit>("backend_audit.json"));
+
+/** The agent runtime constants, exported from Python by scripts/export_agent_runtime.py. */
+export const loadAgentRuntime = () => optional(() => load<AgentRuntime>("agent_runtime.json"));

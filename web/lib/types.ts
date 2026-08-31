@@ -117,3 +117,107 @@ export interface Graph {
   nodes: GraphNode[];
   edges: GraphEdge[];
 }
+
+/**
+ * Serving latency for the exported detector.
+ *
+ * Not a mirrored dataclass -- `artifacts.py` writes this one as a plain dict, so there is
+ * no Python counterpart for tests/test_artifacts.py to check this interface against.
+ */
+export interface LatencyStats {
+  p50_ms: number;
+  p95_ms: number;
+  p99_ms: number;
+  mean_ms: number;
+  max_ms: number;
+  n_samples: number;
+  mode: string;
+  backend: string;
+}
+
+/**
+ * The contract the attacker is held to, as the pipeline actually computed it.
+ *
+ * `frozen`, `coupled_groups` and `mutable` partition `columns`; `bounds` are the observed
+ * min/max in the training corpus, which is what makes "feasible" a measured property
+ * rather than an assertion. Written without an envelope by the feature builder.
+ */
+export interface FeatureSchema {
+  columns: string[];
+  frozen: string[];
+  coupled_groups: string[][];
+  mutable: string[];
+  bounds: Record<string, [number, number]>;
+}
+
+/** Where the transactions came from. Also written without an envelope. */
+export interface DataProvenance {
+  source: string;
+  n_rows: number;
+  fraud_rate: number;
+  n_fraud: number;
+  n_cards: number;
+  date_min: string;
+  date_max: string;
+  kaggle_dataset: string | null;
+  seed: number | null;
+  generator: string | null;
+  path: string;
+  created_at: string;
+  /** non-null when the loader fell back or degraded; surfaced on the page verbatim. */
+  warning: string | null;
+}
+
+/**
+ * Real flagged transactions for the in-browser demo.
+ *
+ * Written by scripts/export_live_samples.py from the chronological test split. Every
+ * sample is genuinely fraudulent and genuinely flagged by the round-0 detector, which is
+ * exactly the population attack/engine.py::select_targets picks -- so /live starts where
+ * the pipeline starts rather than on an invented row.
+ */
+export interface LiveSample {
+  id: string;
+  p_fraud: number;
+  values: Record<string, number>;
+}
+
+export interface LiveSamples {
+  threshold: number;
+  features: string[];
+  samples: LiveSample[];
+}
+
+/**
+ * The backend, inventoried by scripts/export_backend_audit.py.
+ *
+ * Walked out of the source with `ast` rather than written down, so it cannot go stale:
+ * every module, its measured size, its own docstring's first sentence, and its public API.
+ */
+export interface AuditModule {
+  path: string;
+  module: string;
+  loc: number;
+  summary: string;
+  api: string[];
+}
+
+export interface AuditGroup {
+  key: string;
+  title: string;
+  blurb: string;
+  modules: AuditModule[];
+}
+
+export interface BackendAudit {
+  groups: AuditGroup[];
+  tests: { path: string; cases: number; summary: string }[];
+  scripts: { path: string; summary: string }[];
+  totals: {
+    modules: number;
+    loc: number;
+    test_files: number;
+    test_cases: number;
+    scripts: number;
+  };
+}
