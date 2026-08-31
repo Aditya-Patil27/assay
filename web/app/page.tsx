@@ -145,10 +145,10 @@ export default async function Home() {
       <section className="bg-night text-night-ink">
         <div className="wrap grid gap-12 py-16 md:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-start">
           <div>
-            <p className="text-[0.8125rem] font-medium text-defend-dim">
+            <p className="mono-label text-[0.8125rem] text-attack">
               Mastercard Innovation Challenge 2026
             </p>
-            <h1 className="display mt-3 max-w-[16ch] text-[2.5rem] leading-[1.04] sm:text-[3.25rem] md:text-[3.75rem]">
+            <h1 className="display mt-4 max-w-[15ch] text-[2.75rem] sm:text-[3.75rem] md:text-[4.5rem]">
               An attack that keeps working, and costs more every round.
             </h1>
 
@@ -157,7 +157,7 @@ export default async function Home() {
             <dl className="mt-8 space-y-4 border-l border-night-rule pl-5">
               {STEPS.map((s) => (
                 <div key={s.k}>
-                  <dt className="text-[0.75rem] font-medium uppercase tracking-[0.04em] text-defend-dim">
+                  <dt className="mono-label text-[0.75rem] text-attack">
                     {s.k}
                   </dt>
                   <dd className="mt-1 max-w-[56ch] text-[0.9375rem] leading-relaxed text-night-muted">
@@ -170,13 +170,13 @@ export default async function Home() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/live"
-                className="rounded-[6px] bg-defend-fill px-4 py-2.5 text-[0.875rem] font-medium text-white transition-opacity hover:opacity-90"
+                className="mono-label rounded-[5px] bg-attack-fill px-4 py-2.5 text-[0.8125rem] font-bold text-[#0b0b0b] transition-opacity hover:opacity-90"
               >
                 Run the live detector
               </Link>
               <Link
                 href="/results"
-                className="rounded-[6px] border border-night-rule bg-night-2/60 px-4 py-2.5 text-[0.875rem] font-medium text-night-ink transition-colors hover:border-night-muted hover:bg-night-2"
+                className="mono-label rounded-[5px] border border-rule px-4 py-2.5 text-[0.8125rem] text-ink transition-colors hover:border-muted"
               >
                 See the results
               </Link>
@@ -203,7 +203,7 @@ export default async function Home() {
 
       {/* ---- Bento statistics ---------------------------------------------------- */}
       <section className="wrap reveal py-14">
-        <h2 className="text-[0.8125rem] font-medium text-muted">Measured, end to end</h2>
+        <h2 className="mono-label text-[0.8125rem] text-muted">Measured, end to end</h2>
         <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {stats.map((s) => (
             <div key={s.label} className="card border border-rule p-5">
@@ -273,13 +273,13 @@ export default async function Home() {
           <div className="flex shrink-0 flex-wrap gap-3">
             <Link
               href="/live"
-              className="rounded-[6px] bg-defend-fill px-5 py-3 text-[0.875rem] font-medium text-white transition-opacity hover:opacity-90"
+              className="mono-label rounded-[5px] bg-attack-fill px-5 py-3 text-[0.8125rem] font-bold text-[#0b0b0b] transition-opacity hover:opacity-90"
             >
               Run the detector
             </Link>
             <Link
               href="/agent"
-              className="rounded-[6px] border border-night-rule bg-night-2/60 px-5 py-3 text-[0.875rem] font-medium text-night-ink transition-colors hover:border-night-muted hover:bg-night-2"
+              className="mono-label rounded-[5px] border border-rule px-5 py-3 text-[0.8125rem] text-ink transition-colors hover:border-muted"
             >
               Fire an injection
             </Link>

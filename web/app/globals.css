@@ -2,105 +2,97 @@
 
 @theme {
   /* ------------------------------------------------------------------------------
-   * Attio's system, read off attio.com's own stylesheets rather than eyeballed.
+   * Unit21's system, read off unit21.ai with a real browser rather than eyeballed.
    *
-   * Their neutral and surface ramps are used verbatim. The accents are not: Attio is a
-   * CRM and has no red/blue-team story to tell, so its palette carries one blue and no
-   * strong red. The attack red and the ochre below were derived by rotating the hue of
-   * their primary blue (#266df0, H219 S.87 L.55) and holding saturation and lightness,
-   * so the three accents are siblings rather than three unrelated brand colours.
+   * Eight fraud platforms were surveyed for their computed styles. Seven read as SaaS;
+   * Unit21 reads as a security lab, which is what this project is. Its signature is
+   * three things nobody else does: cream type rather than white, a coral accent where
+   * everyone else reaches for blue, and a *serif* at 93px in weight 400.
+   *
+   * The Attio palette this replaced was competent and completely anonymous -- flat
+   * grey, hairline rules, dense tables, blue accent. That is IBM Carbon's language,
+   * and it made a red-team tool look like an internal reporting console.
    * ------------------------------------------------------------------------------ */
 
-  /* Surfaces -- Attio's white ramp. The page is off-white and cards are pure white,
-     which is what produces their "paper resting on a surface" look. */
-  --color-paper: #fafafb;
-  --color-figure: #ffffff;
-  --color-figure-2: #f3f4f6;
-  --color-rule: #e4e7ec;
-  --color-rule-strong: #d3d8df;
+  /* Surfaces. Not pure black: #000 under cream vibrates at large sizes. */
+  --color-paper: #0b0b0b;
+  --color-figure: #141414;
+  --color-figure-2: #1c1c1c;
+  --color-rule: #2f2f2d;
+  --color-rule-strong: #46433c;
 
-  /* Text -- Attio's black ramp. */
-  --color-ink: #1c1d1f;
-  --color-muted: #6f7988;
+  /* Cream, not white. The single most recognisable thing about the reference, and what
+     stops a dark site reading as a terminal. 17.89:1 on the page. */
+  --color-ink: #fff4ce;
+  --color-muted: #a8a291;
 
   /* ------------------------------------------------------------------------------
-   * Two variants per accent, because one colour cannot do both jobs.
-   *
-   * The -fill values are vivid and used for bars, strokes and dots, which only need
-   * 3:1 as non-text graphics. The plain values are darkened until small text clears
-   * 4.5:1 on the off-white page. Attio's own primary is a fill, not a text colour --
-   * #266df0 reads at 4.45:1, which is why their body copy never uses it.
+   * Accents from Unit21's own ramp, mapped onto the red/blue-team story. All clear AA
+   * on both surfaces. The -fill variants are separate tokens because bars and strokes
+   * owe only 3:1 and may run brighter than text.
    * ------------------------------------------------------------------------------ */
-  --color-attack: #e5101e; /* 4.55:1 */
-  --color-attack-fill: #f02633;
-  --color-attack-dim: #f7a6ac;
+  --color-attack: #ff6158; /* their coral -- the attacker */
+  --color-attack-fill: #ff6158;
+  --color-attack-dim: #ff9d97;
 
-  --color-defend: #245bc2; /* 6.01:1 -- Attio's blue-600 */
-  --color-defend-fill: #266df0; /* Attio's primary */
-  --color-defend-dim: #94b9ff; /* Attio's blue-300 */
+  --color-defend: #46daff; /* their cyan -- the defence */
+  --color-defend-fill: #46daff;
+  --color-defend-dim: #a2ecff;
 
-  --color-warn: #a7640c; /* 4.50:1 */
-  --color-warn-fill: #f09826;
+  --color-warn: #d5bdff; /* their lilac -- provisional, placeholder, unroll */
+  --color-warn-fill: #d5bdff;
 
-  --color-wash-defend: #e8f0ff; /* Attio's blue-100 */
+  --color-ok: #15be74;
+  --color-wash-defend: #12303a;
+
+  /* Categorical ramp for the audit groups, drawn from the same hues so a group chip
+     never competes with the red and cyan that carry the argument. */
+  --color-g1: #46daff;
+  --color-g1-wash: #102c36;
+  --color-g2: #15be74;
+  --color-g2-wash: #0d2a1e;
+  --color-g3: #d5bdff;
+  --color-g3-wash: #221c30;
+  --color-g4: #ff9d97;
+  --color-g4-wash: #301a18;
+  --color-g5: #ffd47a;
+  --color-g5-wash: #2e2415;
+  --color-g6: #8fd3ff;
+  --color-g6-wash: #16262f;
+  --color-g7: #ff6158;
+  --color-g7-wash: #2c1513;
+  --color-g8: #a8a291;
+  --color-g8-wash: #232320;
+
+  /* Dark-section aliases. The site is one register now, so these resolve to the same
+     surfaces -- kept because the hero and closing band still name them. */
+  --color-night: #0b0b0b;
+  --color-night-2: #141414;
+  --color-night-rule: #2f2f2d;
+  --color-night-ink: #fff4ce;
+  --color-night-muted: #a8a291;
 
   /* ------------------------------------------------------------------------------
-   * A categorical ramp for the backend groups.
+   * Three faces, matching the reference's three jobs.
    *
-   * Attio ships exactly this kind of pastel set for record-type pills (#fff3cc,
-   * #feecf3, #e5eeff and friends are in their stylesheet). Each pair is a wash for the
-   * chip background and a solid for its text and bar, so a group is identifiable by
-   * colour without any of them competing with the attack red or the defend blue that
-   * carry the actual argument.
+   *   Libre Baskerville  display. The Baskerville revival Unit21 sets its 93px
+   *                      headline in. A serif that large at weight 400 is the whole
+   *                      reason their hero does not look like every other vendor's.
+   *   Space Mono         the machine layer: eyebrows, buttons, labels, numbers. Their
+   *                      UI is entirely mono, which makes the page read as an
+   *                      instrument rather than a brochure.
+   *   DM Sans            running prose, where a serif at 16px would tire a reader.
    * ------------------------------------------------------------------------------ */
-  --color-g1: #245bc2;
-  --color-g1-wash: #e5eeff;
-  --color-g2: #0f7a5a;
-  --color-g2-wash: #d8f3e8;
-  --color-g3: #a7640c;
-  --color-g3-wash: #fff3cc;
-  --color-g4: #a32d6b;
-  --color-g4-wash: #fdddea;
-  --color-g5: #5b3fb8;
-  --color-g5-wash: #eae5ff;
-  --color-g6: #0d6f7a;
-  --color-g6-wash: #d6f0f3;
-  --color-g7: #9c3a2a;
-  --color-g7-wash: #fde4dd;
-  --color-g8: #4a5568;
-  --color-g8-wash: #e8ebef;
+  --font-display: var(--font-baskerville), Baskerville, Georgia, serif;
+  --font-sans: var(--font-dmsans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-spacemono), ui-monospace, Menlo, monospace;
 
-  /* ------------------------------------------------------------------------------
-   * Dark sections.
-   *
-   * Every enterprise fraud platform (Feedzai, Forter, Riskified) opens on a dark hero
-   * and alternates dark bands down the page, because a wall of white reads as a
-   * document and they are selling a control room. The rhythm is worth taking; their
-   * atmospheric glow is not -- an unprompted neon bloom on dark is the single most
-   * recognisable AI-generated tell. These are flat, using Attio's own black ramp.
-   * ------------------------------------------------------------------------------ */
-  --color-night: #16181c;
-  --color-night-2: #202329;
-  --color-night-rule: #31353d;
-  --color-night-ink: #f3f4f6;
-  --color-night-muted: #9aa4b2;
-
-  /* ------------------------------------------------------------------------------
-   * Two faces. Attio ships Inter, Inter Display and JetBrains Mono (plus Tiempos, a
-   * licensed serif we do not fake). Inter's variable optical-size axis gives the
-   * Display cut without a second download -- headings set `opsz` high, which tightens
-   * the spacing and thins the joins the way a display cut should.
-   * ------------------------------------------------------------------------------ */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, Menlo, monospace;
-
-  /* Attio's radii sit at 5-9px, not the 12-16px that reads as generic SaaS. */
-  --radius-card: 8px;
-  --radius-chip: 5px;
+  --radius-card: 5px;
+  --radius-chip: 4px;
 }
 
 html {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 html,
@@ -108,28 +100,33 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
-  letter-spacing: -0.011em;
 }
 
 /* --------------------------------------------------------------------------------
- * Display type.
+ * Display type: big, light, tight, serif.
  *
- * `opsz` is Inter's optical-size axis; 32 is the Display cut. -0.015em is the tracking
- * Attio uses on headings, and it is the single most recognisable thing about their
- * type -- without it Inter at large sizes reads loose and generic.
+ * -0.022em is the reference's -2px at 93px. Line-height 1.02 is theirs too: a serif
+ * this large needs the leading pulled in or the headline falls apart into stripes.
  * -------------------------------------------------------------------------------- */
 .display {
-  font-variation-settings: "opsz" 32;
-  letter-spacing: -0.015em;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.022em;
+  line-height: 1.04;
+}
+
+/* The machine layer. Every eyebrow, button and small label on the site is mono. */
+.mono-label {
+  font-family: var(--font-mono);
+  letter-spacing: -0.01em;
 }
 
 /* --------------------------------------------------------------------------------
- * The layout. One measure for prose, one full width for figures.
+ * Layout.
  * -------------------------------------------------------------------------------- */
 .wrap {
   width: 100%;
-  max-width: 76rem;
+  max-width: 78rem;
   margin-inline: auto;
   padding-inline: 1.25rem;
 }
@@ -140,12 +137,12 @@ body {
 }
 
 .col {
-  max-width: 68ch;
+  max-width: 66ch;
 }
 
 .prose {
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--color-muted);
 }
 @media (min-width: 768px) {
@@ -154,18 +151,15 @@ body {
   }
 }
 .prose strong {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--color-ink);
 }
 
-/* Attio's card: white, tight radius, and a two-layer shadow so faint it reads as a
-   lift rather than a drop. Copied exactly -- it is their signature surface. */
+/* A card on black is a lighter panel with a hairline, not a shadow: a drop shadow on a
+   dark ground is invisible and only ever adds mud. */
 .card {
   background: var(--color-figure);
   border-radius: var(--radius-card);
-  box-shadow:
-    0 1px 3px #0000000a,
-    0 0 2px #1c28402e;
 }
 
 table,
@@ -182,7 +176,6 @@ table,
 .react-flow__attribution {
   display: none;
 }
-/* Row gutter labels are not real pipeline nodes -- no connection handles. */
 .band-label .react-flow__handle {
   display: none;
 }
@@ -193,11 +186,7 @@ table,
 }
 
 /* --------------------------------------------------------------------------------
- * Motion.
- *
- * The site was criticised, fairly, for being inert. These are the only two animations
- * on it: a scroll reveal and the hero's pulse. Both stop entirely under
- * prefers-reduced-motion -- an animation that ignores that setting is not polish.
+ * Motion: a scroll reveal and one pulse, both off under prefers-reduced-motion.
  * -------------------------------------------------------------------------------- */
 @keyframes reveal-up {
   from {
