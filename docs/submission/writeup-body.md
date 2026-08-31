@@ -5,7 +5,7 @@ that is what the submission is checked for.
 
 ---
 
-## Adversarial Payments Framework
+## Assay
 
 **A closed-loop red team for payment fraud — and an audit that says which attack numbers are real.**
 

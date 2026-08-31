@@ -1,4 +1,10 @@
-# Adversarial Payments Framework
+# Assay
+
+**Red-teaming payment fraud detection under the constraints that make a number mean something**
+
+*An assay is the test that determines the true metal content of a coin. This framework
+does the same to a security number — and the repository keeps the `adversarial-payments`
+slug it was created under.*
 
 **Mastercard Innovation Challenge 2026 — AI red teaming for payment security**
 

@@ -41,8 +41,8 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "Adversarial Payments Framework",
-    template: "%s · Adversarial Payments",
+    default: "Assay — adversarial payment security",
+    template: "%s · Assay",
   },
   description:
     "A closed-loop red/blue framework for payment security, measured on two attack surfaces.",

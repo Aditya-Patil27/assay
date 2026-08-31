@@ -1,10 +1,16 @@
-# An Adversarial Framework for Payment Security
+# Assay
 
 ## Red-teaming fraud detection and agentic payment systems
 
 **Mastercard Innovation Challenge 2026 — Solution Walkthrough**
 
 ---
+
+> **On the name.** An assay is the test that determines the true metal content of a
+> coin — historically, the check that money is what it claims to be. That is what this
+> framework does to a security number. It is also literally what §4.4's feasibility
+> audit does: two attackers report the same 100% success rate, and 99.9% of one's
+> evasions turn out to be base metal.
 
 > **Editorial status.** Every figure in this document traces to a result file in
 > `artifacts/` produced by code in this repository. Figures not yet computed are marked
@@ -855,5 +861,11 @@ would rather be believed about the two surfaces we built than admired for five w
 | Unrolled loop | `src/adversarial_payments/loop/flows.py` |
 | Agentic red team | `src/adversarial_payments/agentic/` |
 | Results | `artifacts/` |
+
+**A note on the two names.** The project is **Assay**. The repository and deployment
+keep the `adversarial-payments` slug they were created under: that URL is cited in this
+document and in the submission, and `src/adversarial_payments/` is imported by 35
+modules and two cross-language conformance checks. Renaming them hours before a deadline
+would risk the deliverable to fix nothing a reader can see.
 
 Setup and run instructions are in `docs/team/BUILD.md`.

@@ -1,4 +1,4 @@
-# Adversarial Payments Framework — Design Spec
+# Assay — Design Spec
 
 **Date:** 2026-08-29
 **Supersedes scope in:** `docs/2026-08-22-challenge-strategy.md` (§4 schedule only; §1–§3 taxonomy still stands)

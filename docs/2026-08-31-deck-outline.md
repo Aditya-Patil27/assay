@@ -41,7 +41,7 @@ so the promised architecture and the demoed artifact are deliberately the same s
 ## Slide-by-slide
 
 ### 1 — Title + the claim
-**Says:** Adversarial Payments Framework. One framework, two attack surfaces, red vs blue,
+**Says:** Assay. One framework, two attack surfaces, red vs blue,
 measured.
 **Shows:** The scorecard table's two rows, before/after, as the title slide's only graphic.
 Lead with the result; do not save it.

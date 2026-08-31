@@ -28,7 +28,7 @@ export function SiteHeader() {
       <div className="wrap flex h-14 items-center gap-6">
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
           <Mark />
-          <span className="display text-[0.9375rem] text-ink">Adversarial Payments</span>
+          <span className="display text-[0.9375rem] text-ink">Assay</span>
         </Link>
 
         <nav aria-label="Sections" className="ml-auto flex items-center gap-0.5 overflow-x-auto">
@@ -86,11 +86,11 @@ export function SiteFooter({ children }: { children?: React.ReactNode }) {
           <div className="max-w-[34ch]">
             <div className="flex items-center gap-2.5">
               <Mark />
-              <span className="display text-[0.9375rem]">Adversarial Payments</span>
+              <span className="display text-[0.9375rem]">Assay</span>
             </div>
             <p className="mt-3 text-[0.8125rem] leading-relaxed text-muted">
-              A closed-loop red/blue framework for payment security, measured on two attack
-              surfaces. Mastercard Innovation Challenge 2026.
+              Assay tests whether an adversarial security number means anything, by holding the
+              attacker to constraints a real one would face. Mastercard Innovation Challenge 2026.
             </p>
           </div>
 
