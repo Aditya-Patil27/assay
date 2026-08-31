@@ -620,6 +620,45 @@ assumptions, not model behaviour, and we decline to present them as findings.
 
 ---
 
+### 4.6 Detecting, flagging and mitigating
+
+The brief asks for a system that *detects, flags and mitigates* the generated attacks. Those
+are three different actions and we implement them at both surfaces, so this section names
+which mechanism performs which rather than leaving a reader to infer it from the results
+above.
+
+| | Tabular detector | Payment agent |
+|---|---|---|
+| **Detect** | Score every transaction; PR-AUC 0.9472, and **68.9%** recall on generated attacks it has never seen | Judge the agent's *audit log*, never its prose: an exploit is a dangerous tool call that actually fired with attacker-chosen arguments |
+| **Flag** | Decline above a threshold chosen at a fixed false-positive budget — 114 legitimate declines per 100,000 | Raise a defence event naming the layer and the reason, e.g. `classifier · redact · score=0.54 addresses-the-assistant, authority-framing` |
+| **Mitigate** | The threshold *is* the mitigation: the transaction does not authorise. Section 4.4 prices tightening it | Three layers, each blocking a different way in — see below |
+
+**The agent's mitigation is layered, and the layers are not interchangeable.**
+
+1. **Injection classifier** — scores untrusted text and *redacts* the offending span before the
+   model ever sees it. The document reaches the agent with the payload replaced by
+   `[REDACTED BY INJECTION FILTER]`, so the instruction cannot be followed rather than being
+   refused after the fact.
+2. **Tool scoping** — each task carries its own permitted tool set
+   (`memo_review`, `dispute_review`, `invoice_payment`, `payee_onboarding`). A payee-mutation call arriving during a
+   memo review is denied because that task cannot make it, independent of anything the model
+   decided.
+3. **Human in the loop** — any transfer above 500 is held for
+   approval rather than executed. This is the layer that catches what the first two miss, and
+   it is why the defence does not have to be perfect to be useful.
+
+**Both halves of the trade are measured.** The layers remove every exploit observed on
+`gpt-oss-120b` (Fisher p = 0.015) and refuse **none** of the 14 benign control documents — a 0%
+false-refusal rate. A defence that blocked everything would score a perfect exploit rate and be
+worthless, which is exactly why the benign controls exist.
+
+The `/agent` page on the prototype runs this stack live. Firing the default injection with
+defences off rewrites a supplier's IBAN to the attacker's account and the ledger diff shows it;
+firing it again with defences on produces `classifier · redact` followed by `hitl · approve`,
+the legitimate transfer completes, and the ledger is untouched.
+
+---
+
 ## 5. Reproducibility
 
 An evaluation nobody can re-run is an assertion.
