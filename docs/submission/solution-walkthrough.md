@@ -43,7 +43,10 @@ informative problem than the unconstrained version.
 Generative AI has not invented new categories of payment fraud. It has collapsed the cost of
 executing the existing ones at scale, and that is a different and more serious problem.
 
-We mapped the attack surface across five vectors before deciding what to build.
+We mapped the attack surface across five vectors in depth before deciding what to build,
+and catalogued a further eight that GenAI changes materially but that we did not
+implement. Section 2.6 lists those, because a threat map that contains only the things
+we happened to build is not a threat map.
 
 ### 2.1 Synthetic identity synthesis
 
@@ -82,8 +85,31 @@ The vector we chose to build against. An attacker with query access to a scoring
 search for the minimal modification to a transaction that flips it from *decline* to
 *approve*. Unlike the four above, this attack targets the defence itself.
 
-**We built against 2.4 and 2.5.** The other three are mapped, not implemented, and section 8
-says so explicitly.
+### 2.6 The wider catalogue
+
+The five above are the vectors we analysed in depth. Restricting a threat map to them would
+misrepresent the surface, so the following are catalogued with what GenAI actually changes
+about each. None is implemented, and none is claimed to be.
+
+| Vector | How the rail is abused | What GenAI changes |
+|---|---|---|
+| **Card testing / BIN attacks** | Automated low-value authorisations probe stolen card ranges for live numbers before resale | Agents adapt probe amount, merchant and pacing in response to declines, turning a fixed script into a feedback loop |
+| **Account takeover via OTP interception** | SIM-swap or social-engineered OTP capture converts credential theft into transaction authority | Voice synthesis makes the carrier-support call that authorises the swap cheap and repeatable |
+| **Authorised push payment (APP) fraud** | The victim is persuaded to send the payment themselves, so every control that checks authenticity passes | Conversational agents sustain a plausible pretext across hours and channels at negligible marginal cost |
+| **Bust-out fraud** | An account is nurtured into good standing over months, then drawn down in a burst | Generative behavioural modelling can shape the nurture phase to resemble a specific segment's real spending |
+| **Triangulation fraud** | A fake storefront takes real orders, fulfils them with stolen cards, and harvests the card data | Storefront copy, product listings and reviews are now generated end to end |
+| **First-party / friendly fraud** | The legitimate cardholder disputes a genuine transaction | LLM-drafted dispute narratives are internally consistent and match issuer templates, defeating text heuristics |
+| **Money mule layering** | Proceeds are split across many accounts to break the transaction graph | Agents coordinate split sizes and timing against known velocity rules rather than fixed patterns |
+| **Model extraction and training-set poisoning** | The detector itself is the target: queried to clone its boundary, or fed crafted transactions that shift it | Directly adjacent to what we built. Our dosage sweep is the defensive mirror of a poisoning attack — it measures what a fixed number of crafted rows does to a model, which is the same question a poisoner asks |
+
+**We built against 2.4 and 2.5.** The other three in-depth vectors, and all eight above, are
+mapped and not implemented. Section 8 says so again rather than relying on a reader
+remembering it.
+
+This is a deliberate trade and worth stating rather than letting a reader infer it: **breadth
+in identifying the surface, depth in the two we could measure end to end.** Two vectors carried
+to a defensible number are worth more than eight carried to a screenshot, and the ones we did
+not build are listed here precisely so that the choice is visible.
 
 ---
 
