@@ -8,6 +8,8 @@ slug it was created under.*
 
 **Mastercard Innovation Challenge 2026 — AI red teaming for payment security**
 
+**Demo Video:** https://www.youtube.com/watch?v=oE7-N0wZTM0
+
 > ## Status — 2026-08-30: five of six results are real
 >
 > The tabular track has been run end to end on the genuine Sparkov dataset
