@@ -7,12 +7,26 @@
  * because the route rotates keys it drains all of them rather than one. The demo then
  * returns 503 to the next person who opens it.
  *
- * WHAT THIS IS NOT: a distributed rate limiter. State is per serverless instance, so a
- * caller spread across cold starts sees a higher effective limit than the numbers below.
- * Fixing that properly needs shared state (Vercel KV, Upstash, Redis) and an account we do
- * not have. This raises the cost of casual abuse from zero to real, and the daily ceiling
- * caps the worst case per instance. It is a mitigation, not a guarantee, and saying so here
- * is cheaper than someone later assuming it is airtight.
+ * WHAT THIS DOES NOT DO, VERIFIED RATHER THAN ASSUMED.
+ *
+ * State here is per serverless instance. On this deployment that means it does not bind at
+ * all: firing five requests at the live endpoint returns five distinct x-vercel-id lambda
+ * ids, so every request gets a fresh module scope and a full bucket. Fifteen consecutive
+ * calls all returned 200. This limiter stops a burst only where an instance is reused,
+ * which under Vercel's model for a low-traffic app is close to never.
+ *
+ * It is kept because it costs nothing, it binds under sustained load where instances do get
+ * reused, and the tests hold it to its stated behaviour. It is NOT the control that protects
+ * the endpoint, and this comment exists so nobody reads the file and concludes otherwise.
+ *
+ * WHAT ACTUALLY BOUNDS THE DAMAGE TODAY: the provider keys are free-tier with no payment
+ * method attached, so the worst case is quota exhaustion -- the demo answers 503 -- and not
+ * an unbounded bill. That is a real risk during judging and not a financial one.
+ *
+ * THE REAL FIX needs shared state across instances: Vercel KV or Upstash Redis (both have
+ * free tiers, roughly ten minutes plus a signup), or a WAF rule at the edge. Either makes
+ * the bucket global instead of per-instance. Neither was available to do here without
+ * creating an account on someone's behalf.
  */
 
 const PER_IP_TOKENS = 8;
