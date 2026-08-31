@@ -81,9 +81,10 @@ attack surfaces that share one contract and one scorecard.
         free. The attacker may touch only the last group, clipped to bands observed in the
         corpus.
   \item \textbf{Attack success does not fall.} It is \AsrFirst\% at round~0 and \AsrLast\% at
-        the final round. What moved is cost: mean features touched \LzeroFirst{} $\to$
-        \LzeroLast{} (+\LzeroRise\%) and median queries \QueriesFirst{} $\to$ \QueriesLast{}
-        (+\QueriesRise\%).
+        the final round. What moved is the \emph{search} cost: median queries to find an
+        evasion \QueriesFirst{} $\to$ \QueriesLast{} (\QueriesRise\%). The number of features
+        an evasion touches did not move (\LzeroFirst{} $\to$ \LzeroLast{}, \LzeroRise\%) ---
+        retraining made evasions harder to \emph{find}, not structurally more expensive.
   \item \textbf{We refuted our own explanation for that.} Our first draft blamed the flat
         result on too small an adversarial dosage. A sweep from \DosageMin$\times$ to
         \DosageMax$\times$ on the full corpus leaves attack success at \AsrLast\% in every
@@ -162,18 +163,19 @@ before reporting anything.
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{figures/coevolution.pdf}
-  \caption{Attack success is flat at \AsrLast\% across every round. The attacker's cost is
-  not: it touches more features and spends more queries each round to find an evasion that
-  still works. A defence that raises the price of an attack without preventing it is a real
-  outcome, and reporting it as a fall in success rate would have been the easier story.}
+  \caption{Attack success is flat at \AsrLast\% across every round, while the search needed
+  to reach it lengthens: median queries \QueriesFirst{} $\to$ \QueriesLast{}. Sparsity is
+  unchanged over the same rounds (\LzeroFirst{} $\to$ \LzeroLast{}), so the honest reading is
+  that retraining made evasions harder to \emph{find} rather than structurally more costly.
+  A defence that raises the price of an attack without preventing it is a real outcome, and
+  reporting it as a fall in success rate would have been the easier story.}
   \label{fig:coevolution}
 \end{figure}
 
 \noindent
-The detector for this loop is P1's published round~0 on a temporal split
-(PR-AUC \PrAucTemporal{}, $n_{\text{train}}=\NTrainTemporal$). The sweeps below use a
-stratified split at a larger training size and are a \emph{different experiment}; their
-PR-AUC is not comparable to this one and the two never appear in the same claim.
+The detector behind this loop reports PR-AUC \PrAucTemporal{} at
+$n_{\text{train}}=\NTrainTemporal$. Detection quality and attack success are measured on
+different axes and are never combined into a single score.
 
 \subsection{We refuted our own excuse}
 
@@ -309,6 +311,23 @@ The draft explained the flat attack success rate as an artefact of small adversa
 Figure~\ref{fig:dosage} is the test of that explanation, and it fails: 5000$\times$ the
 dosage changes nothing and costs \DosagePrAucDrop\% of PR-AUC. We deleted the excuse rather
 than keeping it as a hedge.
+
+\subsection{A fifth, caught while writing this document}
+
+The artifacts moved underneath this writeup mid-draft. An earlier run had mean features
+touched rising \(3.81 \to 4.64\); the current one has \LzeroFirst{} \(\to\) \LzeroLast{}.
+The prose, the figure and the prototype all said attacker effort was climbing, and one of
+the two axes had stopped agreeing.
+
+It was caught mechanically rather than by reading: this document defines every quoted value
+as a macro, and a cross-check of defined-versus-referenced macros flagged one that had gone
+unused. The template also hard-coded a \texttt{+} before the delta, so a fall would have
+rendered as ``+-2\%'' --- a sign error announcing a substantive one. The deltas now carry
+their own sign, and the figure plots the axis that actually moved.
+
+\claim{The claim that survives is narrower than the one we had written.} Retraining makes
+evasions harder to \emph{find} --- median queries \QueriesFirst{} \(\to\) \QueriesLast{} --- and
+does not make them structurally more expensive.
 
 \subsection{Two smaller retractions, same species}
 

@@ -85,14 +85,14 @@ def fig_coevolution() -> None:
 
     ax2 = ax.twinx()
     ax2.spines["top"].set_visible(False)
-    ax2.plot(rounds, [r["mean_l0"] for r in a], "--s", color=DEFEND, lw=2, ms=5,
-             label="Mean features touched (L0)")
-    ax2.set_ylabel("Mean features touched", color=DEFEND)
+    ax2.plot(rounds, [r["median_queries"] for r in a], "--s", color=DEFEND, lw=2, ms=5,
+             label="Median queries to find an evasion")
+    ax2.set_ylabel("Median queries", color=DEFEND)
 
     h1, l1 = ax.get_legend_handles_labels()
     h2, l2 = ax2.get_legend_handles_labels()
     ax.legend(h1 + h2, l1 + l2, loc="center left", frameon=False, fontsize=8)
-    ax.set_title("Retraining moved the attacker's cost, not its success rate")
+    ax.set_title("Retraining moved the attacker's search cost, not its success rate")
     save(fig, "coevolution")
 
 
@@ -302,10 +302,10 @@ def build_numbers() -> None:
         "AsrLast": pct(last["asr"]),
         "LzeroFirst": f"{first['mean_l0']:.2f}",
         "LzeroLast": f"{last['mean_l0']:.2f}",
-        "LzeroRise": f"{(last['mean_l0'] / first['mean_l0'] - 1) * 100:.0f}",
+        "LzeroRise": f"{(last['mean_l0'] / first['mean_l0'] - 1) * 100:+.0f}",
         "QueriesFirst": str(first["median_queries"]),
         "QueriesLast": str(last["median_queries"]),
-        "QueriesRise": f"{(last['median_queries'] / first['median_queries'] - 1) * 100:.0f}",
+        "QueriesRise": f"{(last['median_queries'] / first['median_queries'] - 1) * 100:+.0f}",
         "PrAucTemporal": f"{d[0]['pr_auc']:.3f}",
         "NTrainTemporal": f"{d[0]['n_train']:,}",
         # Sweeps (stratified split -- a different experiment; never mix with the above)

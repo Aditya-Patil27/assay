@@ -295,6 +295,10 @@ export default async function Home() {
 /**
  * The hero visual: attack success pinned flat, attacker cost climbing under it.
  *
+ * The cost series is median QUERIES, not features touched. On the full dataset mean L0
+ * is flat (4.12 -> 4.03) while queries rise 275 -> 391, so features touched would draw a
+ * flat line under a legend promising a climb.
+ *
  * This replaced three full-width red bars. They were not wrong -- attack success really is
  * 100% at every round -- but three identical full bars spend a lot of red saying one
  * thing, and a reader scanning quickly reads three alarms instead of one flat line. Drawn
@@ -317,9 +321,13 @@ function CoevolutionSpark({
   const pad = 6;
   const x = (i: number) => pad + (i * (W - pad * 2)) / Math.max(rounds.length - 1, 1);
 
-  const l0s = rounds.map((r) => r.mean_l0);
-  const lo = Math.min(...l0s);
-  const hi = Math.max(...l0s);
+  // Queries, not features touched. Mean L0 is flat across rounds on the full dataset
+  // (4.12 -> 4.03), so drawing it as the "effort" series would show a flat line beneath a
+  // legend claiming it climbs. Median queries per success is the axis the cost actually
+  // appears on, and it is the one plotted.
+  const efforts = rounds.map((r) => r.median_queries);
+  const lo = Math.min(...efforts);
+  const hi = Math.max(...efforts);
   // Effort is drawn on its own scale across the lower band; the two series share no unit
   // and a shared axis would invent a comparison that does not exist.
   const yEffort = (v: number) => H - 14 - ((v - lo) / Math.max(hi - lo, 1e-9)) * (H * 0.42);
@@ -333,7 +341,7 @@ function CoevolutionSpark({
         viewBox={`0 0 ${W} ${H}`}
         className="mt-4 w-full"
         role="img"
-        aria-label={`Attack success rate stays at 100% across ${rounds.length} rounds while mean features touched rises from ${l0s[0].toFixed(2)} to ${l0s[l0s.length - 1].toFixed(2)}`}
+        aria-label={`Attack success rate stays at 100% across ${rounds.length} rounds while median queries per successful evasion rise from ${efforts[0]} to ${efforts[efforts.length - 1]}`}
       >
         <line
           x1={pad}
@@ -348,7 +356,7 @@ function CoevolutionSpark({
         ))}
 
         <polyline
-          points={rounds.map((r, i) => `${x(i)},${yEffort(r.mean_l0)}`).join(" ")}
+          points={rounds.map((r, i) => `${x(i)},${yEffort(r.median_queries)}`).join(" ")}
           fill="none"
           stroke="var(--color-defend-fill)"
           strokeWidth="2"
@@ -357,7 +365,7 @@ function CoevolutionSpark({
           <circle
             key={r.round}
             cx={x(i)}
-            cy={yEffort(r.mean_l0)}
+            cy={yEffort(r.median_queries)}
             r="3.5"
             fill="var(--color-figure)"
             stroke="var(--color-defend-fill)"
@@ -387,7 +395,7 @@ function CoevolutionSpark({
         </span>
         <span className="inline-flex items-center gap-1.5 text-night-muted">
           <span className="inline-block h-0.5 w-4 bg-defend-fill" aria-hidden="true" />
-          attacker effort — climbing
+          attacker effort — queries climbing
         </span>
       </div>
 
@@ -395,7 +403,13 @@ function CoevolutionSpark({
         <Cost
           value={`${rounds[0].mean_l0.toFixed(2)} → ${rounds[rounds.length - 1].mean_l0.toFixed(2)}`}
           label="mean features touched"
-          delta={`+${l0Pct.toFixed(0)}% effort per evasion`}
+          // The sign is derived, never assumed. A hardcoded "+" rendered "+-2%" once the
+          // full dataset turned this delta negative, which is how it was found.
+          delta={
+            Math.abs(l0Pct) < 5
+              ? "flat within noise"
+              : `${l0Pct >= 0 ? "+" : "−"}${Math.abs(l0Pct).toFixed(0)}% per evasion`
+          }
         />
         <Cost
           value={`${rounds[0].median_queries} → ${rounds[rounds.length - 1].median_queries}`}
