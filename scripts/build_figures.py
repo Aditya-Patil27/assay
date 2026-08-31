@@ -306,8 +306,8 @@ def build_numbers() -> None:
         "QueriesFirst": str(first["median_queries"]),
         "QueriesLast": str(last["median_queries"]),
         "QueriesRise": f"{(last['median_queries'] / first['median_queries'] - 1) * 100:+.0f}",
-        "PrAucTemporal": f"{d[0]['pr_auc']:.3f}",
-        "NTrainTemporal": f"{d[0]['n_train']:,}",
+        "LoopPrAuc": f"{d[0]['pr_auc']:.3f}",
+        "LoopNTrain": f"{d[0]['n_train']:,}",
         # Sweeps (stratified split -- a different experiment; never mix with the above)
         "SweepRows": f"{ds['rows']:,}",
         "NTrainStratified": f"{ds['n_train']:,}",
