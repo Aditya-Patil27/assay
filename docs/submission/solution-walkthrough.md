@@ -238,6 +238,8 @@ physically exist. We considered that disqualifying.
 **Sparsity.** Among successful attacks we prefer the one touching fewest features, which is
 also the one hardest for a monitoring system to notice.
 
+![Figure 1 — All 20 detector inputs, assigned a tier and a band measured from the corpus: 7 frozen, 4 coupled as a single merchant move, 9 free. This table is the attack's search space.](figures/constraints.png)
+
 ### 3.3 The search
 
 The detector is a gradient-boosted tree ensemble, so gradient-based attacks (FGSM, PGD) do
@@ -522,6 +524,8 @@ existed.
 
 Two things follow that we would rather state than have asked.
 
+![Figure 2 — Attack success is flat at 100% across all three rounds. What lengthens is the search: median queries 275 to 391. Mean features touched is unchanged over the same rounds (4.12 to 4.03), so retraining made evasions harder to find rather than structurally more expensive.](figures/coevolution.png)
+
 **We tested the dosage explanation, and it is wrong.**
 
 The obvious objection to the table above is that a few hundred adversarial rows against a
@@ -569,6 +573,8 @@ run rather than the subsample that happened to contain a more interesting number
 That is a real result about adversarial retraining under an adaptive threat model, and it is
 worth more to a reader than the falling curve we set out to produce.
 
+![Figure 3 — Adversarial dosage swept 1x to 5000x on the full corpus. Attack success is 1.000 in all eighteen measurements; the left panel shows no trend because there is none. Detector PR-AUC falls from 0.9457 to 0.7343 across the same arms.](figures/dosage.png)
+
 **Then we priced the other lever, and it does not work either.**
 
 Retraining is not the only defence available. The attacker wins by pushing a score below the
@@ -598,6 +604,8 @@ evasion scores 1.9e-03; at a threshold of 0.0004 it scores 6.6e-05. The attacker
 clear a fixed bar — it lands just underneath whichever bar we set, and lowering the bar only
 makes it search harder. Its search stops as soon as it wins, so the scores hug the threshold
 from below while retaining headroom to go further.
+
+![Figure 4 — Attack success against the false-positive budget. It holds at 1.000 until the widest budget tested, where it reaches 0.998 — at 10,035 legitimate declines per 100,000 transactions.](figures/threshold.png)
 
 **Taken together these two sweeps say something narrower and more useful than either alone.**
 Both defences available at the model layer were measured, not assumed, and both were priced:
@@ -645,6 +653,8 @@ real-fraud recall — and it declines fewer legitimate payments than before, not
 100% figure on the rows it trained on is reported beside it deliberately: it is the ceiling
 memorisation would produce, and the gap between 100% and 68.9% is how much of the result is
 generalisation rather than recall of specific rows.
+
+![Figure 5 — Recall on 283 adversarial examples the retrained model never saw: 0.0% to 68.9%. Recall on rows it did see is 100%, which is the memorisation ceiling and why the held-out figure is the only honest one. Real-fraud recall holds and legitimate declines fall. Measured on a 400,000-row run.](figures/adversarial_detection.png)
 
 **Both of these are true at once, and the pair is the finding.** Adversarial retraining
 generalises *within* the attack distribution — it learns something transferable about how
@@ -704,6 +714,8 @@ injections across six OWASP-mapped categories, paired with the scenarios on thei
 
 *Sources: `artifacts/agentic/redteam-groq.json` and `redteam-nvidia.json`, both
 `placeholder: false`. 95% CI on the pooled before-rate is 2.4%–7.1%.*
+
+![Figure 6 — Exploit rate before and after the defence layer, on two vendors. The reduction clears alpha = 0.05 on gpt-oss-120b and on the pooled corpus, and does not clear it on nemotron-120b taken alone.](figures/agentic.png)
 
 **The defence layer produces a statistically significant reduction** on `gpt-oss-120b`
 (p = 0.015) and pooled across both models (p = 0.003). It refused **none** of the 14 benign
