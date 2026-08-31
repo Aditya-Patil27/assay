@@ -1,2 +1,8 @@
 .vercel
 .env*
+
+# Synced build outputs, not sources. scripts/sync-runtime.mjs regenerates both from
+# node_modules and ../models, so committing 14MB of WASM would be storing a copy of a
+# dependency in git.
+public/ort/
+public/models/
