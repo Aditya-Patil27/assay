@@ -13,13 +13,31 @@ import {
  * The overview.
  *
  * Structurally this borrows the shape every enterprise fraud platform uses -- dark hero,
- * statistics band, capability cards, close -- because that shape works and a wall of white
- * reads as a document rather than a system. What it deliberately does NOT borrow is the
- * half of that page which is social proof: customer logo carousels, testimonials, award
- * strips, "trusted by" badges. This is a three-day hackathon build with no customers, and
- * every one of those would have to be invented. The statistics band below is the honest
- * substitute: the same visual weight, filled with numbers that came out of the pipeline.
+ * statistics band, capability cards, close -- because a wall of white reads as a document
+ * rather than a system. What it deliberately does not borrow is the half of that page
+ * which is social proof: logo carousels, testimonials, award strips. This is a three-day
+ * build with no customers, and every one of those would have to be invented.
+ *
+ * A judging panel scans for what/why/impressive in the first ten seconds, so the argument
+ * is a three-step flow before it is a paragraph, and every raw metric carries its own
+ * translation -- "3.81 -> 4.64 mean features touched" means nothing to a reader who does
+ * not already know what L0 is.
  */
+
+const STEPS = [
+  {
+    k: "The problem",
+    v: "A fraud detector that scores well offline can be walked past. Published evasion results usually prove less than they look like they prove.",
+  },
+  {
+    k: "What we built",
+    v: "A red team that may only move what a real attacker controls, against a detector that retrains on every evasion it finds. Attack, measure, defend, repeat.",
+  },
+  {
+    k: "The result",
+    v: "The attacker still gets through every time — so we report what it costs instead, and the audit showing an unconstrained attacker's identical score is mostly impossible transactions.",
+  },
+];
 
 const CAPABILITIES = [
   {
@@ -27,6 +45,13 @@ const CAPABILITIES = [
     label: "Run the detector live",
     blurb:
       "The exported ONNX graph, executed in your browser on WASM. Move a transaction, watch the score move, then run the constraint-aware attack against it.",
+    tone: "accent" as const,
+  },
+  {
+    href: "/agent",
+    label: "Fire a live injection",
+    blurb:
+      "Pick a prompt-injection payload and fire it at a real model with the defenses on or off. Watch the payee's IBAN move, or not.",
     tone: "accent" as const,
   },
   {
@@ -39,19 +64,13 @@ const CAPABILITIES = [
     href: "/attack",
     label: "Tabular surface",
     blurb:
-      "Worked evasions feature by feature, which levers the search reaches for as the detector retrains, and the constraint contract every perturbation is held to.",
-  },
-  {
-    href: "/agent",
-    label: "Agentic surface",
-    blurb:
-      "Indirect prompt injection against a payment agent, scored by OWASP LLM Top 10 and measured on two vendors with an exact test on each row.",
+      "Worked evasions feature by feature, and the constraint contract every perturbation is held to.",
   },
   {
     href: "/system",
     label: "The system, audited",
     blurb:
-      "Every backend module inventoried from source, the ONNX serving latency, and the corpus the constraint bands were measured from.",
+      "Every backend module inventoried from source, the ONNX serving latency, and the corpus the bands were measured from.",
   },
 ];
 
@@ -65,32 +84,36 @@ export default async function Home() {
     loadProviderRedteams(),
   ]);
 
-  const first = attack.payload[0];
-  const last = attack.payload[attack.payload.length - 1];
+  const rounds = attack.payload;
+  const first = rounds[0];
+  const last = rounds[rounds.length - 1];
   const injections =
     providers.length > 0
       ? providers.reduce((n, p) => n + p.payload.reduce((m, c) => m + c.attempts, 0), 0)
       : agentic.payload.reduce((m, c) => m + c.attempts, 0);
 
-  // Every figure in this band is read off a committed artifact. Nothing here is a round
-  // number somebody liked the look of.
+  // Translations, computed rather than written down: a reader who does not know what L0
+  // is still learns that the attack got 22% more expensive.
+  const l0Pct = (last.mean_l0 / first.mean_l0 - 1) * 100;
+  const qPct = (last.median_queries / first.median_queries - 1) * 100;
+
   const stats = [
     corpus && {
       value: corpus.n_rows.toLocaleString("en-US"),
-      label: "transactions in the corpus",
+      label: "real transactions",
       sub: `${corpus.n_fraud.toLocaleString("en-US")} labelled fraud · ${(corpus.fraud_rate * 100).toFixed(2)}% base rate`,
     },
     latency && {
       value: `${latency.payload.p50_ms.toFixed(3)} ms`,
       label: "to score one transaction",
-      sub: `p50 on ${latency.payload.backend} over ${latency.payload.n_samples.toLocaleString("en-US")} samples`,
+      sub: `p50 on ${latency.payload.backend} — fast enough for an authorisation path`,
     },
     {
       value: injections.toLocaleString("en-US"),
       label: "prompt injections fired",
       sub:
         providers.length > 1
-          ? `across ${providers.length} model vendors, scored by OWASP category`
+          ? `across ${providers.length} model vendors, with an exact test on each`
           : "scored by OWASP LLM Top 10 category",
     },
     schema && {
@@ -100,16 +123,22 @@ export default async function Home() {
     },
     audit && {
       value: audit.payload.totals.loc.toLocaleString("en-US"),
-      label: "lines of backend, under test",
+      label: "lines of backend",
       sub: `${audit.payload.totals.modules} modules · ${audit.payload.totals.test_cases} test cases`,
     },
-  ].filter(Boolean) as { value: string; label: string; sub: string }[];
+    {
+      value: `${(last.asr * 100).toFixed(0)}%`,
+      label: "attack success, still",
+      sub: "after three rounds of adversarial retraining",
+      tone: "attack" as const,
+    },
+  ].filter(Boolean) as { value: string; label: string; sub: string; tone?: "attack" }[];
 
   return (
     <>
       {/* ---- Dark hero ---------------------------------------------------------- */}
       <section className="bg-night text-night-ink">
-        <div className="wrap grid gap-12 py-16 md:py-24 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-center">
+        <div className="wrap grid gap-12 py-16 md:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-start">
           <div>
             <p className="text-[0.8125rem] font-medium text-defend-dim">
               Mastercard Innovation Challenge 2026
@@ -117,13 +146,21 @@ export default async function Home() {
             <h1 className="display mt-3 max-w-[16ch] text-[2.5rem] leading-[1.04] sm:text-[3.25rem] md:text-[3.75rem]">
               An attack that keeps working, and costs more every round.
             </h1>
-            <p className="mt-6 max-w-[54ch] text-[1.0625rem] leading-relaxed text-night-muted">
-              A constraint-aware red team evades a payment fraud detector by moving only what a
-              real attacker controls. The detector retrains on those evasions. Repeat. Three
-              rounds in, the attacker still succeeds on every attempt — so what we report is the
-              price it pays, and the audit proving an unconstrained attacker&apos;s
-              identical-looking score is mostly transactions that could never occur.
-            </p>
+
+            {/* The three-step read, before the paragraph. A panel scans; it does not
+                start by reading 60 words of prose. */}
+            <dl className="mt-8 space-y-4 border-l border-night-rule pl-5">
+              {STEPS.map((s) => (
+                <div key={s.k}>
+                  <dt className="text-[0.75rem] font-medium uppercase tracking-[0.04em] text-defend-dim">
+                    {s.k}
+                  </dt>
+                  <dd className="mt-1 max-w-[56ch] text-[0.9375rem] leading-relaxed text-night-muted">
+                    {s.v}
+                  </dd>
+                </div>
+              ))}
+            </dl>
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -134,95 +171,53 @@ export default async function Home() {
               </Link>
               <Link
                 href="/results"
-                className="rounded-[6px] border border-night-rule px-4 py-2.5 text-[0.875rem] font-medium text-night-ink transition-colors hover:bg-night-2"
+                className="rounded-[6px] border border-night-rule bg-night-2/60 px-4 py-2.5 text-[0.875rem] font-medium text-night-ink transition-colors hover:border-night-muted hover:bg-night-2"
               >
                 See the results
               </Link>
             </div>
-          </div>
 
-          {/* The product visual is the actual result, not an abstract render: the two
-              numbers the whole project turns on, and the gap between them. */}
-          <div className="rounded-[10px] border border-night-rule bg-night-2 p-6">
-            <p className="text-[0.75rem] font-medium text-night-muted">
-              Attack success rate, by round
+            {/* The transparency claim, up here rather than buried in a footnote. It is
+                the most persuasive thing on the page for this particular panel. */}
+            <p className="mt-8 max-w-[60ch] border-t border-night-rule pt-5 text-[0.8125rem] leading-relaxed text-night-muted">
+              <span className="font-medium text-night-ink">Every number on this site is read
+              from a committed artifact.</span>{" "}
+              There are no customer logos, testimonials or award badges anywhere on it, because
+              a project about measurement dishonesty does not get to invent its own proof.
             </p>
-            <div className="mt-5 space-y-4">
-              {attack.payload.map((r) => (
-                <div key={r.round}>
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="font-mono text-[0.8125rem] text-night-muted">
-                      round {r.round}
-                    </span>
-                    <span className="tnum font-mono text-[0.875rem] text-attack-dim">
-                      {(r.asr * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-[2px] bg-night">
-                    <div
-                      className="h-full bg-attack-fill"
-                      style={{ width: `${r.asr * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 border-t border-night-rule pt-5">
-              <p className="text-[0.75rem] font-medium text-night-muted">
-                What it cost the attacker
-              </p>
-              <div className="mt-3 grid grid-cols-2 gap-4">
-                <div>
-                  <p className="tnum display text-[1.5rem] text-defend-dim">
-                    {first.mean_l0.toFixed(2)} → {last.mean_l0.toFixed(2)}
-                  </p>
-                  <p className="mt-1 text-[0.75rem] text-night-muted">mean features touched</p>
-                </div>
-                <div>
-                  <p className="tnum display text-[1.5rem] text-defend-dim">
-                    {first.median_queries} → {last.median_queries}
-                  </p>
-                  <p className="mt-1 text-[0.75rem] text-night-muted">median queries</p>
-                </div>
-              </div>
-            </div>
           </div>
+
+          <CoevolutionSpark rounds={rounds} l0Pct={l0Pct} qPct={qPct} />
         </div>
       </section>
 
-      {/* ---- Statistics band ----------------------------------------------------- */}
-      <section className="border-b border-rule bg-figure">
-        <div className="wrap py-12">
-          <dl className="grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-            {stats.map((s) => (
-              <div key={s.label}>
-                <dd className="tnum display text-[2rem] leading-none md:text-[2.25rem]">
-                  {s.value}
-                </dd>
-                <dt className="mt-2 text-[0.9375rem] font-medium">{s.label}</dt>
-                <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">{s.sub}</p>
-              </div>
-            ))}
-          </dl>
-          <p className="mt-9 border-t border-rule pt-4 text-[0.75rem] text-muted">
-            Every figure above is read from a committed artifact at build time. There are no
-            customer logos, testimonials or award badges on this page because this is a
-            three-day build with none of those, and inventing them is the one thing a project
-            about measurement dishonesty must not do.
-          </p>
-        </div>
+      {/* ---- Bento statistics ---------------------------------------------------- */}
+      <section className="wrap py-14">
+        <h2 className="text-[0.8125rem] font-medium text-muted">Measured, end to end</h2>
+        <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {stats.map((s) => (
+            <div key={s.label} className="card border border-rule p-5">
+              <dd
+                className={`tnum display text-[1.875rem] leading-none ${s.tone === "attack" ? "text-attack" : ""}`}
+              >
+                {s.value}
+              </dd>
+              <dt className="mt-2 text-[0.9375rem] font-medium">{s.label}</dt>
+              <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">{s.sub}</p>
+            </div>
+          ))}
+        </dl>
       </section>
 
       {/* ---- Capabilities -------------------------------------------------------- */}
-      <section className="wrap py-14">
+      <section className="wrap pb-14">
         <h2 className="display text-[1.75rem] md:text-[2rem]">
-          Two attack surfaces, one loop, measured end to end
+          Two attack surfaces, one loop, both of them live
         </h2>
         <p className="prose col mt-3">
           The same cycle — attack, measure, defend, re-measure — applied to a tabular fraud
-          detector and to a payment agent. Two surfaces is what makes this a framework rather
-          than a project.
+          detector and to a payment agent. Two of these pages run the real thing in front of
+          you rather than showing you a picture of it.
         </p>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -257,21 +252,155 @@ export default async function Home() {
         <div className="wrap flex flex-wrap items-center justify-between gap-6 py-12">
           <div>
             <h2 className="display text-[1.5rem] md:text-[1.75rem]">
-              The detector is one click away, and it runs in your tab.
+              Both demos run for real, and neither needs a sign-up.
             </h2>
-            <p className="mt-2 max-w-[56ch] text-[0.9375rem] text-night-muted">
-              No sign-up, no server, no cold start — the model is downloaded and executed
-              locally, so the numbers you get are the model&apos;s own.
+            <p className="mt-2 max-w-[58ch] text-[0.9375rem] text-night-muted">
+              The detector is downloaded and executed in your own tab. The payment agent is a
+              live model call behind one server route, because that is where the key has to
+              live.
             </p>
           </div>
-          <Link
-            href="/live"
-            className="shrink-0 rounded-[6px] bg-defend-fill px-5 py-3 text-[0.875rem] font-medium text-white transition-opacity hover:opacity-90"
-          >
-            Run the live detector
-          </Link>
+          <div className="flex shrink-0 flex-wrap gap-3">
+            <Link
+              href="/live"
+              className="rounded-[6px] bg-defend-fill px-5 py-3 text-[0.875rem] font-medium text-white transition-opacity hover:opacity-90"
+            >
+              Run the detector
+            </Link>
+            <Link
+              href="/agent"
+              className="rounded-[6px] border border-night-rule bg-night-2/60 px-5 py-3 text-[0.875rem] font-medium text-night-ink transition-colors hover:border-night-muted hover:bg-night-2"
+            >
+              Fire an injection
+            </Link>
+          </div>
         </div>
       </section>
     </>
+  );
+}
+
+/**
+ * The hero visual: attack success pinned flat, attacker cost climbing under it.
+ *
+ * This replaced three full-width red bars. They were not wrong -- attack success really is
+ * 100% at every round -- but three identical full bars spend a lot of red saying one
+ * thing, and a reader scanning quickly reads three alarms instead of one flat line. Drawn
+ * as two series the shape *is* the finding: the red does not move, the blue does.
+ *
+ * Inline SVG rather than a chart library because it is server-rendered, has no interaction
+ * to offer, and must not cost the hero a client bundle.
+ */
+function CoevolutionSpark({
+  rounds,
+  l0Pct,
+  qPct,
+}: {
+  rounds: { round: number; asr: number; mean_l0: number; median_queries: number }[];
+  l0Pct: number;
+  qPct: number;
+}) {
+  const W = 320;
+  const H = 116;
+  const pad = 6;
+  const x = (i: number) => pad + (i * (W - pad * 2)) / Math.max(rounds.length - 1, 1);
+
+  const l0s = rounds.map((r) => r.mean_l0);
+  const lo = Math.min(...l0s);
+  const hi = Math.max(...l0s);
+  // Effort is drawn on its own scale across the lower band; the two series share no unit
+  // and a shared axis would invent a comparison that does not exist.
+  const yEffort = (v: number) => H - 14 - ((v - lo) / Math.max(hi - lo, 1e-9)) * (H * 0.42);
+  const yAsr = 20;
+
+  return (
+    <div className="rounded-[10px] border border-night-rule bg-night-2 p-6">
+      <p className="text-[0.75rem] font-medium text-night-muted">Across three rounds</p>
+
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="mt-4 w-full"
+        role="img"
+        aria-label={`Attack success rate stays at 100% across ${rounds.length} rounds while mean features touched rises from ${l0s[0].toFixed(2)} to ${l0s[l0s.length - 1].toFixed(2)}`}
+      >
+        <line
+          x1={pad}
+          y1={yAsr}
+          x2={W - pad}
+          y2={yAsr}
+          stroke="var(--color-attack-fill)"
+          strokeWidth="2"
+        />
+        {rounds.map((r, i) => (
+          <circle key={r.round} cx={x(i)} cy={yAsr} r="3.5" fill="var(--color-attack-fill)" />
+        ))}
+
+        <polyline
+          points={rounds.map((r, i) => `${x(i)},${yEffort(r.mean_l0)}`).join(" ")}
+          fill="none"
+          stroke="var(--color-defend-fill)"
+          strokeWidth="2"
+        />
+        {rounds.map((r, i) => (
+          <circle
+            key={r.round}
+            cx={x(i)}
+            cy={yEffort(r.mean_l0)}
+            r="3.5"
+            fill="var(--color-night-2)"
+            stroke="var(--color-defend-fill)"
+            strokeWidth="2"
+          />
+        ))}
+
+        {rounds.map((r, i) => (
+          <text
+            key={r.round}
+            x={x(i)}
+            y={H - 1}
+            textAnchor={i === 0 ? "start" : i === rounds.length - 1 ? "end" : "middle"}
+            fontSize="9"
+            fill="var(--color-night-muted)"
+            fontFamily="var(--font-mono)"
+          >
+            r{r.round}
+          </text>
+        ))}
+      </svg>
+
+      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-[0.75rem]">
+        <span className="inline-flex items-center gap-1.5 text-night-muted">
+          <span className="inline-block h-0.5 w-4 bg-attack-fill" aria-hidden="true" />
+          attack success — flat at 100%
+        </span>
+        <span className="inline-flex items-center gap-1.5 text-night-muted">
+          <span className="inline-block h-0.5 w-4 bg-defend-fill" aria-hidden="true" />
+          attacker effort — climbing
+        </span>
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 gap-4 border-t border-night-rule pt-5">
+        <Cost
+          value={`${rounds[0].mean_l0.toFixed(2)} → ${rounds[rounds.length - 1].mean_l0.toFixed(2)}`}
+          label="mean features touched"
+          delta={`+${l0Pct.toFixed(0)}% effort per evasion`}
+        />
+        <Cost
+          value={`${rounds[0].median_queries} → ${rounds[rounds.length - 1].median_queries}`}
+          label="median queries"
+          delta={`+${qPct.toFixed(0)}% probing to find one`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function Cost({ value, label, delta }: { value: string; label: string; delta: string }) {
+  return (
+    <div>
+      <p className="tnum display text-[1.375rem] text-night-ink">{value}</p>
+      <p className="mt-1 text-[0.75rem] text-night-muted">{label}</p>
+      <p className="mt-1.5 text-[0.75rem] font-medium text-defend-dim">{delta}</p>
+    </div>
   );
 }
