@@ -94,31 +94,81 @@ The vector we chose to build against. An attacker with query access to a scoring
 search for the minimal modification to a transaction that flips it from *decline* to
 *approve*. Unlike the four above, this attack targets the defence itself.
 
-### 2.6 The wider catalogue
+### 2.6 The wider catalogue, by surface
 
 The five above are the vectors we analysed in depth. Restricting a threat map to them would
 misrepresent the surface, so the following are catalogued with what GenAI actually changes
-about each. None is implemented, and none is claimed to be.
+about each. They are grouped by the surface they attack, because "payments" is not one
+channel: a vector that works against a card rail often has no analogue on a real-time
+account-to-account rail, and a control that stops one is frequently irrelevant to the other.
+
+None of these is implemented, and none is claimed to be.
+
+#### Card rails — card-not-present
 
 | Vector | How the rail is abused | What GenAI changes |
 |---|---|---|
 | **Card testing / BIN attacks** | Automated low-value authorisations probe stolen card ranges for live numbers before resale | Agents adapt probe amount, merchant and pacing in response to declines, turning a fixed script into a feedback loop |
-| **Account takeover via OTP interception** | SIM-swap or social-engineered OTP capture converts credential theft into transaction authority | Voice synthesis makes the carrier-support call that authorises the swap cheap and repeatable |
-| **Authorised push payment (APP) fraud** | The victim is persuaded to send the payment themselves, so every control that checks authenticity passes | Conversational agents sustain a plausible pretext across hours and channels at negligible marginal cost |
-| **Bust-out fraud** | An account is nurtured into good standing over months, then drawn down in a burst | Generative behavioural modelling can shape the nurture phase to resemble a specific segment's real spending |
-| **Triangulation fraud** | A fake storefront takes real orders, fulfils them with stolen cards, and harvests the card data | Storefront copy, product listings and reviews are now generated end to end |
+| **Triangulation fraud** | A fake storefront takes real orders, fulfils them with stolen cards, and harvests the card data | Storefront copy, product listings and reviews are now generated end to end, so the shopfront is no longer the weak link |
 | **First-party / friendly fraud** | The legitimate cardholder disputes a genuine transaction | LLM-drafted dispute narratives are internally consistent and match issuer templates, defeating text heuristics |
-| **Money mule layering** | Proceeds are split across many accounts to break the transaction graph | Agents coordinate split sizes and timing against known velocity rules rather than fixed patterns |
-| **Model extraction and training-set poisoning** | The detector itself is the target: queried to clone its boundary, or fed crafted transactions that shift it | Directly adjacent to what we built. Our dosage sweep is the defensive mirror of a poisoning attack — it measures what a fixed number of crafted rows does to a model, which is the same question a poisoner asks |
+| **Refund and returns abuse** | Refunds are claimed for goods never returned, or returns are made with substituted items | Generated photographic "evidence" and consistent narratives across multiple claims raise the cost of manual review past what it is worth |
+| **Adversarial evasion of detection models** | *Section 2.5 — the vector we built against* | |
 
-**We built against 2.4 and 2.5.** The other three in-depth vectors, and all eight above, are
-mapped and not implemented. Section 8 says so again rather than relying on a reader
-remembering it.
+#### Card rails — card-present
+
+| Vector | How the rail is abused | What GenAI changes |
+|---|---|---|
+| **Shimming and EMV relay** | A thin shim inside the reader captures chip-transaction data; relay attacks extend a contactless card's range to a terminal elsewhere | Less about generation than logistics — but agents coordinate mule timing across terminals, which is the part that used to need a person |
+| **ATM cash-out and jackpotting** | Withdrawal limits are lifted on compromised accounts and drained simultaneously across many ATMs | Coordination of a timed multi-city cash-out is a scheduling problem that agents do cheaply |
+| **Wallet provisioning fraud** | A stolen card is added to a mobile wallet, converting a card-not-present theft into a card-present token | Voice synthesis defeats the call-centre step of "yellow path" provisioning, which is precisely the human check that exists to stop this |
+
+#### Real-time account-to-account rails
+
+Relevant to this challenge's setting: India's UPI settles irrevocably in seconds, so a
+successful attack is unrecoverable in a way a card chargeback is not.
+
+| Vector | How the rail is abused | What GenAI changes |
+|---|---|---|
+| **Authorised push payment (APP) fraud** | The victim is persuaded to send the payment themselves, so every control that checks authenticity passes | Conversational agents sustain a plausible pretext across hours and channels at negligible marginal cost |
+| **Collect-request abuse** | A "collect" request is presented as an incoming payment; approving it debits the victim | Localised, contextually plausible request text at scale — the attack has always been a language problem, not a technical one |
+| **QR tampering** | A sticker over a merchant's static QR redirects funds to the attacker | Generated merchant branding makes the overlay indistinguishable at a glance |
+| **E-mandate / autopay abuse** | A recurring debit authority is established under a pretext and drawn down slowly | Agents can run the enrolment conversation and pace the debits under velocity thresholds |
+| **Money mule layering** | Proceeds are split across many accounts to break the transaction graph | Agents coordinate split sizes and timing against known velocity rules rather than fixed patterns |
+
+#### Identity and onboarding
+
+| Vector | How the rail is abused | What GenAI changes |
+|---|---|---|
+| **Synthetic identity synthesis** | *Section 2.1* | |
+| **Deepfake video-KYC and liveness bypass** | A generated face or replayed video passes remote onboarding checks | This is the vector GenAI most directly created; liveness detection and generation are now in a direct arms race |
+| **Account takeover via OTP interception** | SIM-swap or social-engineered OTP capture converts credential theft into transaction authority | Voice synthesis makes the carrier-support call that authorises the swap cheap and repeatable |
+| **Bust-out fraud** | An account is nurtured into good standing over months, then drawn down in a burst | Generative behavioural modelling can shape the nurture phase to resemble a specific segment's real spending |
+| **BNPL origination fraud** | Thin-file or synthetic identities take instalment credit with no intent to repay | Underwriting on sparse data is exactly where synthetic identities are hardest to separate from genuine thin files |
+
+#### Merchant side
+
+| Vector | How the rail is abused | What GenAI changes |
+|---|---|---|
+| **Transaction laundering** | An illegitimate business processes its volume through a legitimate merchant ID | Generated site content and plausible transaction mixes make the front business survive monitoring longer |
+| **Merchant account takeover** | Payout details on a real merchant account are altered so settlement is redirected | The same payee-mutation objective our agentic red team fires at an assistant, aimed at a support desk instead |
+| **Loyalty and rewards theft** | Points balances are drained or converted; often weaker controls than the payment rail beside them | Credential-stuffing agents adapt per-programme, and rewards are frequently not monitored as money |
+
+#### The defence itself as a target
+
+| Vector | How the rail is abused | What GenAI changes |
+|---|---|---|
+| **Agentic prompt injection** | *Section 2.4 — the vector we built against* | |
+| **Model extraction and training-set poisoning** | The detector is queried to clone its boundary, or fed crafted transactions that shift it | Directly adjacent to what we built. Our dosage sweep is the defensive mirror of a poisoning attack — it measures what a bounded number of crafted rows does to a trained model, which is the same question a poisoner asks |
+
+**Twenty-five vectors across six surfaces; we built against two.** Sections 2.4 and 2.5 are
+implemented end to end. Everything else here is mapped and not implemented, and section 8
+says so again rather than relying on a reader remembering it.
 
 This is a deliberate trade and worth stating rather than letting a reader infer it: **breadth
 in identifying the surface, depth in the two we could measure end to end.** Two vectors carried
-to a defensible number are worth more than eight carried to a screenshot, and the ones we did
-not build are listed here precisely so that the choice is visible.
+to a defensible number are worth more than 23 carried to a screenshot, and the ones we did
+not build are listed here precisely so that the choice is visible rather than looking like an
+oversight.
 
 ---
 
