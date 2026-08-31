@@ -258,7 +258,7 @@ export function LiveDetector({
               <p className="mt-2 text-[0.8125rem]">
                 <span
                   className={`inline-block rounded-[5px] px-2 py-0.5 font-medium ${
-                    flagged ? "bg-attack-fill text-white" : "bg-defend-fill text-white"
+                    flagged ? "bg-attack-fill text-ink" : "bg-defend-fill text-ink"
                   }`}
                 >
                   {flagged ? "FLAGGED" : "PASSES"}
@@ -279,7 +279,7 @@ export function LiveDetector({
                 type="button"
                 onClick={runAttack}
                 disabled={running || !flagged}
-                className="mt-5 w-full rounded-[6px] bg-ink px-4 py-2.5 text-[0.875rem] font-medium text-white transition-opacity disabled:opacity-40"
+                className="mt-5 w-full rounded-[6px] bg-ink px-4 py-2.5 text-[0.875rem] font-medium text-paper transition-opacity disabled:opacity-40"
               >
                 {running ? "searching…" : flagged ? "Run the attack" : "Already evaded"}
               </button>

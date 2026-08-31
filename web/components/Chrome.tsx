@@ -148,7 +148,7 @@ export function KeyResult({
 export function PlaceholderBanner({ sources }: { sources: PlaceholderSource[] }) {
   if (sources.length === 0) return null;
   return (
-    <div role="alert" className="bg-warn text-white">
+    <div role="alert" className="bg-warn text-paper">
       <div className="wrap flex flex-col gap-2 py-2.5 sm:flex-row sm:items-baseline sm:gap-4">
         <p className="shrink-0 font-mono text-[0.8125rem] font-semibold uppercase tracking-[0.06em]">
           <span aria-hidden="true">&#9650; </span>

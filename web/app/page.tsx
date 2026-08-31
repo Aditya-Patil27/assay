@@ -172,7 +172,7 @@ export default async function Home() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/live"
-                className="mono-label rounded-[5px] bg-attack-fill px-4 py-2.5 text-[0.8125rem] font-bold text-[#0b0b0b] transition-opacity hover:opacity-90"
+                className="mono-label rounded-[5px] bg-attack-fill px-4 py-2.5 text-[0.8125rem] font-bold text-ink transition-opacity hover:opacity-90"
               >
                 Run the live detector
               </Link>
@@ -275,7 +275,7 @@ export default async function Home() {
           <div className="flex shrink-0 flex-wrap gap-3">
             <Link
               href="/live"
-              className="mono-label rounded-[5px] bg-attack-fill px-5 py-3 text-[0.8125rem] font-bold text-[#0b0b0b] transition-opacity hover:opacity-90"
+              className="mono-label rounded-[5px] bg-attack-fill px-5 py-3 text-[0.8125rem] font-bold text-ink transition-opacity hover:opacity-90"
             >
               Run the detector
             </Link>

@@ -165,7 +165,7 @@ export function LiveAgent({ runtime }: { runtime: Pick<AgentRuntime, "scenarios"
             type="button"
             onClick={() => fire(false)}
             disabled={busy !== null}
-            className="rounded-[6px] bg-attack-fill px-4 py-2.5 text-[0.875rem] font-medium text-white transition-opacity disabled:opacity-40"
+            className="rounded-[6px] bg-attack-fill px-4 py-2.5 text-[0.875rem] font-medium text-ink transition-opacity disabled:opacity-40"
           >
             {busy === "off" ? "running…" : "Fire with defenses OFF"}
           </button>
@@ -173,7 +173,7 @@ export function LiveAgent({ runtime }: { runtime: Pick<AgentRuntime, "scenarios"
             type="button"
             onClick={() => fire(true)}
             disabled={busy !== null}
-            className="rounded-[6px] bg-defend-fill px-4 py-2.5 text-[0.875rem] font-medium text-white transition-opacity disabled:opacity-40"
+            className="rounded-[6px] bg-defend-fill px-4 py-2.5 text-[0.875rem] font-medium text-ink transition-opacity disabled:opacity-40"
           >
             {busy === "on" ? "running…" : "Fire with defenses ON"}
           </button>
@@ -236,7 +236,7 @@ function Outcome({ label, result }: { label: string; result?: Result | { error: 
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-[0.8125rem] font-medium">{label}</p>
         <span
-          className={`rounded-[5px] px-2 py-0.5 text-[0.75rem] font-medium text-white ${
+          className={`rounded-[5px] px-2 py-0.5 text-[0.75rem] font-medium text-ink ${
             result.exploited ? "bg-attack-fill" : "bg-defend-fill"
           }`}
         >
