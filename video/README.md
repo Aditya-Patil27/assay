@@ -8,7 +8,7 @@ cd video
 npm install && npx playwright install chromium     # once
 powershell -File make_narration.ps1                # narration WAVs + durations
 node record.mjs                                    # records the LIVE site
-bash mux.sh                                        # -> adversarial-payments-walkthrough.mp4
+bash mux.sh                                        # -> assay-workflow.mp4
 ```
 
 Output: 1920x1080 H.264 + AAC, roughly 3m15s and 17 MB.

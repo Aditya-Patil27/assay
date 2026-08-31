@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Adversarial Payments — workflow</title>
+<title>Assay — workflow</title>
 <style>
   /* Every figure below is read from a committed artifact carrying placeholder:false.
      Nothing here is illustrative. If a number changes, this file changes with it. */
@@ -84,7 +84,8 @@
 
   <section class="scene" id="s1">
     <div class="kicker">Mastercard Innovation Challenge 2026</div>
-    <h1>Adversarial Payments<br/>Framework</h1>
+    <h1>Assay</h1>
+    <p class="sub" style="margin-top:14px;font-size:26px">An assay determines the true metal content of a coin. This one does it to a security number.</p>
     <p class="sub">A constraint-aware red team against a payment fraud detector —
       and an audit that says which attack numbers are real.</p>
   </section>
@@ -192,12 +193,12 @@
 // wall-clock jitter would desync from the narration, and re-running would not reproduce
 // the same frames.
 const T = [
-  ["s1", 4200, []],
+  ["s1", 9000, []],
   ["s2", 11400, [[600,()=>lit("n1","a1")],[1500,()=>lit("n2","a2")],[2400,()=>hot("n3")],
                 [2500,()=>lit("a3")],[3300,()=>lit("n4")],[5200,()=>fade("s2sub")]]],
   ["s3", 11600, []],
   ["s4", 10600, [[1800,()=>{ setScore(0.0); }],[3400,()=>fade("s4sub")]]],
-  ["s5", 7000, [[400,()=>grow("rounds")]]],
+  ["s5", 11500, [[400,()=>grow("rounds")]]],
   ["s6", 17200,[[400,()=>grow("sweep")]]],
   ["s7", 11200, [[600,()=>{ el("spa").style.width="99.9%"; el("spb").style.width="0.5%"; }]]],
   ["s8", 10200, []],

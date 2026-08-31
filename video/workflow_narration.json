@@ -5,8 +5,8 @@
   "scenes": [
     {
       "id": "s1",
-      "seconds": 4.2,
-      "text": "A constraint aware red team against a payment fraud detector."
+      "seconds": 9.0,
+      "text": "Assay. An assay determines the true metal content of a coin. This one does it to a security number, for a payment fraud detector."
     },
     {
       "id": "s2",
@@ -25,7 +25,7 @@
     },
     {
       "id": "s5",
-      "seconds": 7.0,
+      "seconds": 11.5,
       "text": "Three rounds of adversarial retraining prevented zero evasions. What moved was the attacker's cost: median queries per success rose from two hundred seventy five to three hundred ninety one."
     },
     {
