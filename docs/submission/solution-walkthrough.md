@@ -341,7 +341,7 @@ We report it because it is built and tested, and because the saturation guard is
 we are *not* claiming co-evolution from a flat attack-success curve — a guard that refuses
 to support your own pitch is worth more than one that never fires.
 
-### 3.4 Three errors worth reporting
+### 3.4 Four errors worth reporting
 
 An earlier version of our engine reported a 100% attack success rate. It achieved this by
 shrinking transactions to roughly 12% of their original value.
@@ -418,9 +418,46 @@ was not what was propping up the result. Had we found it after publishing rather
 the number would have survived; but we would have been quoting it for the wrong reason, and
 we could not have told the difference.
 
-That is the pattern in all three errors. Each was caught by asking what the number was
-measured *under* rather than whether it looked plausible. None of them would have been caught
-by a number that looked wrong, because in every case the number looked entirely reasonable.
+**The fourth error is the one careful reading would not have found.**
+
+`loop/flows.py` built its detector like this:
+
+```python
+try:
+    from ..detect.train import train_model
+    return train_model(train_df)
+except Exception:
+    pass                     # fall through to the configuration below
+```
+
+`train_model` does not exist. That module exports `train_round`. So the import raised on
+every call, the fallback ran every time, and it ran that way for the life of the project.
+
+Nothing was broken and no published number is wrong. What was wrong is that **the source
+could not tell you which model produced the results.** A reader following that code would
+conclude the rounds in `artifacts/detect/rounds.json` came from `detect/train.py` at 400
+estimators, depth 7, learning rate 0.08. They came from 300, depth 6, 0.1. Both are real
+configurations in real files that a maintained project would legitimately contain; only the
+absence of one function definition separates the live one from the dead one.
+
+It was caught because a second person, drafting section 3.5, went to cite the detector's
+hyperparameters and read them out of `detect/train.py` — the file the code appeared to
+prefer. Confirming which one actually ran took a single command, `grep -c "^def train_model"`,
+returning zero. Nobody reading either file carefully would have found it, because neither
+file is wrong. The disagreement lives in the space between them.
+
+The `try/except` is what let it persist: an exception handler that catches everything and
+continues cannot distinguish "this dependency is temporarily unavailable" from "this function
+was never written." It reports success either way. The branch is now deleted and the live
+configuration sits inline.
+
+**The pattern across the first three is one thing; the fourth is another, and both are worth
+carrying away.** The first three were each caught by asking what a number was measured
+*under* rather than whether it looked plausible — none would have been caught by a number
+that looked wrong, because in every case the number looked entirely reasonable. The fourth
+would not have been caught by that question either. It needed someone to ask which code
+actually ran, and to check rather than read. In a codebase where failures are swallowed, that
+is a question you have to ask deliberately, because nothing will ever raise it for you.
 
 ---
 

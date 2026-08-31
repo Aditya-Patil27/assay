@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import re
 import sys
+import os
 from pathlib import Path
 
 from docx import Document
@@ -26,7 +27,12 @@ from docx.shared import Inches, Pt, RGBColor
 from adversarial_payments.config import ROOT
 
 SOURCE = ROOT / "docs" / "submission" / "solution-walkthrough.md"
-DEST = ROOT / "docs" / "submission" / "solution-walkthrough.docx"
+# Overridable so a rebuild is possible while the document is open in Word, which holds an
+# exclusive lock. Building beside it and swapping afterwards beats asking someone to close a
+# file they are in the middle of reading.
+DEST = Path(
+    os.environ.get("DOCX_OUT", ROOT / "docs" / "submission" / "solution-walkthrough.docx")
+)
 
 ACCENT = RGBColor(0x1F, 0x3A, 0x5F)
 MUTED = RGBColor(0x60, 0x6A, 0x78)
