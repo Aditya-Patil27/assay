@@ -13,13 +13,13 @@ import type {
   AgenticCategory,
   AttackExample,
   AttackRound,
-  BackendAudit,
   DataProvenance,
   DetectRound,
   Envelope,
   FeasibilityAudit,
   FeatureSchema,
   Graph,
+  Guarantees,
   LatencyStats,
   LiveSamples,
   ScorecardRow,
@@ -199,7 +199,8 @@ export async function loadProviderRedteams(): Promise<Envelope<AgenticCategory[]
 
 export const loadLiveSamples = () => optional(() => load<LiveSamples>("live_samples.json"));
 
-export const loadBackendAudit = () => optional(() => load<BackendAudit>("backend_audit.json"));
 
 /** The agent runtime constants, exported from Python by scripts/export_agent_runtime.py. */
 export const loadAgentRuntime = () => optional(() => load<AgentRuntime>("agent_runtime.json"));
+
+export const loadGuarantees = () => optional(() => load<Guarantees>("guarantees.json"));

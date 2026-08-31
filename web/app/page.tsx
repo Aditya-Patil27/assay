@@ -4,7 +4,7 @@ import { LiveScoreStream } from "@/components/LiveScoreStream";
 
 import {
   loadArtifacts,
-  loadBackendAudit,
+  loadGuarantees,
   loadDataProvenance,
   loadFeatureSchema,
   loadLatency,
@@ -78,13 +78,13 @@ const CAPABILITIES = [
 ];
 
 export default async function Home() {
-  const [{ attack, agentic }, latency, corpus, schema, audit, providers, live] =
+  const [{ attack, agentic }, latency, corpus, schema, guarantees, providers, live] =
     await Promise.all([
       loadArtifacts(),
       loadLatency(),
       loadDataProvenance(),
       loadFeatureSchema(),
-      loadBackendAudit(),
+      loadGuarantees(),
       loadProviderRedteams(),
       loadLiveSamples(),
     ]);
@@ -126,10 +126,12 @@ export default async function Home() {
       label: "features the attacker cannot touch",
       sub: "frozen by the constraint contract, not by policy",
     },
-    audit && {
-      value: audit.payload.totals.loc.toLocaleString("en-US"),
-      label: "lines of backend",
-      sub: `${audit.payload.totals.modules} modules · ${audit.payload.totals.test_cases} test cases`,
+    guarantees && {
+      // Not lines of code. LOC says nothing about whether a system works; the number of
+      // places the same logic is held equal across two languages says quite a lot.
+      value: String(guarantees.payload.guarantees.length),
+      label: "checks that fail loudly",
+      sub: `cross-language equivalence proofs · ${guarantees.payload.tests.cases} test cases`,
     },
     {
       value: `${(last.asr * 100).toFixed(0)}%`,

@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 
 import { AdversarialGraph } from "@/components/AdversarialGraph";
 import { Block, Figure, PageHeader } from "@/components/Chrome";
-import { BackendAudit } from "@/components/BackendAudit";
+import { Guarantees } from "@/components/Guarantees";
 import { Corpus, ServingLatency } from "@/components/System";
 import {
   loadArtifacts,
-  loadBackendAudit,
+  loadGuarantees,
   loadDataProvenance,
   loadLatency,
 } from "@/lib/load";
@@ -15,10 +15,10 @@ export const metadata: Metadata = { title: "System" };
 
 export default async function SystemPage() {
   const { graph } = await loadArtifacts();
-  const [latency, corpus, audit] = await Promise.all([
+  const [latency, corpus, guarantees] = await Promise.all([
     loadLatency(),
     loadDataProvenance(),
-    loadBackendAudit(),
+    loadGuarantees(),
   ]);
 
   return (
@@ -29,12 +29,12 @@ export default async function SystemPage() {
         lede="Everything on the other routes is a result. This is what produced it: the pipeline as it actually runs, the serving path the detector was exported to, and the corpus every band was measured from. All three are committed artifacts the site reads, not claims it makes."
       />
 
-      {audit && (
+      {guarantees && (
         <Block
-          title="Every module, measured"
-          lede="An inventory of the Python package behind all of this, walked out of the source with ast rather than written down: each module's real size, the first sentence of its own docstring, and the public API it exposes. It regenerates with the code, so it cannot drift into being a flattering description of a system that no longer exists."
+          title="How this is kept honest"
+          lede="The same logic exists in two languages three separate times: the artifact contract, the agent's defense stack, and the detector itself. Each pair is held equal by a check that fails loudly rather than by anyone's good intentions — and each one below gives you the command rather than a badge."
         >
-          <BackendAudit audit={audit.payload} />
+          <Guarantees data={guarantees.payload} />
         </Block>
       )}
 

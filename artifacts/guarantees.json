@@ -1,0 +1,48 @@
+{
+  "kind": "guarantees",
+  "placeholder": false,
+  "schema_version": 1,
+  "created_at": "2026-08-31T09:03:01.784183+00:00",
+  "git_sha": "8695b07",
+  "payload": {
+    "guarantees": [
+      {
+        "id": "artifact-contract",
+        "title": "The artifact contract cannot drift",
+        "claim": "10 dataclasses in artifacts.py are mirrored by TypeScript interfaces in web/lib/types.ts. Nothing in either toolchain notices when they diverge: Python keeps writing, TypeScript keeps compiling, and the site renders undefined for a field somebody renamed.",
+        "how": "tests/test_artifacts.py parses types.ts and fails on any field present on one side and not the other.",
+        "scale": "10 interfaces",
+        "command": "pytest tests/test_artifacts.py"
+      },
+      {
+        "id": "defense-port",
+        "title": "The live agent runs the same defenses as the corpus",
+        "claim": "The /agent demo needs a server, and that server is Node \u2014 so the injection classifier, tool scoping and HITL policy exist in TypeScript as well as Python. Two implementations of one security control is how a demo drifts into looking right while being wrong.",
+        "how": "Every scoreable span of every spliced document is scored by both, and compared on score, on the reasons that fired, and on the redacted document byte for byte.",
+        "scale": "144 documents \u00b7 360 spans \u00b7 66 over threshold",
+        "command": "npm run check:agent"
+      },
+      {
+        "id": "detector-port",
+        "title": "The in-browser detector is the trained model",
+        "claim": "The site walks the 400-tree ensemble in JavaScript so a visitor does not download 3.2MB of inference runtime to see a score. That is only a good trade if the answer is unchanged.",
+        "how": "Every row the demo can display is scored through the exported ONNX graph and through the JavaScript walker, and the two are diffed.",
+        "scale": "68 rows \u00b7 agreement to 1e-6",
+        "command": "npm run check:trees"
+      },
+      {
+        "id": "placeholder-discipline",
+        "title": "Fixture data announces itself",
+        "claim": "Every artifact carries a placeholder flag, a git sha and a timestamp. While any artifact on the page is a seeded fixture, a banner sits above the header on every route and names the exact files \u2014 so no figure on this site can quietly be invented.",
+        "how": "The writers set the flag; the site reads it and refuses to hide it.",
+        "scale": "14 enveloped artifacts \u00b7 0 fixtures remaining",
+        "command": "grep -l '\"placeholder\": true' artifacts/**/*.json"
+      }
+    ],
+    "tests": {
+      "files": 6,
+      "cases": 92,
+      "command": "pytest"
+    }
+  }
+}

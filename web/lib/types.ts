@@ -198,35 +198,50 @@ export interface LiveSamples {
 }
 
 /**
- * The backend, inventoried by scripts/export_backend_audit.py.
+ * Real flagged transactions for the in-browser demo.
  *
- * Walked out of the source with `ast` rather than written down, so it cannot go stale:
- * every module, its measured size, its own docstring's first sentence, and its public API.
+ * Written by scripts/export_live_samples.py from the chronological test split. Every
+ * sample is genuinely fraudulent and genuinely flagged by the round-0 detector, which is
+ * exactly the population attack/engine.py::select_targets picks -- so /live starts where
+ * the pipeline starts rather than on an invented row.
  */
-export interface AuditModule {
-  path: string;
-  module: string;
-  loc: number;
-  summary: string;
-  api: string[];
+export interface LiveSample {
+  id: string;
+  p_fraud: number;
+  values: Record<string, number>;
 }
 
-export interface AuditGroup {
-  key: string;
+export interface LiveStreamRow {
+  id: string;
+  is_fraud: number;
+  amt: number;
+  values: Record<string, number>;
+}
+
+export interface LiveSamples {
+  threshold: number;
+  features: string[];
+  samples: LiveSample[];
+  /** Real rows, fraud and legitimate mixed, for the hero to score live. */
+  stream?: LiveStreamRow[];
+}
+
+/**
+ * The checks that hold the two languages equal, from scripts/export_guarantees.py.
+ *
+ * Counts and commands rather than verdicts: a hardcoded PASS rendered on a page is the
+ * kind of unearned claim this project argues against, so the reader gets the command.
+ */
+export interface Guarantee {
+  id: string;
   title: string;
-  blurb: string;
-  modules: AuditModule[];
+  claim: string;
+  how: string;
+  scale: string;
+  command: string;
 }
 
-export interface BackendAudit {
-  groups: AuditGroup[];
-  tests: { path: string; cases: number; summary: string }[];
-  scripts: { path: string; summary: string }[];
-  totals: {
-    modules: number;
-    loc: number;
-    test_files: number;
-    test_cases: number;
-    scripts: number;
-  };
+export interface Guarantees {
+  guarantees: Guarantee[];
+  tests: { files: number; cases: number; command: string };
 }
