@@ -363,6 +363,49 @@ the attacker searches next round; it can only overfit to the points it was given
 That is a real result about adversarial retraining under an adaptive threat model, and it is
 worth more to a reader than the falling curve we set out to produce.
 
+**Then we priced the other lever, and it does not work either.**
+
+Retraining is not the only defence available. The attacker wins by pushing a score below the
+operating threshold, so lowering that threshold shrinks the target for reasons that have
+nothing to do with what the model learned. It is instant, needs no retraining, and is not
+free: every step down declines more legitimate customers. We swept the false-positive budget
+against a single fixed detector, so any change is attributable to the operating point alone.
+
+| FPR budget | Threshold | ASR | Recall | Legitimate declines per 100,000 |
+|---|---|---|---|---|
+| 0.001 | 0.478 | 1.000 | 0.893 | 114 |
+| 0.002 | 0.229 | 1.000 | 0.916 | 226 |
+| 0.005 | 0.067 | 1.000 | 0.943 | 528 |
+| 0.01 | 0.022 | 1.000 | 0.964 | 1,002 |
+| 0.02 | 0.006 | 1.000 | 0.973 | 1,981 |
+| 0.05 | 0.001 | 1.000 | 0.986 | 5,008 |
+| 0.10 | 0.0004 | 0.998 | 0.994 | 10,035 |
+
+*Source: `artifacts/attack/threshold_sweep.json`.*
+
+**Moving attack success from 1.000 to 0.998 costs declining roughly one in ten legitimate
+transactions.** No payment network runs at a 10% decline rate. The defence is not expensive;
+it is unbuyable.
+
+The reason is visible in where the attack lands. At a threshold of 0.478 the median successful
+evasion scores 1.9e-03; at a threshold of 0.0004 it scores 6.6e-05. The attacker does not
+clear a fixed bar — it lands just underneath whichever bar we set, and lowering the bar only
+makes it search harder. Its search stops as soon as it wins, so the scores hug the threshold
+from below while retaining headroom to go further.
+
+**Taken together these two sweeps say something narrower and more useful than either alone.**
+Both defences available at the model layer were measured, not assumed, and both were priced:
+retraining fails at any dosage, and threshold tightening fails at any operating point a
+business could run. That is not a failure of tuning. Against an attacker who re-searches after
+every change, defending inside the model is the wrong layer.
+
+Which is exactly where the agentic result earns its place in this document. That surface is
+defended by *layered controls* rather than by the model — an injection classifier, tool
+scoping, and a human-in-the-loop threshold — and there the reduction is statistically
+significant at p = 0.015 with a 0% false-refusal rate. The contrast between the two surfaces
+is the most actionable thing we found: **the tabular track shows where model-layer defence
+runs out, and the agentic track shows what replaces it.**
+
 Second, per-round PR-AUC is deliberately absent from the table. The loop does not write
 `artifacts/detect/rounds.json` — that artifact belongs to the detector track and holds a
 round-0 figure computed under a different split — so the loop's own per-round PR-AUC exists
