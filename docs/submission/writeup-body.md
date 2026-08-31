@@ -57,18 +57,31 @@ the fidelity claim, demonstrated against our own baseline rather than asserted.
 
 ### Detection results
 
-| Metric | Value |
-|---|---|
-| PR-AUC | 0.9472 |
-| Recall on real fraud | 0.916 |
-| Legitimate declines per 100,000 | 114 |
-| **Recall on held-out generated attacks** | **68.9%** (from 0%) |
-| Single-transaction serving latency (ONNX, p50) | 0.035 ms |
+| Metric | Value | Measured on |
+|---|---|---|
+| PR-AUC | 0.9472 | full 1,852,394 rows |
+| Recall on real fraud | 0.916 | full 1,852,394 rows |
+| Legitimate declines per 100,000 | 114 | 400,000-row subsample |
+| **Recall on held-out generated attacks** | **68.9%** (from 0%) | 400,000-row subsample |
+| Single-transaction serving latency (ONNX, p50) | 0.035 ms | 1,000 timed calls |
+
+The right-hand column is there because these are not all one run, and a table without it would
+imply they were.
+
+**The caveat that belongs next to 0.9472.** It comes from the unrolled loop, which splits
+**stratified at random** rather than temporally. Features are computed causally on the
+time-ordered frame, so this is not label leakage — but a card's transactions can land on both
+sides, which makes the test set easier than deployment would be. We treat anything above
+roughly 0.95 PR-AUC on this data as a leakage signal, and **0.9472 sits just under that line,
+on the split most likely to inflate it.** The temporally-split alternative scores 0.829.
+Walkthrough §4.2 carries the full discussion; we would rather you meet this here than find it
+there.
 
 The defence detects **69% of generated attacks it has never seen**, at a cost of 1.4 points of
-real-fraud recall — and it declines *fewer* legitimate payments than before. The split matters:
-we retrain on half the generated attacks and score the other half, because reporting recall on
-the rows a model trained on measures memorisation, not detection.
+real-fraud recall — and it declines *fewer* legitimate payments than before. That result rests
+on a *different* split from the one above: we retrain on half the generated attacks and score
+the other half, because reporting recall on the rows a model trained on measures memorisation
+rather than detection.
 
 ### The result we did not expect, reported anyway
 
