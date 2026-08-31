@@ -48,6 +48,13 @@ jobs:
         working-directory: web
         run: npm run typecheck
 
+      # The conformance checks read web/public/data, which is gitignored build output that
+      # prebuild normally materialises. Running them before a build meant they ran against a
+      # directory that does not exist in a fresh clone -- caught by the first CI run.
+      - name: Sync artifacts into the app
+        working-directory: web
+        run: npm run sync
+
       # The two checks that make the live demo admissible as evidence. If the browser
       # detector and the Python one disagree, or the TypeScript defence port disagrees with
       # the Python control, then the interactive page is demonstrating something other than
