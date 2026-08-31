@@ -10,7 +10,7 @@
 >
 > **Every result artifact is now real.** The placeholder banner is gone, the scorecard
 > carries **both rows**, and the dashboard is deployed at
-> <https://aditya-patil27.github.io/mastercard-adversarial-payments/>.
+> <https://adversarial-payments.vercel.app>.
 >
 > The agentic corpus ran live against two independent 120B models on two providers,
 > 144 trials per arm each, and replays entirely from cache with no network. **The defence
@@ -33,6 +33,12 @@
 > The defense buys **+0.83 coordinates and +215 median queries of attacker effort**, and does
 > not stop a single attempt. That is a defense-in-depth economics claim, not a solved problem,
 > and the repo says so everywhere rather than implying a collapse it did not measure.
+>
+> **The dosage explanation was tested and refuted.** A sweep of the adversarial training
+> weight () shows that raising the dosage 5000x moves
+> attack success from 1.000 to 0.996 while costing 8.1% of PR-AUC. The lowest ASR in the
+> sweep, 0.982, is at the *smallest* dosage. Adversarial retraining does not beat this
+> attacker at any dosage we can afford.
 >
 > ⚠️ **Per-round PR-AUC is not yet quotable.** The loop does not write `detect/rounds.json`
 > (that file is the detector owner's, and holds a round-0 figure computed under a *different*

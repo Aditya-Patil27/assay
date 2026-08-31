@@ -328,10 +328,40 @@ existed.
 
 Two things follow that we would rather state than have asked.
 
-First, the dosage is modest by construction: 400 adversarial rows folded into a training set
-of 196,001 is roughly 0.2% of the data, unweighted. This experiment does not license any
-claim that adversarial retraining is ineffective in general; it shows that *this* dosage,
-against *this* attacker, moved cost and not outcome.
+**We tested the dosage explanation, and it is wrong.**
+
+The obvious objection to the table above is that 400 adversarial rows in 196,001 is a 0.2%
+dosage, too small to expect anything. We swept it rather than asserting it: each arm reruns
+the loop with adversarial rows carrying `sample_weight = w`, over a range wide enough that
+at the top the adversarial rows outweigh the entire legitimate training set.
+
+| Adversarial weight | Final ASR | Final PR-AUC |
+|---|---|---|
+| 1 | **0.982** | 0.9256 |
+| 10 | 1.000 | 0.9051 |
+| 50 | 0.995 | 0.8964 |
+| 200 | 1.000 | 0.8825 |
+| 1000 | 0.998 | 0.8667 |
+| 5000 | 0.996 | 0.8524 |
+
+*Source: `artifacts/attack/dosage_sweep.json`. 800 attacked transactions per round, three
+rounds per arm, 400,000 rows.*
+
+Raising the dosage by a factor of **5000 changed attack success from 1.000 to 0.996 and cost
+8.1% of PR-AUC.** The lowest attack success in the whole sweep, 0.982, occurs at weight 1 —
+the *smallest* dosage tested. Dosage and defence are not merely uncorrelated here; across the
+range they run in opposite directions, because heavier weighting degrades the detector faster
+than it teaches it.
+
+So the explanation we offered in an earlier revision of this document — that the defence
+looked ineffective only because the dosage was small — is refuted by our own experiment. The
+supportable claim is narrower and less comfortable: **against a constraint-aware attacker
+that re-searches after every retrain, adversarial retraining does not work at any dosage we
+can afford.** Retraining on a few hundred specific evasions cannot cover the feasible region
+the attacker searches next round; it can only overfit to the points it was given.
+
+That is a real result about adversarial retraining under an adaptive threat model, and it is
+worth more to a reader than the falling curve we set out to produce.
 
 Second, per-round PR-AUC is deliberately absent from the table. The loop does not write
 `artifacts/detect/rounds.json` — that artifact belongs to the detector track and holds a
@@ -560,7 +590,7 @@ would rather be believed about the two surfaces we built than admired for five w
 | | |
 |---|---|
 | Code | `https://github.com/Aditya-Patil27/mastercard-adversarial-payments` |
-| Web prototype | https://aditya-patil27.github.io/mastercard-adversarial-payments/ |
+| Web prototype | https://adversarial-payments.vercel.app |
 | Attack constraints | `src/adversarial_payments/attack/constraints.py` |
 | Attack search | `src/adversarial_payments/attack/engine.py` |
 | Feature contract | `src/adversarial_payments/schema.py` |
