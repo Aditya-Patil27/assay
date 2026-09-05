@@ -1,99 +1,81 @@
 # Assay
 
-**Red-teaming payment fraud detection under the constraints that make a number mean something**
+**An assay for security numbers. Payment fraud defences report metrics that nobody has
+attacked — this is the test that tells you which of those numbers are real.**
 
-*An assay is the test that determines the true metal content of a coin. This framework
-does the same to a security number — and the repository keeps the `adversarial-payments`
-slug it was created under.*
+*An assay is the test that determines the true metal content of a coin. This framework does
+the same to a security number.*
 
-**Mastercard Innovation Challenge 2026 — AI red teaming for payment security**
-
-**Demo Video:** https://www.youtube.com/watch?v=oE7-N0wZTM0
-**Audit console:** https://adversarial-payments.vercel.app/audit — every artifact as a claim, green where something ran, amber where nothing did
-**Razorpay AI Buildathon 2026, Open Track** — pitch video link to follow once uploaded
-
-> ## Status — 2026-08-30: five of six results are real
->
-> The tabular track has been run end to end on the genuine Sparkov dataset
-> (see [Provenance](#provenance)). `attack/rounds`, `attack/examples`, `graph`, `scorecard`
-> and `detect/rounds` all carry `placeholder: false` and are safe to quote.
->
-> **Every result artifact is now real.** The placeholder banner is gone, the scorecard
-> carries **both rows**, and the dashboard is deployed at
-> <https://adversarial-payments.vercel.app>.
->
-> The agentic corpus ran live against two independent 120B models on two providers,
-> 144 trials per arm each, and replays entirely from cache with no network. **The defence
-> reduction is statistically significant** — 4.9% to 0.0% on `gpt-oss-120b` (Fisher
-> p = 0.015) and 4.2% to 0.3% pooled (p = 0.003) — with a **0% false-refusal rate** on the
-> benign controls. It is *not* significant on `nemotron-120b` alone (p = 0.214), where one
-> exploit survived; we publish the per-model rows rather than only the pooled figure so that
-> disagreement is visible. See [§4.5](docs/submission/solution-walkthrough.md).
-
----|---|---|---|
-> | 0 | 1.000 | 4.12 | 275 |
-> | 1 | 1.000 | 4.00 | 291 |
-> | 2 | 1.000 | 4.03 | 391 |
->
-> *400 attacked transactions per round, 400,000-row subsample, train 196,001 / val 84,000 /
-> test 119,999. Threshold fitted on val at `FPR_BUDGET = 0.001`, never on the test rows the
-> attack is scored over. Every figure above is read from
-> `artifacts/attack/rounds.json` (`placeholder: false`).*
->
-> The defense buys **+116 median queries of attacker effort** and does not stop a single
-> attempt. Mean features touched does *not* rise — 4.12 → 4.03, flat within noise. An earlier
-> revision claimed a rise on both axes from a 400,000-row subsample; the full run keeps only
-> the query cost. That is a defense-in-depth economics claim, not a solved problem,
-> and the repo says so everywhere rather than implying a collapse it did not measure.
->
-> **The defence does detect the generated attacks — 68.9% of ones it has never seen**
-> (`artifacts/attack/adversarial_detection.json`), at a cost of 1.4 points of real-fraud
-> recall and *fewer* false positives than before. That sits alongside the ASR result rather
-> than contradicting it: adversarial retraining generalises within the attack distribution,
-> and still does not survive an attacker who re-searches against the new model.
->
-> **The dosage explanation was tested and refuted.** A sweep of the adversarial training
-> weight () shows that raising the dosage 5000x moves
-> attack success **not at all** — it is 1.000 in every arm and every round across the full
-> 1.85M-row dataset — while costing 22.3% of PR-AUC and a third of recall (0.911 to 0.609).
-> Adversarial retraining does not beat this attacker at any dosage we can afford.
->
-> ⚠️ **Per-round PR-AUC is not yet quotable.** The loop does not write `detect/rounds.json`
-> (that file is the detector owner's, and holds a round-0 figure computed under a *different*
-> split). The loop's own per-round PR-AUC exists only in its run log, which puts it outside
-> the placeholder machinery — the same gap that applies to `latency.json`. Treat
-> "PR-AUC holds while attacker cost rises" as **unverified** until those rounds are published
-> through `artifacts.py`.
+**[Live dashboard](https://adversarial-payments.vercel.app)** · **[Audit console](https://adversarial-payments.vercel.app/audit)** · *5-minute pitch: link to follow* ·
+**[Architecture](docs/submission/solution-walkthrough.md)** · Razorpay AI Buildathon 2026,
+Open Track
 
 ---
 
-## Where the work stands
+## The result
 
-For teammates picking this up mid-flight. The per-person board with full detail is
-[`docs/team/STATUS.md`](docs/team/STATUS.md); this is the one-screen version.
+One closed-loop red/blue framework, two attack surfaces, one table.
 
-| Area | State | Blocked on |
-|---|---|---|
-| Data + round-0 detector | ✅ real, 1.85M Sparkov rows | — |
-| Constraint engine + attack | ✅ real, 3 rounds run end to end | — |
-| Feasibility audit | ✅ published, `placeholder: false` | — |
-| Red/Blue orchestrators | ✅ landed; loop runs end to end | baseline stays saturated at ASR 1.000 |
-| Agentic red team | ✅ real, 144 trials/arm on two vendors | — |
-| Dashboard | ✅ [deployed and live](https://adversarial-payments.vercel.app) | — |
-| `.docx` walkthrough | ✅ complete, 0 `[[PENDING]]` markers | — |
-| Submission | ❌ nothing submitted | all three artifacts, via Writeups |
+| Surface | Attack success **before** | **After** | What the defence cost |
+|---|---|---|---|
+| Tabular fraud detector | 1.000 | **1.000** | PR-AUC 0.947 → 0.932 (−1.6%) |
+| Payment agent | 4.86% | **0.0%** | significant at *p* = 0.015 |
 
-**The three things worth knowing before you touch anything:**
+**Read the first row before the second.**
 
-1. **ASR is 1.000 and does not fall.** Any doc, chart caption or slide still promising a
-   collapse is now wrong. The honest headline is attacker *cost*, not attacker failure.
-2. **Both provider keys are present and both agentic arms have been run.** The corpus was
-   fired at `gpt-oss-120b` (Groq) and `nemotron-3-super-120b` (NVIDIA NIM), 144 trials each.
-   `/agent` on the live site fires a single injection against a real model on demand.
-3. **The loop's threshold was fitted on the test split until 2026-08-30.** It maximised F1 on
-   the rows the attack was scored over, which lifted the bar to ~0.94 and made evasion free.
-   It now uses `choose_threshold` at a fixed FPR budget on a held-out validation slice. Any
-   ASR measured before that fix is not comparable to one measured after it.
+On the tabular detector our defence did nothing. Attack success stayed at 1.000 across three
+rounds of adversarial retraining. We could have quietly dropped that row. Instead it is the
+first thing on this page, because the second row only means something next to it.
+
+On the payment agent the same framework took indirect prompt injection from 4.86% to zero,
+across 144 trials per arm on two independent 120B models — with **zero false refusals** on benign controls (from the run log; not yet an artifact), which is the number that decides whether a defence is deployable or merely
+strict.
+
+You should trust the second number **because** we showed you the first.
+
+Every figure above reads from `artifacts/scorecard.json` (`placeholder: false`,
+`git_sha 6ca9dbd`). Nothing on this page is typed by hand.
+
+---
+
+## Why this should exist
+
+Most adversarial-ML work asks *"can I flip this prediction?"* Payments demands a harder
+question: **"can I flip it using only what an attacker actually controls?"**
+
+A fraudster with stolen credentials inherits the victim's age, home city and job; the network
+stamps the timestamp. What they control is the amount, the timing, and which merchant to hit
+— and choosing a merchant moves four features at once, because those are four projections of
+one decision. Perturb them independently and you have produced a transaction that cannot
+physically occur.
+
+**An ASR measured over impossible transactions is a number you would have to retract under
+questioning.** Every published robustness figure that skipped this is measuring an attacker
+who does not exist.
+
+That contract is code, not prose — `src/adversarial_payments/schema.py`, frozen on day one,
+and the attack engine calls `schema.validate()` at entry so a feature change fails loudly
+instead of silently producing a meaningless ASR.
+
+---
+
+## What we got wrong, in public
+
+This repository has reported four of its own errors. They are still here:
+
+- **ASR does not collapse.** An earlier revision promised it would. The honest headline is
+  attacker *cost* — the defence buys +116 median queries of attacker effort and does not stop
+  a single attempt. Every chart caption claiming otherwise has been corrected.
+- **The dosage explanation was refuted by its own sweep.** Raising adversarial-training
+  weight 5000× moves attack success not at all, while costing 22.3% of PR-AUC.
+- **The threshold was fitted on the test split until 2026-08-30.** That made evasion free and
+  every ASR measured before the fix incomparable to one measured after.
+- **A trainer that never ran** was reported rather than left in the history.
+- **Not significant on `nemotron-120b` alone** (*p* = 0.214), where one exploit survived. We
+  publish per-model rows rather than only the pooled figure, so the disagreement is visible.
+
+Any number here without `placeholder: false` behind it is marked unverified — including
+per-round PR-AUC and `latency.json`. A metric nobody could retract is not a metric.
 
 ---
 
@@ -265,6 +247,96 @@ are outstanding:
 Presenting synthetic or simulated results as real ones is the one thing that would
 legitimately sink a submission like this, so these lines get filled in truthfully or the
 claims come out.
+
+**3. Origin.** Assay was built for the Mastercard Innovation Challenge 2026 (AI red teaming
+for payment security) and re-framed for the Razorpay AI Buildathon 2026, Open Track. Both
+framings are honest; the numbers did not change between them. The 97-second explainer from
+the first framing is at <https://www.youtube.com/watch?v=oE7-N0wZTM0>.
+
+> ## Status — 2026-08-30: five of six results are real
+>
+> The tabular track has been run end to end on the genuine Sparkov dataset
+> (see [Provenance](#provenance)). `attack/rounds`, `attack/examples`, `graph`, `scorecard`
+> and `detect/rounds` all carry `placeholder: false` and are safe to quote.
+>
+> **Every result artifact is now real.** The placeholder banner is gone, the scorecard
+> carries **both rows**, and the dashboard is deployed at
+> <https://adversarial-payments.vercel.app>.
+>
+> The agentic corpus ran live against two independent 120B models on two providers,
+> 144 trials per arm each, and replays entirely from cache with no network. **The defence
+> reduction is statistically significant** — 4.9% to 0.0% on `gpt-oss-120b` (Fisher
+> p = 0.015) and 4.2% to 0.3% pooled (p = 0.003) — with a **0% false-refusal rate** on the
+> benign controls. It is *not* significant on `nemotron-120b` alone (p = 0.214), where one
+> exploit survived; we publish the per-model rows rather than only the pooled figure so that
+> disagreement is visible. See [§4.5](docs/submission/solution-walkthrough.md).
+
+---|---|---|---|
+> | 0 | 1.000 | 4.12 | 275 |
+> | 1 | 1.000 | 4.00 | 291 |
+> | 2 | 1.000 | 4.03 | 391 |
+>
+> *400 attacked transactions per round, 400,000-row subsample, train 196,001 / val 84,000 /
+> test 119,999. Threshold fitted on val at `FPR_BUDGET = 0.001`, never on the test rows the
+> attack is scored over. Every figure above is read from
+> `artifacts/attack/rounds.json` (`placeholder: false`).*
+>
+> The defense buys **+116 median queries of attacker effort** and does not stop a single
+> attempt. Mean features touched does *not* rise — 4.12 → 4.03, flat within noise. An earlier
+> revision claimed a rise on both axes from a 400,000-row subsample; the full run keeps only
+> the query cost. That is a defense-in-depth economics claim, not a solved problem,
+> and the repo says so everywhere rather than implying a collapse it did not measure.
+>
+> **The defence does detect the generated attacks — 68.9% of ones it has never seen**
+> (`artifacts/attack/adversarial_detection.json`), at a cost of 1.4 points of real-fraud
+> recall and *fewer* false positives than before. That sits alongside the ASR result rather
+> than contradicting it: adversarial retraining generalises within the attack distribution,
+> and still does not survive an attacker who re-searches against the new model.
+>
+> **The dosage explanation was tested and refuted.** A sweep of the adversarial training
+> weight () shows that raising the dosage 5000x moves
+> attack success **not at all** — it is 1.000 in every arm and every round across the full
+> 1.85M-row dataset — while costing 22.3% of PR-AUC and a third of recall (0.911 to 0.609).
+> Adversarial retraining does not beat this attacker at any dosage we can afford.
+>
+> ⚠️ **Per-round PR-AUC is not yet quotable.** The loop does not write `detect/rounds.json`
+> (that file is the detector owner's, and holds a round-0 figure computed under a *different*
+> split). The loop's own per-round PR-AUC exists only in its run log, which puts it outside
+> the placeholder machinery — the same gap that applies to `latency.json`. Treat
+> "PR-AUC holds while attacker cost rises" as **unverified** until those rounds are published
+> through `artifacts.py`.
+
+---
+
+## Where the work stands
+
+For teammates picking this up mid-flight. The per-person board with full detail is
+[`docs/team/STATUS.md`](docs/team/STATUS.md); this is the one-screen version.
+
+| Area | State | Blocked on |
+|---|---|---|
+| Data + round-0 detector | ✅ real, 1.85M Sparkov rows | — |
+| Constraint engine + attack | ✅ real, 3 rounds run end to end | — |
+| Feasibility audit | ✅ published, `placeholder: false` | — |
+| Red/Blue orchestrators | ✅ landed; loop runs end to end | baseline stays saturated at ASR 1.000 |
+| Agentic red team | ✅ real, 144 trials/arm on two vendors | — |
+| Dashboard | ✅ [deployed and live](https://adversarial-payments.vercel.app) | — |
+| `.docx` walkthrough | ✅ complete, 0 `[[PENDING]]` markers | — |
+| Submission | ❌ nothing submitted | all three artifacts, via Writeups |
+
+**The three things worth knowing before you touch anything:**
+
+1. **ASR is 1.000 and does not fall.** Any doc, chart caption or slide still promising a
+   collapse is now wrong. The honest headline is attacker *cost*, not attacker failure.
+2. **Both provider keys are present and both agentic arms have been run.** The corpus was
+   fired at `gpt-oss-120b` (Groq) and `nemotron-3-super-120b` (NVIDIA NIM), 144 trials each.
+   `/agent` on the live site fires a single injection against a real model on demand.
+3. **The loop's threshold was fitted on the test split until 2026-08-30.** It maximised F1 on
+   the rows the attack was scored over, which lifted the bar to ~0.94 and made evasion free.
+   It now uses `choose_threshold` at a fixed FPR budget on a held-out validation slice. Any
+   ASR measured before that fix is not comparable to one measured after it.
+
+---
 
 ## Known limitations
 

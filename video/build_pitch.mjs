@@ -25,6 +25,8 @@ const NORM = path.join(AUDIO, "norm");
 const PADDED = path.join(AUDIO, "padded");
 const RAW = path.join(here, "raw_pitch");
 const DEMOS = path.join(here, "..", "web", "public", "demos");
+const FOOTAGE = path.join(here, "footage");
+const clipPath = (name) => [FOOTAGE, DEMOS].map((d) => path.join(d, `${name}.mp4`)).find((f) => fs.existsSync(f)) || path.join(FOOTAGE, `${name}.mp4`);
 const OUT = path.join(here, "pitch.mp4");
 const BREATH = 0.4;
 const MAX_TOTAL = 300;
@@ -42,7 +44,7 @@ const scenes = cfg.scenes.map((s) => {
   const norm = path.join(NORM, `${s.id}.wav`);
   ff(["-i", wav, "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-ar", "48000", "-ac", "1", norm]);
   const spoken = probe(norm);
-  const clip = s.clip ? path.join(DEMOS, `${s.clip}.mp4`) : null;
+  const clip = s.clip ? clipPath(s.clip) : null;
   if (clip && !fs.existsSync(clip)) throw new Error(`missing ${clip} — run record_loops.mjs ${s.clip}`);
   const clipDur = clip ? probe(clip) : null;
   const natural = r2(spoken + BREATH);

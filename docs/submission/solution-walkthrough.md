@@ -2,7 +2,7 @@
 
 ## Red-teaming fraud detection and agentic payment systems
 
-**Mastercard Innovation Challenge 2026 — Solution Walkthrough**
+**Solution Walkthrough — Razorpay AI Buildathon 2026, Open Track** (prepared for the Mastercard Innovation Challenge 2026; numbers unchanged)
 
 ---
 

@@ -20,6 +20,10 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const BASE = process.env.BASE_URL || "https://adversarial-payments.vercel.app";
 const RAW = path.join(here, "raw_loops");
 const OUT = path.join(here, "..", "web", "public", "demos");
+// Pitch-only footage: real pages as b-roll under the narration. Not embedded on the site.
+const FOOTAGE = path.join(here, "footage");
+const PITCH_ONLY = new Set(["landing", "agent_table", "results", "whatbroke"]);
+const MAX_BY_NAME = { landing: 27, agent_table: 41, results: 33, whatbroke: 32 };
 const MAX_S = 25;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -75,6 +79,47 @@ const LOOPS = {
     await sleep(2000);
   },
 
+  async landing(page) {
+    await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
+    await sleep(9000);
+    await page.evaluate(() => window.scrollBy({ top: 520, behavior: "smooth" }));
+    await sleep(5000);
+    await page.evaluate(() => window.scrollBy({ top: 700, behavior: "smooth" }));
+    await sleep(6000);
+  },
+
+  async agent_table(page) {
+    await page.goto(`${BASE}/agent`, { waitUntil: "networkidle" });
+    const fig = page.getByText("Exploit rate by OWASP category").first();
+    await fig.waitFor({ timeout: 30_000 });
+    await fig.scrollIntoViewIfNeeded();
+    await sleep(9000);
+    await page.evaluate(() => window.scrollBy({ top: 600, behavior: "smooth" }));
+    await sleep(8000);
+    const two = page.getByText("Measured twice, on two vendors").first();
+    if (await two.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await two.scrollIntoViewIfNeeded();
+      await sleep(9000);
+    }
+  },
+
+  async results(page) {
+    await page.goto(`${BASE}/results`, { waitUntil: "networkidle" });
+    await sleep(3000);
+    for (let i = 0; i < 6; i++) {
+      await page.evaluate(() => window.scrollBy({ top: 560, behavior: "smooth" }));
+      await sleep(4500);
+    }
+  },
+
+  async whatbroke(page) {
+    await page.goto(`${BASE}/#what-broke`, { waitUntil: "networkidle" });
+    await page.locator("#what-broke").scrollIntoViewIfNeeded();
+    await sleep(12000);
+    await page.evaluate(() => window.scrollBy({ top: 420, behavior: "smooth" }));
+    await sleep(12000);
+  },
+
   async audit(page) {
     await page.goto(`${BASE}/audit`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.getElementById("hint")?.textContent.includes("run complete"), null, { timeout: 30_000 });
@@ -105,9 +150,11 @@ async function record(name) {
   await browser.close();
 
   const webm = fs.readdirSync(dir).find((f) => f.endsWith(".webm"));
-  const out = path.join(OUT, `${name}.mp4`);
+  const outDir = PITCH_ONLY.has(name) ? FOOTAGE : OUT;
+  fs.mkdirSync(outDir, { recursive: true });
+  const out = path.join(outDir, `${name}.mp4`);
   execFileSync("ffmpeg", [
-    "-y", "-loglevel", "error", "-ss", "1", "-i", path.join(dir, webm), "-t", String(MAX_S),
+    "-y", "-loglevel", "error", "-ss", "1", "-i", path.join(dir, webm), "-t", String(MAX_BY_NAME[name] || MAX_S),
     "-an", "-vf", "fps=30,scale=1920:1080,setsar=1", "-c:v", "libx264", "-crf", "26", "-preset", "slow",
     "-pix_fmt", "yuv420p", "-movflags", "+faststart", out,
   ]);
