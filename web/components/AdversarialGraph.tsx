@@ -208,7 +208,7 @@ export function AdversarialGraph({ graph }: { graph: Graph }) {
           edgesFocusable={false}
           autoPanOnNodeFocus={false}
         >
-          <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="#bdbdb2" />
+          <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="#2a3243" />
           <Controls showInteractive={false} className="!border-rule !bg-figure" />
         </ReactFlow>
       </div>

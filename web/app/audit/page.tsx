@@ -95,7 +95,7 @@ export default async function AuditPage() {
             } unflagged`}
           >
             <div className="bg-defend-fill" style={{ width: `${groundedClaimPct}%` }} />
-            <div className="bg-[#9a6205]" style={{ width: `${100 - groundedClaimPct}%` }} />
+            <div className="bg-warn-fill" style={{ width: `${100 - groundedClaimPct}%` }} />
           </div>
           <div className="mt-2 flex gap-5 text-[0.75rem] text-muted">
             <span className="inline-flex items-center gap-1.5">
@@ -103,7 +103,7 @@ export default async function AuditPage() {
               grounded claims
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-[#9a6205]" aria-hidden="true" />
+              <span className="inline-block h-2 w-2 rounded-full bg-warn-fill" aria-hidden="true" />
               unflagged claims
             </span>
           </div>

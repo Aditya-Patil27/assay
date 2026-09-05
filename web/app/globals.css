@@ -2,82 +2,84 @@
 
 @theme {
   /* ------------------------------------------------------------------------------
-   * Unit21's type and accents, on paper.
+   * Unit21's type and accents, on a night ground.
    *
-   * Their cream-on-black was reported as disturbing to read, which is fair -- a whole
-   * site at 17:1 inverted is a lot to sit in front of. So the ground is inverted and
-   * the parts that gave the reference its character are kept: a Baskerville display at
-   * weight 400, an entirely monospaced UI layer, and coral rather than SaaS blue.
+   * This was ivory for a while, and ivory made it read as a quarterly report: correct,
+   * legible, and dull. The work is a red/blue loop -- an attacker and a detector taking
+   * turns in the dark -- and the pitch that landed shows it that way. So the ground is
+   * back to near-black, and every accent is re-picked for it rather than inherited.
    *
-   * The paper is warm ivory, not the cold grey this had before. That single choice is
-   * what separates it from IBM Carbon: Carbon is #f4f4f4 neutral with a blue accent,
-   * and every enterprise reporting console on earth looks like it.
+   * What separates it from the default dark SaaS console is the same thing that separated
+   * the ivory version from IBM Carbon: a Baskerville display at weight 400, an entirely
+   * monospaced UI layer, and coral rather than blue. The ground is #080a0f -- blue-black,
+   * not neutral -- and cards sit one step up at #11151f rather than being outlined.
+   *
+   * Contrast is not a side effect here: text (#e8edf7) is 16.5:1 on the ground, muted
+   * (#8b97ad) is 7.6:1, and the two accents were moved off the reference's own coral and
+   * cyan to #ff4d5e (5.8:1) and #22d3a6 (10.1:1), which is what lets them be used as text
+   * and not only as bars. Filled buttons flip to --color-on-accent instead.
    * ------------------------------------------------------------------------------ */
 
-  --color-paper: #faf7ef; /* warm ivory -- the reference's cream, used as ground */
-  --color-figure: #ffffff; /* cards lift off the ivory without a heavy shadow */
-  --color-figure-2: #f2eee2;
-  --color-rule: #d6cdb8;
-  --color-rule-strong: #bfb6a0;
+  --color-paper: #080a0f; /* the ground: blue-black, never neutral grey */
+  --color-figure: #11151f; /* cards lift off the ground by one step, not by a shadow */
+  --color-figure-2: #171c29; /* sunken fields, table stripes, code blocks */
+  --color-rule: #232a39;
+  --color-rule-strong: #2f3849;
 
-  --color-ink: #17150f; /* warm near-black, 17.05:1 on paper */
-  --color-muted: #6b6558; /* 5.41:1 */
+  --color-ink: #e8edf7; /* 16.5:1 on the ground, 14.7:1 on figure-2 */
+  --color-muted: #8b97ad; /* 7.6:1 on the ground, 6.3:1 on a card */
+
+  /* Dark text for anything set on a filled accent -- coral and teal are bright enough
+     that ink on them is unreadable and the ground colour is the only correct answer. */
+  --color-on-accent: #080a0f;
 
   /* ------------------------------------------------------------------------------
-   * Two variants per accent. The -fill values are the reference's own colours, used
-   * for bars, strokes and buttons, which owe 3:1 as graphics and carry black text.
-   * The plain values are darkened until small text clears 4.5:1 on the ivory --
-   * #ff6158 itself reads at 2.8:1 and must never be set as body copy.
+   * Two variants per accent. On a dark ground the relationship inverts: the bright
+   * colour is now the one that clears 4.5:1 as small text, so -fill and the plain value
+   * are the same hex, and the -dim variants become deep tints used behind them.
    * ------------------------------------------------------------------------------ */
-  --color-attack: #c9372b; /* 4.83:1 -- deep vermilion */
-  --color-attack-fill: #ff6158; /* the reference's coral */
-  --color-attack-dim: #f5b3ad;
+  --color-attack: #ff4d5e; /* 5.83:1 on the ground -- coral, safe as body text */
+  --color-attack-fill: #ff4d5e;
+  --color-attack-dim: #6b2a31;
 
-  --color-defend: #007b9a; /* 4.56:1 */
-  --color-defend-fill: #46daff; /* the reference's cyan */
-  --color-defend-dim: #9adcee;
+  --color-defend: #22d3a6; /* 10.07:1 -- teal */
+  --color-defend-fill: #22d3a6;
+  --color-defend-dim: #1b5c4c;
 
-  --color-warn: #8845ff; /* 4.52:1 */
-  --color-warn-fill: #a97cff;
+  --color-warn: #f5b544; /* 10.5:1 -- amber, for unflagged / model_prior */
+  --color-warn-fill: #f5b544;
 
-  --color-ok: #0e814f; /* 4.59:1 */
-  --color-wash-defend: #e4f4fa;
+  --color-ok: #22d3a6;
+  --color-wash-defend: #0f2a26;
+  --color-wash-attack: #2b1418;
 
-  /* Categorical ramp for the audit groups: text-safe on paper, washes behind them. */
-  --color-g1: #007b9a;
-  --color-g1-wash: #e4f4fa;
-  --color-g2: #0e814f;
-  --color-g2-wash: #e2f3ea;
-  --color-g3: #8845ff;
-  --color-g3-wash: #efe8ff;
-  --color-g4: #b8453a;
-  --color-g4-wash: #fdeae7;
-  --color-g5: #8a5a08;
-  --color-g5-wash: #fdf0d8;
-  --color-g6: #0f6d8c;
-  --color-g6-wash: #e6f1f6;
-  --color-g7: #c9372b;
-  --color-g7-wash: #fdeae7;
-  --color-g8: #5f5a4e;
-  --color-g8-wash: #efece2;
+  /* Categorical ramp for the audit groups: text-safe on the ground, deep tints of the
+     same hue behind them rather than the pale washes the ivory build used. */
+  --color-g1: #22d3a6;
+  --color-g1-wash: #0f2a26;
+  --color-g2: #5eb0ff;
+  --color-g2-wash: #0f2033;
+  --color-g3: #b48cff;
+  --color-g3-wash: #221a3a;
+  --color-g4: #ff4d5e;
+  --color-g4-wash: #2b1418;
+  --color-g5: #f5b544;
+  --color-g5-wash: #2e2210;
+  --color-g6: #4fd1e0;
+  --color-g6-wash: #0d2830;
+  --color-g7: #ff8a5c;
+  --color-g7-wash: #33190f;
+  --color-g8: #9aa7bd;
+  --color-g8-wash: #1b2130;
 
-  /* The banded sections. Not dark any more -- a deeper tint of the same paper, so the
-     hero and the closing band read as separate without changing register. */
-  --color-night: #f2eee2;
-  --color-night-2: #ffffff;
-  --color-night-rule: #d6cdb8;
-  --color-night-ink: #17150f;
-  --color-night-muted: #6b6558;
+  /* The banded sections. A step *up* from the ground rather than down, so the hero and
+     the closing band still read as bands without leaving the palette. */
+  --color-night: #11151f;
+  --color-night-2: #171c29;
+  --color-night-rule: #2f3849;
+  --color-night-ink: #e8edf7;
+  --color-night-muted: #8b97ad;
 
-  /* ------------------------------------------------------------------------------
-   * Three faces, unchanged -- this is the half of the reference that was working.
-   *
-   *   Libre Baskerville  display, at weight 400. A serif this large is why the page
-   *                      does not look like every other fraud vendor's.
-   *   Space Mono         eyebrows, buttons, labels, numbers. A monospaced UI layer
-   *                      reads as an instrument rather than a brochure.
-   *   DM Sans            running prose, where a serif at 16px would tire a reader.
-   * ------------------------------------------------------------------------------ */
   --font-display: var(--font-baskerville), Baskerville, Georgia, serif;
   --font-sans: var(--font-dmsans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-spacemono), ui-monospace, Menlo, monospace;
@@ -87,7 +89,7 @@
 }
 
 html {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 html,
@@ -148,12 +150,14 @@ body {
   color: var(--color-ink);
 }
 
-/* White on ivory needs only the faintest lift; a heavy shadow on a warm ground goes
-   muddy immediately. */
+/* On a dark ground a drop shadow does nothing -- a card is separated by being one step
+   lighter than the page, plus a hairline of its own so the edge survives on a dim screen. */
 .card {
   background: var(--color-figure);
   border-radius: var(--radius-card);
-  box-shadow: 0 1px 2px rgb(23 21 15 / 0.04);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.03),
+    0 1px 2px rgb(0 0 0 / 0.5);
 }
 
 table,
@@ -173,10 +177,26 @@ table,
 .band-label .react-flow__handle {
   display: none;
 }
+.react-flow__controls {
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.5);
+}
+/* React Flow ships white controls with black glyphs; both have to be restated or the
+   zoom cluster is the one white rectangle left on the page. */
 .react-flow__controls-button {
   border-color: var(--color-rule) !important;
+  border-bottom-color: var(--color-rule) !important;
   background: var(--color-figure) !important;
+  color: var(--color-ink) !important;
   fill: var(--color-ink) !important;
+}
+.react-flow__controls-button:hover {
+  background: var(--color-figure-2) !important;
+}
+.react-flow__controls-button svg {
+  fill: var(--color-ink) !important;
+}
+.react-flow__controls-button:disabled svg {
+  fill: var(--color-muted) !important;
 }
 
 /* --------------------------------------------------------------------------------
@@ -286,8 +306,9 @@ table,
 .card:hover {
   transform: translateY(-1px);
   box-shadow:
-    0 4px 14px rgb(23 21 15 / 0.07),
-    0 1px 2px rgb(23 21 15 / 0.05);
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 6px 18px rgb(0 0 0 / 0.55),
+    0 1px 2px rgb(0 0 0 / 0.5);
 }
 
 .nudge {
@@ -308,7 +329,7 @@ button:hover .nudge {
 }
 .btn:active {
   transform: translateY(1px) scale(0.99);
-  box-shadow: inset 0 1px 3px rgb(23 21 15 / 0.14);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.45);
 }
 
 /* The nav's active item carries a sliding rule rather than a filled chip alone. */

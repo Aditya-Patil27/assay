@@ -178,7 +178,7 @@ function LineageGraphView({
             onNodeClick={(_, node) => pick(node.id)}
             onPaneClick={() => pick(null)}
           >
-            <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#cfc7b4" />
+            <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#2a3243" />
             <Controls showInteractive={false} className="!border-rule !bg-figure" />
           </ReactFlow>
         </div>
@@ -271,7 +271,7 @@ function Legend({ kinds }: { kinds: LineageNodeKind[] }) {
         <span
           aria-hidden="true"
           className="inline-block h-2.5 w-2.5 rounded-[1px]"
-          style={{ background: "#ff6158" }}
+          style={{ background: "#ff4d5e" }}
         />
         coral = exploited
       </span>
@@ -279,7 +279,7 @@ function Legend({ kinds }: { kinds: LineageNodeKind[] }) {
         <span
           aria-hidden="true"
           className="inline-block h-2.5 w-2.5 rounded-[1px]"
-          style={{ background: "#46daff" }}
+          style={{ background: "#22d3a6" }}
         />
         teal = held
       </span>
@@ -361,7 +361,7 @@ function DetailPanel({ node, hint }: { node: LineageNode | null; hint: boolean }
  * ------------------------------------------------------------------------------------- */
 
 const REST_STROKE = "var(--color-rule-strong)";
-const TONE_STROKE = { attack: "#ff6158", defend: "#0d9bc0" } as const;
+const TONE_STROKE = { attack: "#ff4d5e", defend: "#22d3a6" } as const;
 
 function useFlowElements(
   graph: LineageGraphData,
