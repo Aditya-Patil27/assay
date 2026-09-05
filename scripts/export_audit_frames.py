@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / "artifacts"
 OUT = ROOT / "web" / "public" / "audit" / "frames.json"
 ROOT_TASK = "Does this security number survive an adversary?"
-SKIP_PARTS = {"cache"}
+SKIP_PREFIX = ("agentic", "cache")  # the LLM response cache: request/response pairs, not results
 
 
 def _pct(x: float) -> str:
@@ -115,7 +115,7 @@ def build_frames(artifacts_dir: Path) -> dict:
     entries: list[tuple[bool, str, str, Path, dict]] = []
     for path in sorted(artifacts_dir.rglob("*.json")):
         rel_parts = path.relative_to(artifacts_dir).parts
-        if SKIP_PARTS & set(rel_parts[:-1]):
+        if rel_parts[:2] == SKIP_PREFIX:
             continue
         rel = "/".join(rel_parts)
         try:

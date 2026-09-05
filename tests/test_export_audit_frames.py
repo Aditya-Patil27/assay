@@ -29,13 +29,14 @@ def artifacts(tmp_path: Path) -> Path:
     })
     _write(root / "attack" / "dosage_sweep.json", {"kind": "dosage_sweep", "rows": 1852394, "arms": [1, 2, 3]})
     _write(root / "agentic" / "cache" / "deadbeef.json", {"key": "x", "request": {}, "response": {}})
+    _write(root / "detect" / "cache" / "kept.json", {"kind": "kept", "placeholder": False, "git_sha": "d", "created_at": "2026-09-01T00:00:00+00:00", "payload": {"x": 1}})
     return root
 
 
 def test_flagged_is_grounded_and_unflagged_is_prior(artifacts: Path) -> None:
     frames = build_frames(artifacts)
     by_id = {m["message_id"]: m for m in frames["messages"]}
-    assert set(by_id) == {"scorecard.json", "attack/dosage_sweep.json"}  # cache skipped
+    assert set(by_id) == {"scorecard.json", "detect/cache/kept.json", "attack/dosage_sweep.json"}  # cache skipped
 
     sc = by_id["scorecard.json"]
     assert sc["task_status"] == "complete"
@@ -52,7 +53,7 @@ def test_ordering_and_shape(artifacts: Path) -> None:
     frames = build_frames(artifacts)
     ids = [m["message_id"] for m in frames["messages"]]
     assert ids[-1] == "attack/dosage_sweep.json"  # unflagged rows come last
-    assert [m["lamport"] for m in frames["messages"]] == [1, 2]
+    assert [m["lamport"] for m in frames["messages"]] == [1, 2, 3]
     for m in frames["messages"]:
         assert m["type"] == "message" and m["sender"] == "assay" and m["receiver"] == "reviewer"
         assert m["performative"] == "task_result"
