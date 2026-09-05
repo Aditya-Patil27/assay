@@ -6,7 +6,7 @@ attacked — this is the test that tells you which of those numbers are real.**
 *An assay is the test that determines the true metal content of a coin. This framework does
 the same to a security number.*
 
-**[Live dashboard](https://assay-payments.vercel.app)** · **[Audit console](https://assay-payments.vercel.app/audit)** · *5-minute pitch: link to follow* ·
+**[Live dashboard](https://assay-payments.vercel.app)** · **[Audit console](https://assay-payments.vercel.app/audit)** · **[5-minute pitch](https://youtu.be/wjGwf3xRlUU)** ·
 **[Architecture](docs/submission/solution-walkthrough.md)** · Razorpay AI Buildathon 2026,
 Open Track
 
