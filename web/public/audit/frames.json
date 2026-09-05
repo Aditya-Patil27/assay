@@ -441,12 +441,12 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "attack/adversarial_detection.json",
-   "git_sha": "0e25c15",
+   "git_sha": "a999f56",
    "timestamp": "2026-09-05T09:28:29.342755+00:00",
    "claims": [
     {
      "claim": "holdout recall on unseen adversarials 0.000 -> 0.689",
-     "evidence": "artifacts/attack/adversarial_detection.json \u00b7 git_sha 0e25c15 \u00b7 created 2026-09-05T09:28:29.342755+00:00",
+     "evidence": "artifacts/attack/adversarial_detection.json \u00b7 git_sha a999f56 \u00b7 created 2026-09-05T09:28:29.342755+00:00",
      "evidence_type": "test_output"
     }
    ],
@@ -454,8 +454,8 @@
     {
      "ref": "artifacts/attack/adversarial_detection.json",
      "kind": "adversarial_detection",
-     "summary": "1,082 bytes, placeholder=false",
-     "tokens": 270
+     "summary": "1,051 bytes, placeholder=false",
+     "tokens": 262
     }
    ]
   },
