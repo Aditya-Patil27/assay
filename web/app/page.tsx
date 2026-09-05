@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { LiveScoreStream } from "@/components/LiveScoreStream";
 import { WhatBroke } from "@/components/WhatBroke";
+import { FeatureLoop } from "@/components/FeatureLoop";
 
 import {
   loadArtifacts,
@@ -49,36 +50,19 @@ const STEPS = [
 
 const CAPABILITIES = [
   {
-    href: "/live",
-    label: "Run the detector live",
-    blurb:
-      "The exported ONNX graph, executed in your browser on WASM. Move a transaction, watch the score move, then run the constraint-aware attack against it.",
-    tone: "accent" as const,
-  },
-  {
-    href: "/agent",
-    label: "Fire a live injection",
-    blurb:
-      "Pick a prompt-injection payload and fire it at a real model with the defenses on or off. Watch the payee's IBAN move, or not.",
-    tone: "accent" as const,
-  },
-  {
     href: "/results",
     label: "Co-evolution results",
-    blurb:
-      "Three rounds of attack and adversarial retraining, plus the feasibility audit run against our own baseline before any number is reported.",
+    blurb: "Three rounds of attack and adversarial retraining, plus the feasibility audit run against our own baseline before any number is reported.",
   },
   {
     href: "/attack",
     label: "Tabular surface",
-    blurb:
-      "Worked evasions feature by feature, and the constraint contract every perturbation is held to.",
+    blurb: "Worked evasions feature by feature, and the constraint contract every perturbation is held to.",
   },
   {
     href: "/system",
     label: "The system, audited",
-    blurb:
-      "Every backend module inventoried from source, the ONNX serving latency, and the corpus the bands were measured from.",
+    blurb: "Every backend module inventoried from source, the ONNX serving latency, and the corpus the bands were measured from.",
   },
 ];
 
@@ -228,25 +212,50 @@ export default async function Home() {
 
       <WhatBroke />
 
-      {/* ---- Capabilities -------------------------------------------------------- */}
-      <section className="wrap reveal pb-14">
+      {/* ---- Feature loops ------------------------------------------------------ */}
+      <section className="wrap pt-14">
         <h2 className="display text-[1.75rem] md:text-[2rem]">
           Two attack surfaces, one loop, both of them live
         </h2>
         <p className="prose col mt-3">
           The same cycle — attack, measure, defend, re-measure — applied to a tabular fraud
-          detector and to a payment agent. Two of these pages run the real thing in front of
-          you rather than showing you a picture of it.
+          detector and to a payment agent. Each clip below is the deployed page, recorded.
         </p>
+      </section>
+      <FeatureLoop
+        eyebrow="Surface 1 · tabular"
+        title="Run the detector in your own tab"
+        blurb="The exported tree ensemble, walked in the browser. Move a transaction, watch the score move, then run the constraint-aware attack against it."
+        href="/live"
+        cta="Run the live detector"
+        src="/demos/live.mp4"
+      />
+      <FeatureLoop
+        eyebrow="Surface 2 · agentic"
+        title="Fire a live injection at a real model"
+        blurb="Pick a payload planted in a payment memo and fire it twice: defenses off, then on. Watch the payee's account move, or not."
+        href="/agent"
+        cta="Fire an injection"
+        src="/demos/agent.mp4"
+        flip
+      />
+      <FeatureLoop
+        eyebrow="Provenance"
+        title="Every claim, with what ran behind it"
+        blurb="Each artifact becomes an audited claim. Green means a test or a file backs it. Amber means nothing ran — including five of our own."
+        href="/audit"
+        cta="Open the audit console"
+        src="/demos/audit.mp4"
+      />
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* ---- Remaining pages ----------------------------------------------------- */}
+      <section className="wrap reveal pb-14 pt-4">
+        <div className="grid gap-4 md:grid-cols-3">
           {CAPABILITIES.map((c) => (
             <Link
               key={c.href}
               href={c.href}
-              className={`card group flex flex-col border p-5 transition-shadow hover:shadow-md ${
-                c.tone === "accent" ? "border-defend-dim" : "border-rule"
-              }`}
+              className="card group flex flex-col border border-rule p-5 transition-shadow hover:shadow-md"
             >
               <span className="display text-[1.0625rem]">{c.label}</span>
               <span className="mt-2 flex-1 text-[0.8125rem] leading-relaxed text-muted">
