@@ -22,8 +22,8 @@ const RAW = path.join(here, "raw_loops");
 const OUT = path.join(here, "..", "web", "public", "demos");
 // Pitch-only footage: real pages as b-roll under the narration. Not embedded on the site.
 const FOOTAGE = path.join(here, "footage");
-const PITCH_ONLY = new Set(["landing", "agent_table", "results", "whatbroke"]);
-const MAX_BY_NAME = { landing: 27, agent_table: 41, results: 33, whatbroke: 32 };
+const PITCH_ONLY = new Set(["landing", "agent_table", "results", "whatbroke", "feasibility", "graph", "unflagged"]);
+const MAX_BY_NAME = { landing: 27, agent_table: 41, results: 33, whatbroke: 32, feasibility: 28, graph: 39, unflagged: 28 };
 const MAX_S = 25;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -118,6 +118,43 @@ const LOOPS = {
     await sleep(12000);
     await page.evaluate(() => window.scrollBy({ top: 420, behavior: "smooth" }));
     await sleep(12000);
+  },
+
+  async feasibility(page) {
+    await page.goto(`${BASE}/results`, { waitUntil: "networkidle" });
+    const block = page.getByText("Why this attack success rate means something").first();
+    await block.waitFor({ timeout: 30_000 });
+    await block.scrollIntoViewIfNeeded();
+    await sleep(12000);
+    await page.evaluate(() => window.scrollBy({ top: 380, behavior: "smooth" }));
+    await sleep(14000);
+  },
+
+  async graph(page) {
+    await page.goto(`${BASE}/system`, { waitUntil: "networkidle" });
+    const block = page.getByText("The unrolled adversarial loop").first();
+    await block.waitFor({ timeout: 30_000 });
+    await block.scrollIntoViewIfNeeded();
+    await sleep(16000);
+    await page.evaluate(() => window.scrollBy({ top: 520, behavior: "smooth" }));
+    await sleep(10000);
+    const honest = page.getByText("How this is kept honest").first();
+    if (await honest.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await honest.scrollIntoViewIfNeeded();
+      await sleep(12000);
+    }
+  },
+
+  async unflagged(page) {
+    await page.goto(`${BASE}/audit`, { waitUntil: "networkidle" });
+    await page.waitForFunction(() => document.getElementById("hint")?.textContent.includes("run complete"), null, { timeout: 40_000 });
+    await sleep(1500);
+    await page.getByRole("button", { name: "Unflagged" }).click();
+    await sleep(6000);
+    await page.locator("#rows > *").last().click();
+    await sleep(10000);
+    await page.getByRole("button", { name: "All" }).click();
+    await sleep(9000);
   },
 
   async audit(page) {

@@ -1,81 +1,81 @@
 {
-  "total": 290.83,
+  "total": 268,
   "scenes": [
     {
       "id": "s1",
       "start": 0,
-      "slot": 14.29,
-      "spoken": 13.89,
+      "slot": 12.44,
+      "spoken": 12.04,
       "source": "pitch.html"
     },
     {
       "id": "s2",
-      "start": 14.29,
-      "slot": 27,
-      "spoken": 22.47,
+      "start": 12.44,
+      "slot": 22.91,
+      "spoken": 22.51,
       "source": "landing.mp4"
     },
     {
       "id": "s3",
-      "start": 41.29,
-      "slot": 38.35,
-      "spoken": 37.95,
+      "start": 35.35,
+      "slot": 34.92,
+      "spoken": 34.52,
       "source": "agent_table.mp4"
     },
     {
       "id": "s4",
-      "start": 79.64,
-      "slot": 26.57,
-      "spoken": 26.17,
-      "source": "pitch.html"
+      "start": 70.27,
+      "slot": 24.45,
+      "spoken": 24.05,
+      "source": "feasibility.mp4"
     },
     {
       "id": "s5",
-      "start": 106.21,
-      "slot": 44.65,
-      "spoken": 44.25,
+      "start": 94.72,
+      "slot": 40.72,
+      "spoken": 40.32,
       "source": "results.mp4"
     },
     {
       "id": "s6",
-      "start": 150.86,
-      "slot": 18.59,
-      "spoken": 18.19,
+      "start": 135.44,
+      "slot": 15.62,
+      "spoken": 15.22,
       "source": "agent.mp4"
     },
     {
       "id": "s7",
-      "start": 169.45,
-      "slot": 35.43,
-      "spoken": 35.03,
-      "source": "pitch.html"
+      "start": 151.06,
+      "slot": 33.73,
+      "spoken": 33.33,
+      "source": "graph.mp4"
     },
     {
       "id": "s8",
-      "start": 204.88,
-      "slot": 15.11,
-      "spoken": 14.71,
+      "start": 184.79,
+      "slot": 14.59,
+      "spoken": 14.19,
       "source": "audit.mp4"
     },
     {
       "id": "s9",
-      "start": 219.99,
-      "slot": 38.27,
-      "spoken": 37.87,
+      "start": 199.38,
+      "slot": 37.15,
+      "spoken": 36.75,
       "source": "whatbroke.mp4"
     },
     {
       "id": "s10",
-      "start": 258.26,
-      "slot": 22.54,
-      "spoken": 22.14,
-      "source": "pitch.html"
+      "start": 236.53,
+      "slot": 20.74,
+      "spoken": 20.34,
+      "source": "unflagged.mp4"
     },
     {
       "id": "s11",
-      "start": 280.8,
-      "slot": 10.06,
-      "spoken": 9.66,
+      "start": 257.27,
+      "slot": 10.73,
+      "spoken": 10.33,
       "source": "pitch.html"
     }
   ]
