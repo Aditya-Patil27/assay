@@ -5,7 +5,7 @@
  * that unattacked numbers are decoration has to put its own corrections where a judge
  * lands, not in a changelog.
  */
-const REPO = "https://github.com/Aditya-Patil27/mastercard-adversarial-payments";
+const REPO = "https://github.com/Aditya-Patil27/assay";
 
 const ERRORS = [
   {

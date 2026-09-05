@@ -13,7 +13,7 @@ that is what the submission is checked for.
 
 | # | Artifact | Link |
 |---|---|---|
-| 1 | Code repository | https://github.com/Aditya-Patil27/mastercard-adversarial-payments |
+| 1 | Code repository | https://github.com/Aditya-Patil27/assay |
 | 2 | Solution walkthrough (.docx) | attached — `solution-walkthrough.docx` |
 | 3 | Working web prototype | https://adversarial-payments.vercel.app |
 
