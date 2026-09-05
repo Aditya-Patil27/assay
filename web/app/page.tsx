@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { LiveScoreStream } from "@/components/LiveScoreStream";
+import { WhatBroke } from "@/components/WhatBroke";
 
 import {
   loadArtifacts,
@@ -30,15 +31,19 @@ import {
 const STEPS = [
   {
     k: "The problem",
-    v: "A fraud detector that scores well offline can be walked past. Published evasion results usually prove less than they look like they prove.",
+    v: "A fraud defence reports a number nobody attacked. Published evasion results usually measure an attacker who could not exist.",
   },
   {
     k: "What we built",
-    v: "A red team that may only move what a real attacker controls, against a detector that retrains on every evasion it finds. Attack, measure, defend, repeat.",
+    v: "One loop — attack, measure, defend, re-measure — held to what a real attacker controls, run on a tabular detector and on a payment agent.",
   },
   {
-    k: "The result",
-    v: "The attacker still gets through every time — so we report what it costs instead, and the audit showing an unconstrained attacker's identical score is mostly impossible transactions.",
+    k: "What landed",
+    v: "Payment-agent exploits 4.86% → 0.0% with zero false refusals. And a feasibility audit: 99.9% of a naive attacker's identical 100% is transactions that cannot occur.",
+  },
+  {
+    k: "What we priced",
+    v: "Adversarial retraining did not stop one evasion. It raised the attacker's median queries 275 → 391 and cost 1.6% of PR-AUC — so the defence has to live elsewhere.",
   },
 ];
 
@@ -148,10 +153,10 @@ export default async function Home() {
         <div className="wrap grid gap-12 py-16 md:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-start">
           <div>
             <p className="mono-label text-[0.8125rem] text-attack">
-              Mastercard Innovation Challenge 2026
+              Razorpay AI Buildathon 2026 · Open Track
             </p>
             <h1 className="display mt-4 max-w-[15ch] text-[2.75rem] sm:text-[3.75rem] md:text-[4.5rem]">
-              An attack that keeps working, and costs more every round.
+              The test that tells you which of your security numbers are real.
             </h1>
 
             {/* The three-step read, before the paragraph. A panel scans; it does not
@@ -220,6 +225,8 @@ export default async function Home() {
           ))}
         </dl>
       </section>
+
+      <WhatBroke />
 
       {/* ---- Capabilities -------------------------------------------------------- */}
       <section className="wrap reveal pb-14">

@@ -91,7 +91,7 @@ export function SiteFooter({ children }: { children?: React.ReactNode }) {
             </div>
             <p className="mt-3 text-[0.8125rem] leading-relaxed text-muted">
               Assay tests whether an adversarial security number means anything, by holding the
-              attacker to constraints a real one would face. Mastercard Innovation Challenge 2026.
+              attacker to constraints a real one would face. Razorpay AI Buildathon 2026, Open Track.
             </p>
           </div>
 
