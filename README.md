@@ -283,27 +283,20 @@ per-round PR-AUC and `latency.json`. A metric nobody could retract is not a metr
 
 ### 30 seconds, no Python
 
-The dashboard is a **fully static export**: pre-built HTML with the artifact JSON inlined at
-build time. No server, no backend, nothing to install. It reads `artifacts/`; it never
-trains, by design — so nothing heavy can fail mid-demo, and the results are visible on a
-machine that could not build XGBoost.
+The deployed site is the fastest route: <https://assay-payments.vercel.app>. Every page is
+rendered at build time from the committed artifact JSON; the site never trains. Two pages run
+the real thing in front of you: `/live` walks the exported detector in your browser, and
+`/agent` fires one prompt injection at a live model through the site's only server route.
+`/audit` is the provenance ledger and `/lineage` the attack-lineage graph.
+
+To run it yourself:
 
 ```bash
-# If web/out/ is present, just open it — the export uses relative asset paths,
-# so it works straight off the filesystem with no server at all:
-open web/out/index.html          # macOS
-start web/out/index.html         # Windows
+cd web && npm install && npm run dev     # http://localhost:3000 — reads ../artifacts, no Python needed
 ```
 
-> **Note for a judge cloning this repo:** `web/out/` is currently in `.gitignore`, so a fresh
-> clone will not contain the built export. Until that changes or a deployed URL is published,
-> build it once with the command below. This is a known gap, not the intended final state.
-
-```bash
-cd web && npm install && npm run build   # writes web/out/, ~1 min
-```
-
-`npm run dev` serves the same thing at `localhost:3000` if you would rather have hot reload.
+The live injection needs a provider key in `web/.env.local` (`GROQ_API_KEY=...`); without one
+the route returns a labelled 503 and every other page still works.
 
 ### Read the argument — `notebooks/submission.ipynb`
 
