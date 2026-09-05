@@ -33,7 +33,7 @@ const ERRORS = [
   {
     broke: "The second-stage detection script did not run: a refactor moved the trainer into a shared module and left one call behind, so the committed result predated the code that claimed to produce it.",
     fixed: "Caught on submission day by re-running it to give it a provenance flag. Fixed the call, re-ran, reproduced 68.9% held-out recall to the digit, and the artifact now carries placeholder: false.",
-    sha: "1374030",
+    sha: "c48dc45",
   },
 ];
 
