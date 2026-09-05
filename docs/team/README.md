@@ -123,8 +123,8 @@ Each brief has two parts:
 Full detail in [BUILD.md](BUILD.md). Short version:
 
 ```bash
-git clone https://github.com/Aditya-Patil27/mastercard-adversarial-payments.git
-cd mastercard-adversarial-payments
+git clone https://github.com/Aditya-Patil27/assay.git
+cd assay
 
 uv venv --python 3.12          # exactly 3.12 — 3.13 and 3.14 will fail
 uv pip install -e ".[dev]"
@@ -136,7 +136,7 @@ cd web && npm install && npm run dev    # the website at localhost:3000
 Need access? Ask Aditya to run:
 
 ```bash
-gh repo add-collaborator Aditya-Patil27/mastercard-adversarial-payments <your-username> --permission push
+gh repo add-collaborator Aditya-Patil27/assay <your-username> --permission push
 ```
 
 ---

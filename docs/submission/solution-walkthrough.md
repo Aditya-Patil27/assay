@@ -983,7 +983,7 @@ would rather be believed about the two surfaces we built than admired for five w
 
 | | |
 |---|---|
-| Code | `https://github.com/Aditya-Patil27/mastercard-adversarial-payments` |
+| Code | `https://github.com/Aditya-Patil27/assay` |
 | Web prototype | https://adversarial-payments.vercel.app |
 | Attack constraints | `src/adversarial_payments/attack/constraints.py` |
 | Attack search | `src/adversarial_payments/attack/engine.py` |

@@ -76,8 +76,8 @@ before anything else.
 ## First-time setup
 
 ```bash
-git clone https://github.com/Aditya-Patil27/mastercard-adversarial-payments.git
-cd mastercard-adversarial-payments
+git clone https://github.com/Aditya-Patil27/assay.git
+cd assay
 
 uv venv --python 3.12
 uv pip install -e ".[dev]"
