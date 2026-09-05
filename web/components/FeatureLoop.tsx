@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { Reveal } from "@/components/Reveal";
+
 /**
  * A heading beside the product moving. Silent, autoplaying, looping — the pattern the
  * reference site (gr-connect.org) uses for each feature, because a fifteen-second clip of
@@ -24,17 +26,33 @@ export function FeatureLoop({
   flip?: boolean;
 }) {
   return (
-    <section className="wrap reveal py-10">
+    <Reveal as="section" className="wrap py-10">
       <div className="grid items-center gap-8 lg:grid-cols-2">
         <div className={flip ? "lg:order-2" : ""}>
-          <p className="mono-label text-[0.75rem] text-attack">{eyebrow}</p>
-          <h2 className="display mt-3 text-[1.75rem] md:text-[2rem]">{title}</h2>
-          <p className="prose col mt-3">{blurb}</p>
-          <Link href={href} className="mt-5 inline-block text-[0.8125rem] font-medium text-defend">
-            {cta} <span aria-hidden="true">→</span>
+          <p data-stagger="0" className="mono-label text-[0.75rem] text-attack">
+            {eyebrow}
+          </p>
+          <h2 data-stagger="1" className="display mt-3 text-[1.75rem] md:text-[2rem]">
+            {title}
+          </h2>
+          <p data-stagger="2" className="prose col mt-3">
+            {blurb}
+          </p>
+          <Link
+            href={href}
+            data-stagger="3"
+            className="mt-5 inline-block text-[0.8125rem] font-medium text-defend"
+          >
+            {cta}{" "}
+            <span aria-hidden="true" className="nudge">
+              →
+            </span>
           </Link>
         </div>
-        <div className={`overflow-hidden rounded-[8px] border border-rule bg-black ${flip ? "lg:order-1" : ""}`}>
+        <div
+          data-stagger="1"
+          className={`overflow-hidden rounded-[8px] border border-rule bg-black ${flip ? "lg:order-1" : ""}`}
+        >
           <video
             src={src}
             autoPlay
@@ -47,6 +65,6 @@ export function FeatureLoop({
           />
         </div>
       </div>
-    </section>
+    </Reveal>
   );
 }

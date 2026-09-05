@@ -180,7 +180,18 @@ table,
 }
 
 /* --------------------------------------------------------------------------------
- * Motion: a scroll reveal and one pulse, both off under prefers-reduced-motion.
+ * Motion.
+ *
+ * One rule governs the whole system: nothing moves that a reader did not scroll to, and
+ * nothing loops. A section is a `.reveal-group`; `components/Reveal.tsx` adds `is-in` when
+ * an IntersectionObserver says it has entered the viewport, and everything inside marked
+ * `data-stagger` rises into place 60ms apart. Bars draw from zero on the same trigger, so
+ * a number and the bar under it arrive together rather than the bar being already there.
+ *
+ * The hidden-before-reveal state is scoped to `@media (scripting: enabled)`. Without that
+ * guard a reader whose JavaScript never runs -- or an old browser that ignores the query --
+ * would be left staring at an empty page, which is a worse failure than no animation. The
+ * whole block is switched off under prefers-reduced-motion at the bottom of the file.
  * -------------------------------------------------------------------------------- */
 @keyframes reveal-up {
   from {
@@ -197,12 +208,152 @@ table,
   animation: reveal-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Route change: one short fade on the main content, keyed on pathname. */
+.page-enter {
+  animation: page-enter 0.25s ease-out both;
+}
+
+@media (scripting: enabled) {
+  .reveal-group [data-stagger] {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .reveal-group .bar-draw {
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.18s;
+  }
+
+  .sweep::after {
+    transform: scaleX(0);
+  }
+}
+
+.reveal-group.is-in [data-stagger] {
+  opacity: 1;
+  transform: none;
+}
+
+.reveal-group.is-in .bar-draw {
+  transform: scaleX(1);
+}
+
+/* A single teal underline that draws itself once, under the one claim that landed. */
+.sweep {
+  position: relative;
+  display: inline-block;
+}
+.sweep::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -3px;
+  height: 2px;
+  background: var(--color-defend-fill);
+  transform-origin: left center;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.9s;
+}
+.reveal-group.is-in .sweep::after {
+  transform: scaleX(1);
+}
+
+/* --------------------------------------------------------------------------------
+ * Hover and press. A card lifts one pixel; a link's arrow steps forward; a button
+ * takes the press. All 120-150ms -- long enough to read as a response, short enough
+ * that a fast reader never waits on it.
+ * -------------------------------------------------------------------------------- */
+.card {
+  transition:
+    box-shadow 150ms ease,
+    transform 150ms ease,
+    border-color 150ms ease;
+}
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 14px rgb(23 21 15 / 0.07),
+    0 1px 2px rgb(23 21 15 / 0.05);
+}
+
+.nudge {
+  display: inline-block;
+  transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+a:hover .nudge,
+button:hover .nudge {
+  transform: translateX(3px);
+}
+
+.btn {
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    opacity 120ms ease,
+    border-color 120ms ease;
+}
+.btn:active {
+  transform: translateY(1px) scale(0.99);
+  box-shadow: inset 0 1px 3px rgb(23 21 15 / 0.14);
+}
+
+/* The nav's active item carries a sliding rule rather than a filled chip alone. */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 0.25rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-attack-fill);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-link:hover::after {
+  transform: scaleX(0.55);
+}
+.nav-link[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal,
+  .page-enter,
   .animate-pulse {
     animation: none !important;
   }
-  * {
+  .reveal-group [data-stagger],
+  .reveal-group .bar-draw,
+  .sweep::after,
+  .card,
+  .nudge {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* The nav rule is state, not decoration: it must stay hidden on inactive items, so it
+     loses its transition rather than its transform. */
+  *,
+  *::before,
+  *::after {
     transition-duration: 0.01ms !important;
   }
 }

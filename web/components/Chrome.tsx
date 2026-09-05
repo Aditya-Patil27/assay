@@ -1,3 +1,4 @@
+import { Reveal } from "@/components/Reveal";
 import type { PlaceholderSource } from "@/lib/load";
 
 /**
@@ -22,22 +23,35 @@ export function PageHeader({
   children?: React.ReactNode;
 }) {
   return (
-    <header className="wrap pb-10 pt-12 md:pt-16">
+    <Reveal as="header" immediate className="wrap pb-10 pt-12 md:pt-16">
       {eyebrow ? (
-        <p className="text-[0.8125rem] font-medium text-defend">{eyebrow}</p>
+        <p data-stagger className="text-[0.8125rem] font-medium text-defend">
+          {eyebrow}
+        </p>
       ) : null}
       <h1
+        data-stagger
         className={`display max-w-[22ch] text-[2rem] leading-[1.1] sm:text-[2.5rem] md:text-[3rem] ${eyebrow ? "mt-2" : ""}`}
       >
         {title}
       </h1>
-      {lede ? <p className="prose col mt-5">{lede}</p> : null}
-      {children}
-    </header>
+      {lede ? (
+        <p data-stagger className="prose col mt-5">
+          {lede}
+        </p>
+      ) : null}
+      {children ? <div data-stagger>{children}</div> : null}
+    </Reveal>
   );
 }
 
-/** A titled block within a page. */
+/**
+ * A titled block within a page.
+ *
+ * Every block on every route is a reveal group, which is why no page had to be touched to
+ * get scroll motion: the title, its standfirst and its contents rise in 60ms apart when the
+ * section is scrolled to. Bars and counters inside inherit the same trigger.
+ */
 export function Block({
   id,
   title,
@@ -50,11 +64,19 @@ export function Block({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="wrap scroll-mt-20 py-10 md:py-12">
-      <h2 className="display col text-[1.5rem] leading-tight md:text-[1.75rem]">{title}</h2>
-      {lede ? <p className="prose col mt-3">{lede}</p> : null}
-      <div className="mt-7">{children}</div>
-    </section>
+    <Reveal as="section" id={id} className="wrap scroll-mt-20 py-10 md:py-12">
+      <h2 data-stagger className="display col text-[1.5rem] leading-tight md:text-[1.75rem]">
+        {title}
+      </h2>
+      {lede ? (
+        <p data-stagger className="prose col mt-3">
+          {lede}
+        </p>
+      ) : null}
+      <div data-stagger className="mt-7">
+        {children}
+      </div>
+    </Reveal>
   );
 }
 

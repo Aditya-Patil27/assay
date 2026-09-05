@@ -1,11 +1,15 @@
 /**
- * Pure builders for the /lineage page.
+ * Pure builders and layout for the /lineage page.
  *
  * These functions turn committed artifacts into plain node/edge lists a React Flow graph
  * can render -- no React, no DOM, nothing that needs a browser to test. The page ("second
  * brain" reading: entry point -> technique -> goal -> outcome, and feature -> evasion) is
- * assembled here so the layout math and the click-to-highlight traversal can be unit
- * tested without mounting a graph.
+ * assembled here so the layout math, the entry-point chips and the click-to-highlight
+ * traversal can be exercised without mounting a graph.
+ *
+ * Where the nodes are drawn, and which of them a click lights, lives next door in
+ * lib/lineage-layout.ts: the builders change when an artifact's shape changes, the layout
+ * changes when the drawing has to read on a different screen.
  */
 import type { AgentRuntime, Injection, Scenario } from "./agent/types";
 import type { AgenticCategory, AttackExample, FeatureSchema } from "./types";
@@ -20,15 +24,29 @@ export type LineageNodeKind =
   | "feature"
   | "evasion";
 
+/** One mono statistic in a node's side panel: `attempts 24`. */
+export interface LineageStat {
+  k: string;
+  v: string;
+}
+
 export interface LineageDetail {
   title: string;
+  /** Rendered as a row of mono figures above the prose. */
+  stats?: LineageStat[];
+  /** Verbatim payload text, set in a quote block. */
+  quote?: string;
   rows: string[];
 }
 
 export interface LineageNode {
   id: string;
   col: number;
+  /** Lane within the column. Column 1 of graph 2 splits into frozen (0) and movable (1). */
+  subcol?: number;
   kind: LineageNodeKind;
+  /** The mono eyebrow printed above the title -- the column name, or a feature's tier. */
+  eyebrow: string;
   label: string;
   sublabel?: string;
   badge?: string;
@@ -46,9 +64,18 @@ export interface LineageEdge {
   tone?: "attack" | "defend";
 }
 
+/** A row of "start from:" chips above a graph. */
+export interface LineageChipGroup {
+  label: string;
+  chips: { id: string; label: string }[];
+}
+
 export interface LineageGraphData {
   nodes: LineageNode[];
   edges: LineageEdge[];
+  chipGroups: LineageChipGroup[];
+  /** Lit automatically shortly after mount, so the page never opens inert. */
+  defaultSelected: string | null;
 }
 
 /* ---------------------------------------------------------------------------------------
@@ -72,6 +99,8 @@ export const fmtNum = (n: number): string =>
   Math.abs(n) >= 100 ? n.toFixed(0) : Math.abs(n) >= 1 ? n.toFixed(2) : n.toFixed(3);
 
 const dedupeInOrder = (values: string[]): string[] => [...new Set(values)];
+
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 /* ---------------------------------------------------------------------------------------
  * Graph 1 -- the agentic surface: task -> channel -> technique -> goal -> outcome.
@@ -97,8 +126,13 @@ export function buildAgenticLineage(
 
   const nodes: LineageNode[] = [];
   const edges: LineageEdge[] = [];
-  const edge = (id: string, source: string, target: string, label?: string, tone?: "attack" | "defend") =>
-    edges.push({ id, source, target, label, tone });
+  const edge = (
+    id: string,
+    source: string,
+    target: string,
+    label?: string,
+    tone?: "attack" | "defend",
+  ) => edges.push({ id, source, target, label, tone });
 
   for (const t of tasks) {
     const rows = scenarios.filter((s) => s.task_type === t);
@@ -106,10 +140,12 @@ export function buildAgenticLineage(
       id: `task:${t}`,
       col: 0,
       kind: "task",
+      eyebrow: "task",
       label: humanize(t),
-      sublabel: `${rows.length} scenario${rows.length === 1 ? "" : "s"}`,
+      sublabel: plural(rows.length, "scenario"),
       detail: {
-        title: `${humanize(t)} -- ${rows.length} scenario${rows.length === 1 ? "" : "s"}`,
+        title: `${humanize(t)} — ${plural(rows.length, "scenario")}`,
+        stats: [{ k: "scenarios", v: String(rows.length) }],
         rows: rows.map((s: Scenario) => `${s.id}: "${s.user_request}"`),
       },
     });
@@ -117,14 +153,20 @@ export function buildAgenticLineage(
 
   for (const c of channels) {
     const readers = scenarios.filter((s) => s.channel === c);
+    const carries = injections.filter((i) => i.channel === c);
     nodes.push({
       id: `channel:${c}`,
       col: 1,
       kind: "channel",
+      eyebrow: "channel",
       label: humanize(c),
-      sublabel: `read by ${readers.length} scenario${readers.length === 1 ? "" : "s"}`,
+      sublabel: `${readers.length} read · ${carries.length} planted`,
       detail: {
-        title: `${humanize(c)} -- scenarios that read this channel`,
+        title: `${humanize(c)} — scenarios that read this channel`,
+        stats: [
+          { k: "read by", v: String(readers.length) },
+          { k: "injections planted", v: String(carries.length) },
+        ],
         rows: readers.length
           ? readers.map((s) => `${s.id} (${humanize(s.task_type)}): "${s.user_request}"`)
           : ["No scenario in the corpus reads this channel."],
@@ -145,26 +187,45 @@ export function buildAgenticLineage(
       id,
       col: 2,
       kind: "technique",
+      eyebrow: "technique",
       label: row.category,
       badge: row.owasp_id,
       sublabel: `${row.success_before}/${row.attempts} → ${row.success_after}/${row.attempts}`,
       detail: {
         title: `${row.category} · OWASP ${row.owasp_id}${rep ? ` · ${rep.atlas_technique}` : ""}`,
+        stats: [
+          { k: "attempts", v: String(row.attempts) },
+          { k: "exploited, defences off", v: String(row.success_before) },
+          { k: "exploited, defences on", v: String(row.success_after) },
+        ],
+        quote: row.example_injection,
         rows: [
-          `${row.attempts} attempts · exploited ${row.success_before} before defenses, ${row.success_after} after`,
-          `example injection: "${row.example_injection}"`,
+          `channels carrying it: ${
+            dedupeInOrder(
+              injections.filter((i) => i.category_title === row.category).map((i) => humanize(i.channel)),
+            ).join(", ") || "none"
+          }`,
+          `goals it aims at: ${
+            dedupeInOrder(
+              injections.filter((i) => i.category_title === row.category).map((i) => humanize(i.goal)),
+            ).join(", ") || "none"
+          }`,
         ],
       },
     });
 
     for (const c of channels) {
-      const count = injections.filter((i) => i.channel === c && i.category_title === row.category).length;
+      const count = injections.filter(
+        (i) => i.channel === c && i.category_title === row.category,
+      ).length;
       if (count > 0) edge(`channel:${c}->${id}`, `channel:${c}`, id, String(count));
     }
 
     for (const g of goals) {
-      const count = injections.filter((i) => i.category_title === row.category && i.goal === g).length;
-      if (count > 0) edge(`${id}->goal:${g}`, id, `goal:${g}`);
+      const count = injections.filter(
+        (i) => i.category_title === row.category && i.goal === g,
+      ).length;
+      if (count > 0) edge(`${id}->goal:${g}`, id, `goal:${g}`, String(count));
     }
 
     if (row.success_before > 0) {
@@ -183,10 +244,12 @@ export function buildAgenticLineage(
       id: `goal:${g}`,
       col: 3,
       kind: "goal",
+      eyebrow: "goal",
       label: humanize(g),
-      sublabel: `${targeting.length} injection${targeting.length === 1 ? "" : "s"}`,
+      sublabel: plural(targeting.length, "injection"),
       detail: {
-        title: `${humanize(g)} -- targeted by ${targeting.length} injection${targeting.length === 1 ? "" : "s"}`,
+        title: `${humanize(g)} — targeted by ${plural(targeting.length, "injection")}`,
+        stats: [{ k: "injections", v: String(targeting.length) }],
         rows: byTechnique.map(
           (title) => `${title}: ${targeting.filter((i) => i.category_title === title).length}`,
         ),
@@ -202,11 +265,16 @@ export function buildAgenticLineage(
       id: OUTCOME_EXPLOITED,
       col: 4,
       kind: "outcome",
+      eyebrow: "outcome",
       label: "Exploited with defences off",
       sublabel: `${totalBefore}/${totalAttempts}`,
       tone: "attack",
       detail: {
-        title: `Exploited with defences off -- ${totalBefore}/${totalAttempts} attempts`,
+        title: `Exploited with defences off — ${totalBefore}/${totalAttempts} attempts`,
+        stats: [
+          { k: "exploited", v: String(totalBefore) },
+          { k: "of attempts", v: String(totalAttempts) },
+        ],
         rows: redteam
           .filter((r) => r.success_before > 0)
           .map((r) => `${r.category}: ${r.success_before}/${r.attempts}`),
@@ -216,11 +284,16 @@ export function buildAgenticLineage(
       id: OUTCOME_HELD,
       col: 4,
       kind: "outcome",
+      eyebrow: "outcome",
       label: "Held with defences on",
       sublabel: `${totalAttempts - totalAfter}/${totalAttempts}`,
       tone: "defend",
       detail: {
-        title: `Held with defences on -- ${totalAttempts - totalAfter}/${totalAttempts} attempts`,
+        title: `Held with defences on — ${totalAttempts - totalAfter}/${totalAttempts} attempts`,
+        stats: [
+          { k: "held", v: String(totalAttempts - totalAfter) },
+          { k: "of attempts", v: String(totalAttempts) },
+        ],
         rows: redteam
           .filter((r) => r.attempts - r.success_after > 0)
           .map((r) => `${r.category}: ${r.attempts - r.success_after}/${r.attempts}`),
@@ -228,7 +301,28 @@ export function buildAgenticLineage(
     },
   );
 
-  return { nodes, edges };
+  // The page opens on the first technique that actually got through with defences off, so
+  // the lit path a reader lands on is a real exploit rather than an arbitrary node.
+  const firstExploited = redteam.find((r) => r.success_before > 0) ?? redteam[0];
+
+  return {
+    nodes,
+    edges,
+    chipGroups: [
+      {
+        label: "channel",
+        chips: channels.map((c) => ({ id: `channel:${c}`, label: humanize(c) })),
+      },
+      {
+        label: "technique",
+        chips: redteam.map((r) => ({
+          id: `technique:${techniqueSlug(r.category)}`,
+          label: r.category,
+        })),
+      },
+    ],
+    defaultSelected: firstExploited ? `technique:${techniqueSlug(firstExploited.category)}` : null,
+  };
 }
 
 /* ---------------------------------------------------------------------------------------
@@ -252,6 +346,9 @@ export function buildTabularLineage(
 
   const nodes: LineageNode[] = [];
   const edges: LineageEdge[] = [];
+  const edge = (id: string, source: string, target: string, label?: string) => {
+    edges.push({ id, source, target, label });
+  };
 
   (["frozen", "coupled", "mutable"] as const).forEach((tier) => {
     const members = schema.columns.filter((f) => tierOf(f) === tier);
@@ -259,10 +356,12 @@ export function buildTabularLineage(
       id: `tier:${tier}`,
       col: 0,
       kind: "tier",
+      eyebrow: "tier",
       label: TIER_INFO[tier].label,
-      sublabel: TIER_INFO[tier].blurb,
+      sublabel: `${members.length} of ${schema.columns.length} features`,
       detail: {
-        title: `${TIER_INFO[tier].label} -- ${TIER_INFO[tier].blurb}`,
+        title: `${TIER_INFO[tier].label} — ${TIER_INFO[tier].blurb}`,
+        stats: [{ k: "features", v: `${members.length}/${schema.columns.length}` }],
         rows: members,
       },
     });
@@ -275,13 +374,22 @@ export function buildTabularLineage(
     nodes.push({
       id: `feature:${feature}`,
       col: 1,
+      // Frozen features get their own lane on the left, drawn back, because they are the
+      // half of the schema the attack is not allowed to move -- that is the finding.
+      subcol: tier === "frozen" ? 0 : 1,
       kind: "feature",
+      eyebrow: tier,
       label: feature,
-      sublabel: touched > 0 ? `touched ${touched}× last round` : "not touched last round",
+      sublabel: touched > 0 ? `${touched}× last round` : "not touched",
       muted: tier === "frozen",
       lock: tier === "frozen",
       detail: {
-        title: `${feature} -- ${TIER_INFO[tier].label.toLowerCase()}`,
+        title: `${feature} — ${TIER_INFO[tier].label.toLowerCase()}`,
+        stats: [
+          { k: "tier", v: TIER_INFO[tier].label.toLowerCase() },
+          { k: "touched, last round", v: String(touched) },
+          { k: "evasions fed", v: String(touchingEvasions.length) },
+        ],
         rows: [
           `touched ${touched} time${touched === 1 ? "" : "s"} across successful evasions in the last round`,
           ...touchingEvasions.map((e) => {
@@ -294,107 +402,45 @@ export function buildTabularLineage(
     edge(`tier:${tier}->feature:${feature}`, `tier:${tier}`, `feature:${feature}`);
   }
 
-  function edge(id: string, source: string, target: string, label?: string) {
-    edges.push({ id, source, target, label });
-  }
-
   for (const ex of examples) {
     const id = `evasion:${ex.id}`;
     nodes.push({
       id,
       col: 2,
       kind: "evasion",
-      label: `${ex.id} · round ${ex.round} · ${ex.orig_prob.toFixed(2)} → ${ex.adv_prob.toFixed(2)}`,
+      eyebrow: `round ${ex.round}`,
+      label: ex.id,
+      sublabel: `${ex.orig_prob.toFixed(2)} → ${ex.adv_prob.toFixed(2)}`,
       detail: {
-        title: `${ex.id} -- round ${ex.round}`,
-        rows: [
-          `score ${ex.orig_prob.toFixed(4)} → ${ex.adv_prob.toFixed(4)}`,
-          ...ex.touched.map((t) => `${t.feature}: ${fmtNum(t.before)} → ${fmtNum(t.after)}`),
+        title: `${ex.id} — round ${ex.round}`,
+        stats: [
+          { k: "round", v: String(ex.round) },
+          { k: "score before", v: ex.orig_prob.toFixed(4) },
+          { k: "score after", v: ex.adv_prob.toFixed(4) },
         ],
+        rows: ex.touched.map((t) => `${t.feature}: ${fmtNum(t.before)} → ${fmtNum(t.after)}`),
       },
     });
     for (const t of ex.touched) {
-      edge(`feature:${t.feature}->${id}`, `feature:${t.feature}`, id, `${fmtNum(t.before)} → ${fmtNum(t.after)}`);
+      edge(
+        `feature:${t.feature}->${id}`,
+        `feature:${t.feature}`,
+        id,
+        `${fmtNum(t.before)} → ${fmtNum(t.after)}`,
+      );
     }
   }
 
-  return { nodes, edges };
-}
+  // Chips only for features that actually fed an evasion -- a chip that lights nothing is
+  // an invitation to a dead end. Ordered by how often the last round touched them.
+  const fed = schema.columns.filter((f) => examples.some((e) => e.touched.some((t) => t.feature === f)));
+  const chips = fed
+    .map((f) => ({ id: `feature:${f}`, label: `${f} · ${lastRoundFreq[f] ?? 0}`, freq: lastRoundFreq[f] ?? 0 }))
+    .sort((a, b) => b.freq - a.freq)
+    .map(({ id, label }) => ({ id, label }));
 
-/* ---------------------------------------------------------------------------------------
- * Layout and interaction -- pure, so both are unit-testable without React Flow mounted.
- * ------------------------------------------------------------------------------------- */
+  const defaultSelected =
+    fed.includes("hour") ? "feature:hour" : (chips[0]?.id ?? null);
 
-export interface LayoutOptions {
-  colWidth?: number;
-  rowHeight?: number;
-}
-
-/** Fixed x per column; y spread evenly, with shorter columns centred against the tallest. */
-export function layoutColumns(
-  nodes: LineageNode[],
-  { colWidth = 260, rowHeight = 92 }: LayoutOptions = {},
-): Record<string, { x: number; y: number }> {
-  const byCol = new Map<number, string[]>();
-  for (const n of nodes) {
-    const arr = byCol.get(n.col) ?? [];
-    arr.push(n.id);
-    byCol.set(n.col, arr);
-  }
-  const maxCount = Math.max(1, ...[...byCol.values()].map((a) => a.length));
-
-  const pos: Record<string, { x: number; y: number }> = {};
-  for (const [col, ids] of byCol) {
-    const offset = ((maxCount - ids.length) / 2) * rowHeight;
-    ids.forEach((id, i) => {
-      pos[id] = { x: col * colWidth, y: offset + i * rowHeight };
-    });
-  }
-  return pos;
-}
-
-export interface Highlight {
-  nodeIds: string[];
-  edgeIds: string[];
-}
-
-/**
- * Every node and edge on a path through `selectedId` -- ancestors found by walking edges
- * backward, descendants by walking forward. The caller dims everything not returned here.
- */
-export function computeHighlight(edges: LineageEdge[], selectedId: string | null): Highlight {
-  if (!selectedId) return { nodeIds: [], edgeIds: [] };
-
-  const nodeIds = new Set<string>([selectedId]);
-  const edgeIds = new Set<string>();
-
-  const forward = [selectedId];
-  while (forward.length) {
-    const cur = forward.shift()!;
-    for (const e of edges) {
-      if (e.source === cur) {
-        edgeIds.add(e.id);
-        if (!nodeIds.has(e.target)) {
-          nodeIds.add(e.target);
-          forward.push(e.target);
-        }
-      }
-    }
-  }
-
-  const backward = [selectedId];
-  while (backward.length) {
-    const cur = backward.shift()!;
-    for (const e of edges) {
-      if (e.target === cur) {
-        edgeIds.add(e.id);
-        if (!nodeIds.has(e.source)) {
-          nodeIds.add(e.source);
-          backward.push(e.source);
-        }
-      }
-    }
-  }
-
-  return { nodeIds: [...nodeIds], edgeIds: [...edgeIds] };
+  return { nodes, edges, chipGroups: [{ label: "feature", chips }], defaultSelected };
 }
