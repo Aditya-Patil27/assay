@@ -20,6 +20,7 @@ One closed-loop red/blue framework, two attack surfaces, one table.
 |---|---|---|---|
 | Tabular fraud detector | 1.000 | **1.000** | PR-AUC 0.947 → 0.932 (−1.6%) |
 | Payment agent | 4.86% | **0.0%** | significant at *p* = 0.015 |
+| Second-stage detector, evasions it never saw | 0.0% recall | **68.9%** | 94 legitimate declines per 100k · real-fraud recall 89.3% → 87.9% |
 
 **Read the first row before the second.**
 
@@ -32,6 +33,11 @@ across 144 trials per arm on two independent 120B models — with **zero false r
 strict.
 
 You should trust the second number **because** we showed you the first.
+
+The third row is what you do about the first. Retraining never stops the *next* search, but a
+detector retrained on half of the evasions catches 68.9% of the half it never saw, at the same
+false-positive budget (`artifacts/attack/adversarial_detection.json`, `placeholder: false`).
+The defence works one layer out from the model, not inside it.
 
 Every figure above reads from `artifacts/scorecard.json` (`placeholder: false`,
 `git_sha 6ca9dbd`). Nothing on this page is typed by hand.
@@ -79,7 +85,7 @@ tool scoping and the human threshold.
 
 ## What we got wrong, in public
 
-This repository has reported four of its own errors. They are still here:
+This repository has reported five of its own errors. They are still here:
 
 - **ASR does not collapse.** An earlier revision promised it would. The honest headline is
   attacker *cost* — the defence buys +116 median queries of attacker effort and does not stop
@@ -89,6 +95,10 @@ This repository has reported four of its own errors. They are still here:
 - **The threshold was fitted on the test split until 2026-08-30.** That made evasion free and
   every ASR measured before the fix incomparable to one measured after.
 - **A trainer that never ran** was reported rather than left in the history.
+- **The second-stage detection script did not run.** A refactor moved the trainer into a
+  shared module and left one call behind, so the committed result predated the code that
+  claimed to produce it. Found on 2026-09-05 by re-running it to give it a provenance flag;
+  fixed, and reproduced to the digit.
 - **Not significant on `nemotron-120b` alone** (*p* = 0.214), where one exploit survived. We
   publish per-model rows rather than only the pooled figure, so the disagreement is visible.
 

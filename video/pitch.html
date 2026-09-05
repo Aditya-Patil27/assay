@@ -148,8 +148,8 @@
 
   <section class="scene" id="s10">
     <div class="kicker">Still unverified · and next</div>
-    <h2>Five artifacts are still unflagged. They show amber until something runs.</h2>
-    <p class="sub">Dosage sweep · threshold sweep · adversarial-detection holdout · data provenance · feature schema. Next: map the injection channels onto Razorpay surfaces — payment notes, payment-link descriptions, dispute evidence — and run the corpus there.</p>
+    <h2>Four artifacts are still unflagged. They show amber until something runs.</h2>
+    <p class="sub">Dosage sweep · threshold sweep · data provenance · feature schema. Next: map the injection channels onto Razorpay surfaces — payment notes, payment-link descriptions, dispute evidence — and run the corpus there.</p>
   </section>
 
   <section class="scene" id="s11">
@@ -195,7 +195,7 @@ scenes.forEach(id => {
     document.querySelectorAll(".scene").forEach(s => s.classList.remove("on"));
     el(id).style.transition = "opacity .55s ease";
     el(id).classList.add("on");
-    el("foot").textContent = (id === "s10" ? "artifacts/ · placeholder: absent on five files · " : "artifacts/ · placeholder: false · ") + id.toUpperCase();
+    el("foot").textContent = (id === "s10" ? "artifacts/ · placeholder: absent on four files · " : "artifacts/ · placeholder: false · ") + id.toUpperCase();
     (BEATS[id] || []).forEach(([f, fn]) => setTimeout(fn, f * dur));
   }, at);
   at += dur;
