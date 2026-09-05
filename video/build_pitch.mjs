@@ -48,7 +48,9 @@ const scenes = cfg.scenes.map((s) => {
   if (clip && !fs.existsSync(clip)) throw new Error(`missing ${clip} — run record_loops.mjs ${s.clip}`);
   const clipDur = clip ? probe(clip) : null;
   const natural = r2(spoken + BREATH);
-  const slot = clip ? r2(Math.max(clipDur, natural)) : natural;
+  // The narration sets the pace for every scene. A clip longer than its line is cut, a
+  // shorter one holds its last frame; the audience never sits through silent footage.
+  const slot = natural;
   return { ...s, norm, clip, clipDur, spoken: r2(spoken), slot };
 });
 for (const s of scenes) {
@@ -117,12 +119,13 @@ ff(["-f", "concat", "-safe", "0", "-i", path.join(PADDED, "list.txt"), "-c:a", "
 const segments = runs.map((r) => {
   if (r.motion) return { file: r.file, pad: 0 };
   const padSec = Number((r.clip.slot - r.clip.clipDur).toFixed(3));
-  return { file: r.clip.clip, pad: padSec > 0 ? padSec : 0 };
+  return { file: r.clip.clip, pad: padSec > 0 ? padSec : 0, cut: r.clip.slot };
 });
 const inputs = segments.flatMap((seg) => ["-i", seg.file]);
 const chain = segments.map((seg, i) => {
   const tpad = seg.pad > 0 ? `,tpad=stop_mode=clone:stop_duration=${seg.pad.toFixed(3)}` : "";
-  return `[${i}:v]fps=30,scale=1920:1080,setsar=1${tpad}[v${i}]`;
+  const cut = seg.cut ? `trim=duration=${seg.cut.toFixed(3)},setpts=PTS-STARTPTS,` : "";
+  return `[${i}:v]${cut}fps=30,scale=1920:1080,setsar=1${tpad}[v${i}]`;
 }).join(";")
   + ";" + segments.map((_, i) => `[v${i}]`).join("") + `concat=n=${segments.length}:v=1:a=0[v]`;
 ff([...inputs, "-i", narration, "-filter_complex", chain, "-map", "[v]", "-map", `${segments.length}:a`,

@@ -74,7 +74,14 @@ def main() -> int:
             print(f"{scene['id']:<4} kept (take present)")
             continue
         raw = OUT / f"{scene['id']}.sarvam.wav"
-        raw.write_bytes(synth(scene["text"], key, speaker, model, pace))
+        for attempt in range(3):
+            try:
+                raw.write_bytes(synth(scene["text"], key, speaker, model, pace))
+                break
+            except Exception as exc:  # noqa: BLE001 -- flaky network; the third failure raises
+                if attempt == 2:
+                    raise
+                print(f"{scene['id']:<4} retry {attempt + 1}: {exc}")
         # Normalise container/rate so every source looks identical downstream.
         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(raw), "-ar", "48000",
                         "-ac", "1", str(wav)], check=True)

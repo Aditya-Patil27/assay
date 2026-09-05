@@ -23,7 +23,8 @@
     {
       "id": "s4",
       "seconds": 25,
-      "text": "Second result, and the one I would most want you to remember. Two attackers, same detector, both report one hundred percent success. Ours may only move what a real fraudster controls. The other one moves anything. Ninety-nine point nine percent of its evasions land at a merchant that does not exist. Same headline number. Completely different thing. That audit runs before any number is reported."
+      "text": "Second result, and the one I would most want you to remember. Two attackers, same detector, both report one hundred percent success. Ours may only move what a real fraudster controls. The other one moves anything. Ninety-nine point nine percent of its evasions land at a merchant that does not exist. Same headline number. Completely different thing. That audit runs before any number is reported.",
+      "clip": "feasibility"
     },
     {
       "id": "s5",
@@ -40,7 +41,8 @@
     {
       "id": "s7",
       "seconds": 45,
-      "text": "Architecture. One loop: train a detector, attack it, retrain on the evasions, repeat. The constraint contract sits at the attack's entry. It is a frozen schema, and the attacker calls validate before every perturbation, so a feature change fails loudly instead of producing a meaningless number. The same loop drives the second surface, with the agent's defence stack in place of retraining. Every run writes an artifact with a placeholder flag and a git SHA, and the site reads those files. Nothing on it is typed by hand."
+      "text": "Architecture. One loop: train a detector, attack it, retrain on the evasions, repeat. The constraint contract sits at the attack's entry. It is a frozen schema, and the attacker calls validate before every perturbation, so a feature change fails loudly instead of producing a meaningless number. The same loop drives the second surface, with the agent's defence stack in place of retraining. Every run writes an artifact with a placeholder flag and a git SHA, and the site reads those files. Nothing on it is typed by hand.",
+      "clip": "graph"
     },
     {
       "id": "s8",
@@ -57,7 +59,8 @@
     {
       "id": "s10",
       "seconds": 20,
-      "text": "Four artifacts are still unflagged: the dosage and threshold sweeps, the data provenance, and the feature schema. They show amber on the console until something re-runs them. Next is mapping the injection channels onto Razorpay's real surfaces. Payment notes, payment-link descriptions, dispute evidence. And running the corpus there."
+      "text": "Four artifacts are still unflagged: the dosage and threshold sweeps, the data provenance, and the feature schema. They show amber on the console until something re-runs them. Next is mapping the injection channels onto Razorpay's real surfaces. Payment notes, payment-link descriptions, dispute evidence. And running the corpus there.",
+      "clip": "unflagged"
     },
     {
       "id": "s11",
@@ -69,5 +72,5 @@
   "edge_rate": "+0%",
   "sarvam_speaker": "aditya",
   "sarvam_model": "bulbul:v3",
-  "sarvam_pace": 1.08
+  "sarvam_pace": 1.15
 }
