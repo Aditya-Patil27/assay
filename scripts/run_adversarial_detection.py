@@ -38,6 +38,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from adversarial_payments.artifacts import Envelope  # noqa: E402
 from adversarial_payments.attack.constraints import ConstraintProjector  # noqa: E402
 from adversarial_payments.attack.engine import (  # noqa: E402
     AttackConfig,
@@ -122,7 +123,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     print(f"  adversarial train={len(adv_train):,} holdout={len(adv_hold):,}", flush=True)
 
     print("retraining on the adversarial half ...", flush=True)
-    after = _fit(pd.concat([train, adv_train], ignore_index=True), SEED)
+    after = fit_detector(pd.concat([train, adv_train], ignore_index=True), seed=SEED)
     thr1 = choose_threshold(val[TARGET].to_numpy(), scores(after, val), FPR_BUDGET)
     ev1 = metrics_at_threshold(test[TARGET].to_numpy(), scores(after, test), thr1)
 
@@ -146,9 +147,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(
-        json.dumps(
-            {
+    # Wrapped in the shared Envelope so this result carries placeholder:false, a git SHA
+    # and a timestamp like every other quotable artifact. Before this it was a bare JSON
+    # and the audit console rightly showed it amber.
+    payload = {
                 "kind": "adversarial_detection",
                 "rows": len(df),
                 "n_train": len(train),
@@ -160,13 +162,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "question from 'can a fresh search evade the retrained model'."
                 ),
                 "report": asdict(rep),
-            },
-            indent=2,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-
+    }
+    envelope = Envelope(kind="adversarial_detection", placeholder=False, payload=payload)
+    args.out.write_text(json.dumps(asdict(envelope), indent=2) + "\n", encoding="utf-8")
     print("\n=== does the defence detect the generated attacks? ===")
     print(f"  held-out adversarial recall   {rep.holdout_recall_before:.1%} -> "
           f"{rep.holdout_recall_after:.1%}")

@@ -168,9 +168,14 @@ def fig_threshold() -> None:
     save(fig, "threshold")
 
 
+def _unwrap(doc):
+    """Envelope-wrapped artifacts keep their fields under payload."""
+    return doc.get("payload", doc)
+
+
 def fig_adversarial_detection() -> None:
     """Pillar III: does the defence detect the attacks we generated?"""
-    r = load("attack", "adversarial_detection.json")["report"]
+    r = _unwrap(load("attack", "adversarial_detection.json"))["report"]
 
     labels = ["Held-out\nadversarial", "Seen in\ntraining", "Real fraud", "Legitimate\ndeclines"]
     before = [r["holdout_recall_before"] * 100, 0.0, r["real_fraud_recall_before"] * 100,
@@ -277,7 +282,7 @@ def build_numbers() -> None:
     corpus = json.loads((ARTIFACTS / "data_provenance.json").read_text(encoding="utf-8"))
     schema = json.loads((ARTIFACTS / "feature_schema.json").read_text(encoding="utf-8"))
     feas = load("attack", "feasibility.json")
-    ad = load("attack", "adversarial_detection.json")
+    ad = _unwrap(load("attack", "adversarial_detection.json"))
     ds = load("attack", "dosage_sweep.json")
     ts = load("attack", "threshold_sweep.json")
 
