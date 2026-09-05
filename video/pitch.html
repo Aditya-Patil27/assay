@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Assay — pitch</title>
+<style>
+  /* Every figure below is read from a committed artifact carrying placeholder:false.
+     scorecard.json · attack/rounds.json · attack/feasibility.json · agentic/redteam*.json
+     · detect/rounds.json. Nothing here is illustrative. */
+  :root{
+    --bg:#080a0f; --panel:#11151f; --line:#232a39;
+    --text:#e8edf7; --muted:#8b97ad;
+    --attack:#ff4d5e; --defend:#22d3a6; --warn:#f5b544;
+    --mono:'Cascadia Code','SF Mono',Consolas,monospace;
+    --sans:'Segoe UI',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans)}
+  .stage{position:relative;width:1920px;height:1080px}
+  .scene{position:absolute;inset:0;opacity:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 140px}
+  .scene.on{opacity:1}
+  .kicker{font-family:var(--mono);font-size:20px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted);margin-bottom:26px}
+  h1{font-size:104px;font-weight:700;letter-spacing:-.03em;line-height:1.02;text-align:center}
+  h2{font-size:60px;font-weight:650;letter-spacing:-.02em;text-align:center;line-height:1.1;max-width:1500px}
+  .sub{margin-top:26px;font-size:30px;color:var(--muted);text-align:center;max-width:1300px;line-height:1.45}
+  .big{font-family:var(--mono);font-size:150px;font-weight:700;letter-spacing:-.04em}
+  .att{color:var(--attack)} .def{color:var(--defend)} .wrn{color:var(--warn)}
+  .rise{opacity:0;transform:translateY(18px)}
+  .rise.in{opacity:1;transform:none;transition:opacity .7s ease,transform .7s ease}
+  .pipe{display:flex;align-items:center;gap:34px;margin-top:70px}
+  .node{background:var(--panel);border:2px solid var(--line);border-radius:18px;padding:30px 40px;text-align:center;min-width:250px;transform:scale(.9);opacity:.25}
+  .node .t{font-size:27px;font-weight:650}
+  .node .s{font-family:var(--mono);font-size:19px;color:var(--muted);margin-top:10px}
+  .node.lit{opacity:1;transform:scale(1);border-color:var(--defend);box-shadow:0 0 60px -12px var(--defend)}
+  .node.hot{opacity:1;transform:scale(1);border-color:var(--attack);box-shadow:0 0 60px -12px var(--attack)}
+  .arrow{font-size:40px;color:var(--line)} .arrow.lit{color:var(--defend)}
+  .pair{display:flex;gap:60px;margin-top:60px}
+  .stat{background:var(--panel);border:2px solid var(--line);border-radius:18px;padding:40px 56px;min-width:560px;text-align:center}
+  .stat .v{font-family:var(--mono);font-size:96px;font-weight:700;letter-spacing:-.04em}
+  .stat .l{font-size:24px;color:var(--muted);margin-top:14px}
+  .split{width:1250px;height:74px;display:flex;border-radius:14px;overflow:hidden;margin-top:56px;border:2px solid var(--line)}
+  .split .a{background:var(--attack);width:0} .split .b{background:var(--defend);width:0}
+  .legend{display:flex;gap:60px;margin-top:30px;font-family:var(--mono);font-size:25px;color:var(--muted)}
+  .bars{display:flex;align-items:flex-end;gap:26px;height:340px;margin-top:60px}
+  .bar{width:150px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+  .bar .col{width:100%;border-radius:10px 10px 0 0;height:0;background:var(--attack)}
+  .bar .col.q{background:var(--warn)}
+  .bar .lb{font-family:var(--mono);font-size:20px;color:var(--muted);margin-top:14px}
+  .bar .vl{font-family:var(--mono);font-size:22px;margin-bottom:10px}
+  table{margin-top:56px;border-collapse:collapse;font-size:29px}
+  th,td{padding:22px 40px;border-bottom:1px solid var(--line);text-align:left}
+  th{font-family:var(--mono);font-size:20px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+  td.m{font-family:var(--mono)}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:56px;width:1500px}
+  .card{background:var(--panel);border:2px solid var(--line);border-radius:18px;padding:30px 36px}
+  .card .k{font-family:var(--mono);font-size:19px;letter-spacing:.14em;text-transform:uppercase;color:var(--attack)}
+  .card .b{font-size:26px;margin-top:10px;line-height:1.35}
+  .card .f{font-size:22px;color:var(--defend);margin-top:12px;line-height:1.35}
+  .links{margin-top:60px;font-family:var(--mono);font-size:30px;color:var(--muted);line-height:1.8;text-align:center}
+  .foot{position:absolute;bottom:52px;font-family:var(--mono);font-size:19px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <section class="scene" id="s1">
+    <div class="kicker">Razorpay AI Buildathon 2026 · Open Track</div>
+    <h1>Assay</h1>
+    <p class="sub">An assay determines the true metal content of a coin.<br>This one does it to a security number.</p>
+  </section>
+
+  <section class="scene" id="s2">
+    <div class="kicker">The problem</div>
+    <h2>A fraud-detection number nobody attacked is decoration.</h2>
+    <div class="pipe" style="margin-top:80px">
+      <div class="node" id="p1"><div class="t">Attack</div><div class="s">what a fraudster controls</div></div>
+      <div class="arrow" id="pa1">→</div>
+      <div class="node" id="p2"><div class="t">Measure</div><div class="s">attack success</div></div>
+      <div class="arrow" id="pa2">→</div>
+      <div class="node" id="p3"><div class="t">Defend</div><div class="s">retrain · classify · scope</div></div>
+      <div class="arrow" id="pa3">→</div>
+      <div class="node" id="p4"><div class="t">Re-measure</div><div class="s">publish, whatever it says</div></div>
+    </div>
+  </section>
+
+  <section class="scene" id="s3">
+    <div class="kicker">Result one · payment agent · agentic/redteam-groq.json</div>
+    <h2>Indirect prompt injection, 144 trials per arm, two 120B models</h2>
+    <div class="pair">
+      <div class="stat rise" id="s3a"><div class="v att">4.86%</div><div class="l">exploit rate, defences off</div></div>
+      <div class="stat rise" id="s3b"><div class="v def">0.0%</div><div class="l">defences on · p = 0.015</div></div>
+    </div>
+    <p class="sub rise" id="s3c">nemotron-120b alone: not significant (p = 0.214). Published anyway.</p>
+  </section>
+
+  <section class="scene" id="s4">
+    <div class="kicker">Result two · feasibility audit · attack/feasibility.json</div>
+    <h2>Two attackers. Same detector. Both report 100%.</h2>
+    <div class="split"><div class="a" id="spa"></div><div class="b" id="spb"></div></div>
+    <div class="legend"><span class="att">■ 99.9% at a merchant that does not exist</span><span class="def">■ physically possible</span></div>
+    <p class="sub rise" id="s4c">Same number. Completely different thing.</p>
+  </section>
+
+  <section class="scene" id="s5">
+    <div class="kicker">The honest row · scorecard.json · attack/rounds.json</div>
+    <h2>Adversarial retraining stopped zero evasions. It raised the price.</h2>
+    <div class="bars" id="rounds">
+      <div class="bar"><div class="vl">1.000</div><div class="col" data-h="300"></div><div class="lb">ASR r0</div></div>
+      <div class="bar"><div class="vl">1.000</div><div class="col" data-h="300"></div><div class="lb">ASR r1</div></div>
+      <div class="bar"><div class="vl">1.000</div><div class="col" data-h="300"></div><div class="lb">ASR r2</div></div>
+      <div class="bar" style="margin-left:80px"><div class="vl">275</div><div class="col q" data-h="211"></div><div class="lb">queries r0</div></div>
+      <div class="bar"><div class="vl">391</div><div class="col q" data-h="300"></div><div class="lb">queries r2</div></div>
+    </div>
+    <p class="sub rise" id="s5c">PR-AUC 0.947 → 0.932 (−1.6%). The defence has to live elsewhere.</p>
+  </section>
+
+  <section class="scene" id="s7">
+    <div class="kicker">Architecture</div>
+    <h2>One loop, two surfaces, one scorecard</h2>
+    <div class="pipe">
+      <div class="node" id="n1"><div class="t">Train</div><div class="s">XGBoost · 1.85M rows</div></div>
+      <div class="arrow" id="a1">→</div>
+      <div class="node" id="n2"><div class="t">Constraint contract</div><div class="s">schema.validate() at entry</div></div>
+      <div class="arrow" id="a2">→</div>
+      <div class="node" id="n3"><div class="t">Attack</div><div class="s">coordinate descent</div></div>
+      <div class="arrow" id="a3">→</div>
+      <div class="node" id="n4"><div class="t">Retrain</div><div class="s">on the evasions</div></div>
+    </div>
+    <div class="pipe" style="margin-top:40px">
+      <div class="node" id="n5"><div class="t">Payment agent</div><div class="s">memo · merchant · dispute</div></div>
+      <div class="arrow" id="a5">→</div>
+      <div class="node" id="n6"><div class="t">Defence stack</div><div class="s">classifier · tool scoping · HITL</div></div>
+      <div class="arrow" id="a6">→</div>
+      <div class="node" id="n7"><div class="t">artifacts/</div><div class="s">placeholder:false · git_sha</div></div>
+    </div>
+  </section>
+
+  <section class="scene" id="s9">
+    <div class="kicker">Failure recovery</div>
+    <h2>What broke, and how we recovered</h2>
+    <div class="cards">
+      <div class="card rise" id="c1"><div class="k">1 · broke</div><div class="b">Promised attack success would collapse.</div><div class="f">It did not. Every caption corrected; headline became attacker cost.</div></div>
+      <div class="card rise" id="c2"><div class="k">2 · broke</div><div class="b">Blamed under-dosed adversarial training.</div><div class="f">5000× sweep: ASR unmoved, −22.3% PR-AUC. Withdrawn. Sweep unflagged · amber on /audit.</div></div>
+      <div class="card rise" id="c3"><div class="k">3 · broke</div><div class="b">Threshold fitted on the test split until Aug 30.</div><div class="f">Named the split, added a tripwire, re-measured.</div></div>
+      <div class="card rise" id="c4"><div class="k">4 · broke</div><div class="b">A trainer that never ran was reported.</div><div class="f">Reported the error rather than deleting it from history.</div></div>
+    </div>
+  </section>
+
+  <section class="scene" id="s10">
+    <div class="kicker">Still unverified · and next</div>
+    <h2>Five artifacts are still unflagged. They show amber until something runs.</h2>
+    <p class="sub">Dosage sweep · threshold sweep · adversarial-detection holdout · data provenance · feature schema. Next: map the injection channels onto Razorpay surfaces — payment notes, payment-link descriptions, dispute evidence — and run the corpus there.</p>
+  </section>
+
+  <section class="scene" id="s11">
+    <div class="kicker">Why it should exist</div>
+    <h1 style="font-size:84px">A number nobody attacked is decoration.</h1>
+    <div class="links">adversarial-payments.vercel.app<br>adversarial-payments.vercel.app/audit<br>github.com/Aditya-Patil27/mastercard-adversarial-payments</div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+// Slots come from the narrator's audio, injected by record_pitch as window.SLOTS = {id: ms}.
+// Standalone preview (no SLOTS): 8 s each. ?scenes=s1,s2 records a subset in one run.
+const el = id => document.getElementById(id);
+const lit = (...ids) => ids.forEach(i => el(i).classList.add("lit"));
+const hot = (...ids) => ids.forEach(i => el(i).classList.add("hot"));
+const rise = id => el(id).classList.add("in");
+const grow = id => [...el(id).querySelectorAll(".col")].forEach((c,k)=>
+  setTimeout(()=>{ c.style.transition="height .9s cubic-bezier(.2,.8,.2,1)"; c.style.height=c.dataset.h+"px"; }, k*150));
+
+// Beats are fractions of the slot, so they land wherever the narrator's pace puts them.
+const BEATS = {
+  s2: [[.30,()=>lit("p1","pa1")],[.45,()=>lit("p2","pa2")],[.60,()=>hot("p3")],[.62,()=>lit("pa3")],[.75,()=>lit("p4")]],
+  s3: [[.35,()=>rise("s3a")],[.55,()=>rise("s3b")],[.85,()=>rise("s3c")]],
+  s4: [[.40,()=>{ el("spa").style.transition="width 1.2s ease"; el("spb").style.transition="width 1.2s ease"; el("spa").style.width="99.9%"; el("spb").style.width="0.1%"; }],[.80,()=>rise("s4c")]],
+  s5: [[.20,()=>grow("rounds")],[.80,()=>rise("s5c")]],
+  s7: [[.08,()=>lit("n1","a1")],[.20,()=>hot("n2")],[.22,()=>lit("a2")],[.38,()=>hot("n3")],[.40,()=>lit("a3")],[.50,()=>lit("n4")],
+       [.62,()=>lit("n5","a5")],[.72,()=>lit("n6","a6")],[.85,()=>lit("n7")]],
+  s9: [[.10,()=>rise("c1")],[.32,()=>rise("c2")],[.55,()=>rise("c3")],[.78,()=>rise("c4")]],
+};
+
+const param = new URLSearchParams(location.search).get("scenes");
+const ORDER = ["s1","s2","s3","s4","s5","s7","s9","s10","s11"];
+const scenes = param ? param.split(",") : ORDER;
+const slots = window.SLOTS || Object.fromEntries(ORDER.map(id => [id, 8000]));
+
+let at = 0;
+scenes.forEach(id => {
+  const dur = slots[id];
+  if (!dur) throw new Error("no slot for " + id);
+  setTimeout(() => {
+    document.querySelectorAll(".scene").forEach(s => s.classList.remove("on"));
+    el(id).style.transition = "opacity .55s ease";
+    el(id).classList.add("on");
+    el("foot").textContent = (id === "s10" ? "artifacts/ · placeholder: absent on five files · " : "artifacts/ · placeholder: false · ") + id.toUpperCase();
+    (BEATS[id] || []).forEach(([f, fn]) => setTimeout(fn, f * dur));
+  }, at);
+  at += dur;
+});
+window.TOTAL_MS = at;
+</script>
+</body>
+</html>

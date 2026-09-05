@@ -64,3 +64,23 @@ wrong until it is rebuilt — so rebuild rather than patching the narration by h
 `make_narration.ps1`, `record.mjs`, `mux.sh` and `script.json` belong to the retired
 dashboard-walkthrough version and are kept only because the approach may be worth reviving
 for a longer-form demo. The shipped video does not use them.
+
+## Pitch video (Razorpay AI Buildathon)
+
+`pitch.mp4`, ~5 min, human-narrated. Same principle as the workflow explainer: the narration
+is recorded first and every scene is held for exactly its own audio.
+
+```bash
+cd video
+node record_loops.mjs                     # three loops from the deployed site -> web/public/demos/
+node build_pitch.mjs --slots              # prints every slot; the two clip scenes are s6 and s8
+powershell -File rec.ps1 -Scene s1        # ... through s11; re-run an id to retake
+node build_pitch.mjs                      # record pitch.html, pad, concat, mux, verify
+```
+
+`pitch_narration.json` is the only file anyone edits. `make_pitch_narration.ps1` fills any
+missing scene with Windows SAPI so the build never blocks on a microphone. Scenes s6 and s8
+are the `agent` and `audit` loops; their slot is the longer of the clip and the narration,
+and the clip's last frame freezes under any narration that runs past it.
+`pitch_timeline.json` records what shipped. `pitch.mp4` is git-ignored like the other
+renders; the shipped copy is the unlisted upload linked from the root README.
