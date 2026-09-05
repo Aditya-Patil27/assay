@@ -47,3 +47,13 @@ async function walk(dir) {
 await walk(dest);
 
 console.log(`synced ${count} artifact file(s) -> web/public/data`);
+
+// The audit console reads web/public/audit/frames.json, generated from the same artifacts.
+// Regenerate when the repo root and Python are both here; otherwise the committed file
+// stands, which is what Vercel sees.
+import { spawnSync } from "node:child_process";
+const exporter = join(here, "..", "..", "scripts", "export_audit_frames.py");
+const py = spawnSync("python", [exporter], { stdio: "inherit" });
+if (py.status !== 0) {
+  console.warn("audit frames not regenerated (python missing or failed); committed frames.json stands");
+}
