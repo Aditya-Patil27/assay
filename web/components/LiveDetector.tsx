@@ -258,7 +258,7 @@ export function LiveDetector({
               <p className="mt-2 text-[0.8125rem]">
                 <span
                   className={`inline-block rounded-[5px] px-2 py-0.5 font-medium ${
-                    flagged ? "bg-attack-fill text-ink" : "bg-defend-fill text-ink"
+                    flagged ? "bg-attack-fill text-on-accent" : "bg-defend-fill text-on-accent"
                   }`}
                 >
                   {flagged ? "FLAGGED" : "PASSES"}

@@ -73,7 +73,7 @@ function Mark() {
         [5, 9.5],
         [9.5, 9.5],
       ].map(([x, y]) => (
-        <rect key={`${x}-${y}`} x={x} y={y} width="2.5" height="2.5" rx="0.6" fill="#8f99a8" />
+        <rect key={`${x}-${y}`} x={x} y={y} width="2.5" height="2.5" rx="0.6" fill="#3c4557" />
       ))}
       <rect x="14" y="14" width="2.5" height="2.5" rx="0.6" fill="var(--color-attack-fill)" />
     </svg>
