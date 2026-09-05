@@ -124,7 +124,7 @@ const LOOPS = {
     await page.goto(`${BASE}/audit`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.getElementById("hint")?.textContent.includes("run complete"), null, { timeout: 30_000 });
     await sleep(800);
-    await page.locator("#rows tr").last().click();
+    await page.locator("#rows > *").last().click();
     await sleep(3500);
   },
 };
