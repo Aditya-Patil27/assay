@@ -1,0 +1,552 @@
+{
+ "root_task": "Does this security number survive an adversary?",
+ "nodes": [
+  {
+   "type": "node",
+   "agent": "assay",
+   "model": "red/blue loop",
+   "role": "pipeline",
+   "up": true,
+   "children": 0,
+   "context": {
+    "used": 0,
+    "limit": 1
+   },
+   "budget_usd": 0
+  },
+  {
+   "type": "node",
+   "agent": "reviewer",
+   "model": "you",
+   "role": "auditor",
+   "up": true,
+   "children": 0,
+   "context": {
+    "used": 0,
+    "limit": 1
+   },
+   "budget_usd": 0
+  }
+ ],
+ "messages": [
+  {
+   "type": "message",
+   "lamport": 1,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "latency.json",
+   "timestamp": "2026-08-30T19:58:12.721064+00:00",
+   "claims": [
+    {
+     "claim": "onnxruntime: p50 0.035 ms, p95 0.081 ms over 1000 samples",
+     "evidence": "artifacts/latency.json \u00b7 git_sha 18a2ab0 \u00b7 created 2026-08-30T19:58:12.721064+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/latency.json",
+     "kind": "latency",
+     "summary": "441 bytes, placeholder=false",
+     "tokens": 110
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 2,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "agentic/redteam-groq.json",
+   "timestamp": "2026-08-30T20:28:16.009212+00:00",
+   "claims": [
+    {
+     "claim": "openai/gpt-oss-120b: exploit rate 4.9% -> 0.0% over 144 trials per arm",
+     "evidence": "artifacts/agentic/redteam-groq.json \u00b7 git_sha 35ca306 \u00b7 created 2026-08-30T20:28:16.009212+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/agentic/redteam-groq.json",
+     "kind": "agentic_redteam_groq",
+     "summary": "2,459 bytes, placeholder=false",
+     "tokens": 614
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 3,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "agentic/redteam.json",
+   "timestamp": "2026-08-30T20:28:16.048846+00:00",
+   "claims": [
+    {
+     "claim": "openai/gpt-oss-120b: exploit rate 4.9% -> 0.0% over 144 trials per arm",
+     "evidence": "artifacts/agentic/redteam.json \u00b7 git_sha 35ca306 \u00b7 created 2026-08-30T20:28:16.048846+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/agentic/redteam.json",
+     "kind": "agentic_redteam",
+     "summary": "2,454 bytes, placeholder=false",
+     "tokens": 613
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 4,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "agentic/redteam-nvidia.json",
+   "timestamp": "2026-08-30T20:36:14.807635+00:00",
+   "claims": [
+    {
+     "claim": "nvidia/nemotron-3-super-120b-a12b: exploit rate 3.5% -> 0.7% over 144 trials per arm",
+     "evidence": "artifacts/agentic/redteam-nvidia.json \u00b7 git_sha 35ca306 \u00b7 created 2026-08-30T20:36:14.807635+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/agentic/redteam-nvidia.json",
+     "kind": "agentic_redteam_nvidia",
+     "summary": "2,545 bytes, placeholder=false",
+     "tokens": 636
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 5,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "agent_runtime.json",
+   "timestamp": "2026-08-31T06:49:20.516737+00:00",
+   "claims": [
+    {
+     "claim": "agent runtime: 12 scenarios, 48 injections",
+     "evidence": "artifacts/agent_runtime.json \u00b7 git_sha 2a83510 \u00b7 created 2026-08-31T06:49:20.516737+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/agent_runtime.json",
+     "kind": "agent_runtime",
+     "summary": "34,860 bytes, placeholder=false",
+     "tokens": 8715
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 6,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "live_samples.json",
+   "timestamp": "2026-08-31T07:16:01.347533+00:00",
+   "claims": [
+    {
+     "claim": "8 live samples, 60 stream rows, threshold 0.233",
+     "evidence": "artifacts/live_samples.json \u00b7 git_sha cdb0656 \u00b7 created 2026-08-31T07:16:01.347533+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/live_samples.json",
+     "kind": "live_samples",
+     "summary": "56,707 bytes, placeholder=false",
+     "tokens": 14176
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 7,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "detector_trees.json",
+   "timestamp": "2026-08-31T07:27:52.286713+00:00",
+   "claims": [
+    {
+     "claim": "exported detector: 400 trees, 25200 nodes",
+     "evidence": "artifacts/detector_trees.json \u00b7 git_sha b66c76f \u00b7 created 2026-08-31T07:27:52.286713+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/detector_trees.json",
+     "kind": "detector_trees",
+     "summary": "583,430 bytes, placeholder=false",
+     "tokens": 145857
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 8,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "guarantees.json",
+   "timestamp": "2026-08-31T09:03:01.784183+00:00",
+   "claims": [
+    {
+     "claim": "4 cross-language checks, 92 test cases",
+     "evidence": "artifacts/guarantees.json \u00b7 git_sha 8695b07 \u00b7 created 2026-08-31T09:03:01.784183+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/guarantees.json",
+     "kind": "guarantees",
+     "summary": "2,779 bytes, placeholder=false",
+     "tokens": 694
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 9,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "attack/rounds.json",
+   "timestamp": "2026-08-31T10:18:36.131713+00:00",
+   "claims": [
+    {
+     "claim": "round 0: ASR 1.000, median queries 275",
+     "evidence": "artifacts/attack/rounds.json \u00b7 git_sha 6ca9dbd \u00b7 created 2026-08-31T10:18:36.131713+00:00",
+     "evidence_type": "test_output"
+    },
+    {
+     "claim": "round 1: ASR 1.000, median queries 291",
+     "evidence": "artifacts/attack/rounds.json \u00b7 git_sha 6ca9dbd \u00b7 created 2026-08-31T10:18:36.131713+00:00",
+     "evidence_type": "test_output"
+    },
+    {
+     "claim": "round 2: ASR 1.000, median queries 391",
+     "evidence": "artifacts/attack/rounds.json \u00b7 git_sha 6ca9dbd \u00b7 created 2026-08-31T10:18:36.131713+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/attack/rounds.json",
+     "kind": "attack_rounds",
+     "summary": "1,934 bytes, placeholder=false",
+     "tokens": 483
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 10,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "attack/examples.json",
+   "timestamp": "2026-08-31T10:18:36.160764+00:00",
+   "claims": [
+    {
+     "claim": "9 worked evasions, first 0.886 -> 0.0008",
+     "evidence": "artifacts/attack/examples.json \u00b7 git_sha 6ca9dbd \u00b7 created 2026-08-31T10:18:36.160764+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/attack/examples.json",
+     "kind": "attack_examples",
+     "summary": "6,367 bytes, placeholder=false",
+     "tokens": 1591
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 11,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "graph.json",
+   "timestamp": "2026-08-31T10:18:36.179018+00:00",
+   "claims": [
+    {
+     "claim": "pipeline graph: 23 nodes, 22 edges",
+     "evidence": "artifacts/graph.json \u00b7 git_sha 6ca9dbd \u00b7 created 2026-08-31T10:18:36.179018+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/graph.json",
+     "kind": "graph",
+     "summary": "6,901 bytes, placeholder=false",
+     "tokens": 1725
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 12,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "attack/feasibility.json",
+   "timestamp": "2026-08-31T10:18:36.201383+00:00",
+   "claims": [
+    {
+     "claim": "constrained ASR 1.000 vs unconstrained 1.000; 99.9% of unconstrained evasions at an impossible merchant",
+     "evidence": "artifacts/attack/feasibility.json \u00b7 git_sha 6ca9dbd \u00b7 created 2026-08-31T10:18:36.201383+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/attack/feasibility.json",
+     "kind": "feasibility_audit",
+     "summary": "393 bytes, placeholder=false",
+     "tokens": 98
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 13,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "scorecard.json",
+   "timestamp": "2026-08-31T10:18:36.222777+00:00",
+   "claims": [
+    {
+     "claim": "Tabular detector: attack success 1.000 -> 1.000; PR-AUC 0.947 -> 0.932 (-1.6%) over 3 rounds",
+     "evidence": "artifacts/scorecard.json \u00b7 git_sha 6ca9dbd \u00b7 created 2026-08-31T10:18:36.222777+00:00",
+     "evidence_type": "test_output"
+    },
+    {
+     "claim": "Payment agent: attack success 0.049 -> 0.000; significant at p=0.015; model openai/gpt-oss-120b",
+     "evidence": "artifacts/scorecard.json \u00b7 git_sha 6ca9dbd \u00b7 created 2026-08-31T10:18:36.222777+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/scorecard.json",
+     "kind": "scorecard",
+     "summary": "703 bytes, placeholder=false",
+     "tokens": 175
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 14,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "complete",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "detect/rounds.json",
+   "timestamp": "2026-08-31T10:18:36.245721+00:00",
+   "claims": [
+    {
+     "claim": "round 0: PR-AUC 0.947, recall 0.916",
+     "evidence": "artifacts/detect/rounds.json \u00b7 git_sha 6ca9dbd \u00b7 created 2026-08-31T10:18:36.245721+00:00",
+     "evidence_type": "test_output"
+    },
+    {
+     "claim": "round 1: PR-AUC 0.939, recall 0.896",
+     "evidence": "artifacts/detect/rounds.json \u00b7 git_sha 6ca9dbd \u00b7 created 2026-08-31T10:18:36.245721+00:00",
+     "evidence_type": "test_output"
+    },
+    {
+     "claim": "round 2: PR-AUC 0.932, recall 0.890",
+     "evidence": "artifacts/detect/rounds.json \u00b7 git_sha 6ca9dbd \u00b7 created 2026-08-31T10:18:36.245721+00:00",
+     "evidence_type": "test_output"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/detect/rounds.json",
+     "kind": "detect_rounds",
+     "summary": "2,543 bytes, placeholder=false",
+     "tokens": 635
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 15,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "uncertain",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "data_provenance.json",
+   "timestamp": "2026-08-29T18:22:15.351761+00:00",
+   "claims": [
+    {
+     "claim": "kaggle kartik2112/fraud-detection: 1,852,394 rows, fraud rate 0.5%",
+     "evidence": "artifacts/data_provenance.json \u00b7 git_sha none \u00b7 created 2026-08-29T18:22:15.351761+00:00",
+     "evidence_type": "model_prior"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/data_provenance.json",
+     "kind": "data_provenance",
+     "summary": "412 bytes, placeholder=absent",
+     "tokens": 103
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 16,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "uncertain",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "attack/adversarial_detection.json",
+   "timestamp": "",
+   "claims": [
+    {
+     "claim": "holdout recall on unseen adversarials 0.000 -> 0.689",
+     "evidence": "artifacts/attack/adversarial_detection.json \u00b7 git_sha none \u00b7 created unknown",
+     "evidence_type": "model_prior"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/attack/adversarial_detection.json",
+     "kind": "adversarial_detection",
+     "summary": "854 bytes, placeholder=absent",
+     "tokens": 213
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 17,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "uncertain",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "attack/dosage_sweep.json",
+   "timestamp": "",
+   "claims": [
+    {
+     "claim": "dosage sweep: 6 arms on 1,852,394 rows",
+     "evidence": "artifacts/attack/dosage_sweep.json \u00b7 git_sha none \u00b7 created unknown",
+     "evidence_type": "model_prior"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/attack/dosage_sweep.json",
+     "kind": "dosage_sweep",
+     "summary": "8,817 bytes, placeholder=absent",
+     "tokens": 2204
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 18,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "uncertain",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "attack/threshold_sweep.json",
+   "timestamp": "",
+   "claims": [
+    {
+     "claim": "threshold sweep: 7 arms on 400,000 rows",
+     "evidence": "artifacts/attack/threshold_sweep.json \u00b7 git_sha none \u00b7 created unknown",
+     "evidence_type": "model_prior"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/attack/threshold_sweep.json",
+     "kind": "threshold_sweep",
+     "summary": "3,630 bytes, placeholder=absent",
+     "tokens": 907
+    }
+   ]
+  },
+  {
+   "type": "message",
+   "lamport": 19,
+   "sender": "assay",
+   "receiver": "reviewer",
+   "performative": "task_result",
+   "task_status": "uncertain",
+   "root_task": "Does this security number survive an adversary?",
+   "message_id": "feature_schema.json",
+   "timestamp": "",
+   "claims": [
+    {
+     "claim": "20 columns: 7 frozen, 9 mutable",
+     "evidence": "artifacts/feature_schema.json \u00b7 git_sha none \u00b7 created unknown",
+     "evidence_type": "model_prior"
+    }
+   ],
+   "artifacts": [
+    {
+     "ref": "artifacts/feature_schema.json",
+     "kind": "feature_schema",
+     "summary": "2,159 bytes, placeholder=absent",
+     "tokens": 539
+    }
+   ]
+  }
+ ]
+}
