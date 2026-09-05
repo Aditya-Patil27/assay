@@ -17,7 +17,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const BASE = process.env.BASE_URL || "https://adversarial-payments.vercel.app";
+const BASE = process.env.BASE_URL || "https://assay-payments.vercel.app";
 const RAW = path.join(here, "raw_loops");
 const OUT = path.join(here, "..", "web", "public", "demos");
 // Pitch-only footage: real pages as b-roll under the narration. Not embedded on the site.

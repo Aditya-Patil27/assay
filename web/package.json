@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "deploy": "vercel deploy --prod --yes",
+    "deploy": "node scripts/deploy.mjs",
     "check:agent": "tsx scripts/check-agent-port.mjs",
     "check:trees": "tsx scripts/check-tree-port.mjs",
     "check:route": "tsx scripts/check-route-guards.mjs"
