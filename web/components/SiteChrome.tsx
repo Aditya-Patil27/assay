@@ -18,6 +18,7 @@ export const NAV = [
   { href: "/attack", label: "Tabular attack" },
   { href: "/agent", label: "Agent attack" },
   { href: "/audit", label: "Audit" },
+  { href: "/lineage", label: "Lineage" },
   { href: "/system", label: "System" },
 ];
 
