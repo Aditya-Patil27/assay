@@ -98,6 +98,7 @@ def _frame(i: int, rel: str, path: Path, doc: dict) -> dict:
         "task_status": "complete" if flagged else "uncertain",
         "root_task": ROOT_TASK,
         "message_id": rel,
+        "git_sha": sha,
         "timestamp": created if created != "unknown" else "",
         "claims": [{"claim": c, "evidence": evidence, "evidence_type": ev_type} for c in _claims(rel, doc)],
         "artifacts": [{

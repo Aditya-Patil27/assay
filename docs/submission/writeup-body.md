@@ -15,7 +15,7 @@ that is what the submission is checked for.
 |---|---|---|
 | 1 | Code repository | https://github.com/Aditya-Patil27/assay |
 | 2 | Solution walkthrough (.docx) | attached — `solution-walkthrough.docx` |
-| 3 | Working web prototype | https://adversarial-payments.vercel.app |
+| 3 | Working web prototype | https://assay-payments.vercel.app |
 
 ---
 
@@ -113,7 +113,7 @@ than only the pooled figure so that disagreement is visible.
 
 ### Try the prototype in 30 seconds
 
-Open **https://adversarial-payments.vercel.app/agent** and run the default pair with defences
+Open **https://assay-payments.vercel.app/agent** and run the default pair with defences
 off, then on.
 
 - **Off** — the agent executes `update_payee` and a real supplier's IBAN is rewritten to the

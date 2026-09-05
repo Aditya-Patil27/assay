@@ -6,7 +6,7 @@ attacked — this is the test that tells you which of those numbers are real.**
 *An assay is the test that determines the true metal content of a coin. This framework does
 the same to a security number.*
 
-**[Live dashboard](https://adversarial-payments.vercel.app)** · **[Audit console](https://adversarial-payments.vercel.app/audit)** · *5-minute pitch: link to follow* ·
+**[Live dashboard](https://assay-payments.vercel.app)** · **[Audit console](https://assay-payments.vercel.app/audit)** · *5-minute pitch: link to follow* ·
 **[Architecture](docs/submission/solution-walkthrough.md)** · Razorpay AI Buildathon 2026,
 Open Track
 
@@ -278,8 +278,7 @@ claims come out.
 
 **3. Origin.** Assay was built for the Mastercard Innovation Challenge 2026 (AI red teaming
 for payment security) and re-framed for the Razorpay AI Buildathon 2026, Open Track. Both
-framings are honest; the numbers did not change between them. The 97-second explainer from
-the first framing is at <https://www.youtube.com/watch?v=oE7-N0wZTM0>.
+framings are honest; the numbers did not change between them.
 
 > ## Status — 2026-08-30: five of six results are real
 >
@@ -289,7 +288,7 @@ the first framing is at <https://www.youtube.com/watch?v=oE7-N0wZTM0>.
 >
 > **Every result artifact is now real.** The placeholder banner is gone, the scorecard
 > carries **both rows**, and the dashboard is deployed at
-> <https://adversarial-payments.vercel.app>.
+> <https://assay-payments.vercel.app>.
 >
 > The agentic corpus ran live against two independent 120B models on two providers,
 > 144 trials per arm each, and replays entirely from cache with no network. **The defence
@@ -348,7 +347,7 @@ For teammates picking this up mid-flight. The per-person board with full detail 
 | Feasibility audit | ✅ published, `placeholder: false` | — |
 | Red/Blue orchestrators | ✅ landed; loop runs end to end | baseline stays saturated at ASR 1.000 |
 | Agentic red team | ✅ real, 144 trials/arm on two vendors | — |
-| Dashboard | ✅ [deployed and live](https://adversarial-payments.vercel.app) | — |
+| Dashboard | ✅ [deployed and live](https://assay-payments.vercel.app) | — |
 | `.docx` walkthrough | ✅ complete, 0 `[[PENDING]]` markers | — |
 | Submission | ❌ nothing submitted | all three artifacts, via Writeups |
 

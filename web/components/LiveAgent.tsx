@@ -76,11 +76,15 @@ export function LiveAgent({ runtime }: { runtime: Pick<AgentRuntime, "scenarios"
   const scenario = scenarios.find((s) => s.id === scenarioId) ?? scenarios[0];
 
   const [busy, setBusy] = useState<"on" | "off" | null>(null);
+  // The planted text is editable: a judge can type their own injection against the same
+  // task and the same defence stack. Reset to the preset whenever the preset changes.
+  const [payload, setPayload] = useState<string>(injection?.payload ?? "");
   const [results, setResults] = useState<Record<string, Result | { error: string }>>({});
 
   const pick = (id: string) => {
     setInjectionId(id);
     const inj = runtime.injections.find((i) => i.id === id);
+    setPayload(inj?.payload ?? "");
     const first = runtime.scenarios.find((s) => s.channel === inj?.channel);
     if (first) setScenarioId(first.id);
     setResults({});
@@ -93,7 +97,7 @@ export function LiveAgent({ runtime }: { runtime: Pick<AgentRuntime, "scenarios"
       const res = await fetch("/api/agent", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ scenarioId: scenario.id, injectionId: injection.id, defenses }),
+        body: JSON.stringify({ scenarioId: scenario.id, injectionId: injection.id, defenses, payload }),
       });
       const data = await res.json();
       setResults((r) => ({ ...r, [defenses ? "on" : "off"]: data }));
@@ -148,11 +152,38 @@ export function LiveAgent({ runtime }: { runtime: Pick<AgentRuntime, "scenarios"
         {injection && scenario ? (
           <div className="mt-4 space-y-3">
             <Field label={`User request (trusted)`} value={scenario.user_request} />
-            <Field
-              label={`Planted in the ${injection.channel} (untrusted)`}
-              value={injection.payload}
-              tone="attack"
-            />
+            <div>
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="text-[0.75rem] font-medium text-muted">
+                  Planted in the {injection.channel} (untrusted) — edit it and fire your own
+                </p>
+                {payload.trim() !== injection.payload.trim() ? (
+                  <button
+                    type="button"
+                    onClick={() => setPayload(injection.payload)}
+                    className="text-[0.75rem] text-muted underline-offset-2 hover:underline"
+                  >
+                    reset to the corpus payload
+                  </button>
+                ) : null}
+              </div>
+              <textarea
+                value={payload}
+                maxLength={600}
+                rows={3}
+                onChange={(e) => {
+                  setPayload(e.target.value);
+                  setResults({});
+                }}
+                className="mt-1 w-full whitespace-pre-wrap break-words rounded-[5px] border border-attack/30 bg-attack-fill/5 px-3 py-2 font-mono text-[0.75rem] leading-relaxed"
+                aria-label="Injected text"
+              />
+              <p className="mt-1 text-[0.6875rem] text-muted">
+                {payload.length}/600 · the goal below is what the run is scored against, so a
+                typed payload that tries something else will show as HELD even if the model
+                obeyed it.
+              </p>
+            </div>
             <p className="text-[0.75rem] text-muted">
               Goal: <span className="font-mono">{injection.goal}</span> · ATLAS{" "}
               <span className="font-mono">{injection.atlas_technique}</span>

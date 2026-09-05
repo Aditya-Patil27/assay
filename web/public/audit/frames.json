@@ -38,6 +38,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "latency.json",
+   "git_sha": "18a2ab0",
    "timestamp": "2026-08-30T19:58:12.721064+00:00",
    "claims": [
     {
@@ -64,6 +65,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "agentic/redteam-groq.json",
+   "git_sha": "35ca306",
    "timestamp": "2026-08-30T20:28:16.009212+00:00",
    "claims": [
     {
@@ -90,6 +92,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "agentic/redteam.json",
+   "git_sha": "35ca306",
    "timestamp": "2026-08-30T20:28:16.048846+00:00",
    "claims": [
     {
@@ -116,6 +119,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "agentic/redteam-nvidia.json",
+   "git_sha": "35ca306",
    "timestamp": "2026-08-30T20:36:14.807635+00:00",
    "claims": [
     {
@@ -142,6 +146,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "agent_runtime.json",
+   "git_sha": "2a83510",
    "timestamp": "2026-08-31T06:49:20.516737+00:00",
    "claims": [
     {
@@ -168,6 +173,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "live_samples.json",
+   "git_sha": "cdb0656",
    "timestamp": "2026-08-31T07:16:01.347533+00:00",
    "claims": [
     {
@@ -194,6 +200,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "detector_trees.json",
+   "git_sha": "b66c76f",
    "timestamp": "2026-08-31T07:27:52.286713+00:00",
    "claims": [
     {
@@ -220,6 +227,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "guarantees.json",
+   "git_sha": "8695b07",
    "timestamp": "2026-08-31T09:03:01.784183+00:00",
    "claims": [
     {
@@ -246,6 +254,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "attack/rounds.json",
+   "git_sha": "6ca9dbd",
    "timestamp": "2026-08-31T10:18:36.131713+00:00",
    "claims": [
     {
@@ -282,6 +291,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "attack/examples.json",
+   "git_sha": "6ca9dbd",
    "timestamp": "2026-08-31T10:18:36.160764+00:00",
    "claims": [
     {
@@ -308,6 +318,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "graph.json",
+   "git_sha": "6ca9dbd",
    "timestamp": "2026-08-31T10:18:36.179018+00:00",
    "claims": [
     {
@@ -334,6 +345,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "attack/feasibility.json",
+   "git_sha": "6ca9dbd",
    "timestamp": "2026-08-31T10:18:36.201383+00:00",
    "claims": [
     {
@@ -360,6 +372,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "scorecard.json",
+   "git_sha": "6ca9dbd",
    "timestamp": "2026-08-31T10:18:36.222777+00:00",
    "claims": [
     {
@@ -391,6 +404,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "detect/rounds.json",
+   "git_sha": "6ca9dbd",
    "timestamp": "2026-08-31T10:18:36.245721+00:00",
    "claims": [
     {
@@ -427,6 +441,7 @@
    "task_status": "complete",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "attack/adversarial_detection.json",
+   "git_sha": "0e25c15",
    "timestamp": "2026-09-05T09:28:29.342755+00:00",
    "claims": [
     {
@@ -453,6 +468,7 @@
    "task_status": "uncertain",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "data_provenance.json",
+   "git_sha": "none",
    "timestamp": "2026-08-29T18:22:15.351761+00:00",
    "claims": [
     {
@@ -479,6 +495,7 @@
    "task_status": "uncertain",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "attack/dosage_sweep.json",
+   "git_sha": "none",
    "timestamp": "",
    "claims": [
     {
@@ -505,6 +522,7 @@
    "task_status": "uncertain",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "attack/threshold_sweep.json",
+   "git_sha": "none",
    "timestamp": "",
    "claims": [
     {
@@ -531,6 +549,7 @@
    "task_status": "uncertain",
    "root_task": "Does this security number survive an adversary?",
    "message_id": "feature_schema.json",
+   "git_sha": "none",
    "timestamp": "",
    "claims": [
     {

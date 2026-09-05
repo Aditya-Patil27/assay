@@ -17,7 +17,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const BASE = process.env.BASE_URL || "https://adversarial-payments.vercel.app";
+const BASE = process.env.BASE_URL || "https://assay-payments.vercel.app";
 const RAW = path.join(here, "raw_loops");
 const OUT = path.join(here, "..", "web", "public", "demos");
 // Pitch-only footage: real pages as b-roll under the narration. Not embedded on the site.
@@ -124,7 +124,7 @@ const LOOPS = {
     await page.goto(`${BASE}/audit`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.getElementById("hint")?.textContent.includes("run complete"), null, { timeout: 30_000 });
     await sleep(800);
-    await page.locator("#rows tr").last().click();
+    await page.locator("#rows > *").last().click();
     await sleep(3500);
   },
 };
