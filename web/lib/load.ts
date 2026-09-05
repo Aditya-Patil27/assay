@@ -217,6 +217,15 @@ export async function loadProviderRedteams(): Promise<Envelope<AgenticCategory[]
 
 export const loadLiveSamples = () => optional(() => load<LiveSamples>("live_samples.json"));
 
+/**
+ * The single provider the /lineage outcome column is measured against.
+ *
+ * Graph 1 there needs one fixed set of success_before/success_after counts per technique,
+ * not the pooled or per-vendor comparison loadProviderRedteams renders elsewhere -- so it
+ * reads redteam-groq.json directly rather than picking an index out of that array.
+ */
+export const loadRedteamGroq = () =>
+  optional(() => load<AgenticCategory[]>("agentic", "redteam-groq.json"));
 
 /** The agent runtime constants, exported from Python by scripts/export_agent_runtime.py. */
 export const loadAgentRuntime = () => optional(() => load<AgentRuntime>("agent_runtime.json"));

@@ -192,6 +192,29 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ---- The system in 37 seconds ------------------------------------------- */}
+      <section className="wrap reveal pt-12">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h2 className="display text-[1.5rem] md:text-[1.75rem]">The system in 37 seconds</h2>
+          <p className="text-[0.8125rem] text-muted">
+            Four cuts from the deployed site, captioned. No narration; the pitch has that.
+          </p>
+        </div>
+        <div className="mt-4 overflow-hidden rounded-[8px] border border-rule bg-black">
+          <video
+            src="/demos/hero.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            controls
+            preload="metadata"
+            aria-label="The system in 37 seconds: a live injection fired with defences off then on, the detector scoring in the browser, the audit ledger replaying, and the three-round results"
+            className="block h-auto w-full"
+          />
+        </div>
+      </section>
+
       {/* ---- Bento statistics ---------------------------------------------------- */}
       <section className="wrap reveal py-14">
         <h2 className="mono-label text-[0.8125rem] text-muted">Measured, end to end</h2>

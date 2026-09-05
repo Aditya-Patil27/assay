@@ -12,7 +12,87 @@ Open Track
 
 ---
 
-## The result
+## Contents
+
+- [Problem statement](#problem-statement)
+- [What Assay is](#what-assay-is)
+- [Results](#results)
+- [How we tackle it: system architecture](#how-we-tackle-it-system-architecture)
+- [System design decisions](#system-design-decisions)
+- [Security](#security)
+- [Where this sits in a Razorpay stack](#where-this-sits-in-a-razorpay-stack)
+- [What we got wrong, in public](#what-we-got-wrong-in-public)
+- [See it / reproduce](#see-it--reproduce)
+- [Provenance](#provenance)
+- [Where the work stands](#where-the-work-stands)
+- [Related work, and why 1.000 is the expected number](#related-work-and-why-1000-is-the-expected-number)
+- [Known limitations](#known-limitations)
+- [Repository layout](#repository-layout)
+- [Gates](#gates)
+- [Docs](#docs)
+
+---
+
+## Problem statement
+
+Most adversarial-ML work asks *"can I flip this prediction?"* Payments demands a harder
+question: **"can I flip it using only what an attacker actually controls?"** A fraudster with
+stolen credentials inherits the victim's age, home city and job; the network stamps the
+timestamp. What they control is the amount, the timing, and which merchant to hit — and
+choosing a merchant moves four features at once, because those are four projections of one
+decision. Perturb them independently and you have produced a transaction that cannot
+physically occur.
+
+**An ASR measured over impossible transactions is a number you would have to retract under
+questioning.** Every published robustness figure that skipped this is measuring an attacker
+who does not exist. That contract is code, not prose — `src/adversarial_payments/schema.py`,
+frozen on day one, and the attack engine calls `schema.validate()` at entry so a feature
+change fails loudly instead of silently producing a meaningless ASR.
+
+## What Assay is
+
+One loop, two attack surfaces, one scorecard.
+
+| | Red team | Blue team | Metric |
+|---|---|---|---|
+| **Tabular** | Constraint-aware evasion search against an XGBoost fraud detector | Adversarial retraining, 3 rounds | Attack Success Rate |
+| **Agentic** | Indirect prompt injection into memos, invoice metadata, merchant names, dispute text | Injection classifier + tool scoping + HITL threshold | Exploit rate |
+
+Both terminate in one table — `framework_scorecard`: *surface × attack success before ×
+after × defense cost*. Two rows is the whole claim that this is a **framework**, not two
+projects sharing a repo.
+
+The tabular attack search runs under three projections, enforced at every step:
+
+1. **Immutability** — the victim's attributes are excluded from the search entirely.
+2. **Feasibility** — mutable features stay inside the plausible band observed in training,
+   and coupled features move as a group or not at all.
+3. **Sparsity** — minimise the L0 count of features touched.
+
+### Why Sparkov and not `creditcard.csv`
+
+The default choice for a fraud demo is the ULB `creditcard.csv`. We rejected it, and the
+reason is the reason the project exists.
+
+`creditcard.csv` is PCA-anonymized to `V1`–`V28`. No merchant category. No geography. No
+device. On that data the constraint story above is not merely hard to implement — it is
+**undefined**. You cannot freeze the MCC because there is no MCC; it has been linearly mixed
+into all 28 components. Every projection degenerates to "perturb `V1`–`V28` freely", which is
+exactly the unconstrained attack we are arguing against.
+
+And it degenerates *silently*: you can point a constraint-aware engine at it and get a
+beautiful ASR-collapse curve. The number would be real and the claim attached to it a
+fiction — catchable by any domain judge in one question: *which of those V-columns is the
+MCC?*
+
+Sparkov keeps the raw columns, so the claim is literally expressible in the data. The cost,
+stated plainly: **Sparkov is itself simulator-generated**, so absolute accuracy figures
+should be read as relative across rounds, never as production expectations. We take a weaker
+dataset that supports a real claim over a stronger one that supports a fake one.
+
+---
+
+## Results
 
 One closed-loop red/blue framework, two attack surfaces, one table.
 
@@ -44,24 +124,116 @@ Every figure above reads from `artifacts/scorecard.json` (`placeholder: false`,
 
 ---
 
-## Why this should exist
+## How we tackle it: system architecture
 
-Most adversarial-ML work asks *"can I flip this prediction?"* Payments demands a harder
-question: **"can I flip it using only what an attacker actually controls?"**
+Two lanes that both end in the same scorecard.
 
-A fraudster with stolen credentials inherits the victim's age, home city and job; the network
-stamps the timestamp. What they control is the amount, the timing, and which merchant to hit
-— and choosing a merchant moves four features at once, because those are four projections of
-one decision. Perturb them independently and you have produced a transaction that cannot
-physically occur.
+```mermaid
+flowchart LR
+    subgraph Tabular surface
+        DATA["data/interim/sparkov.parquet<br/>data/load.py"] --> SCHEMA["schema.py +<br/>attack/constraints.py"]
+        SCHEMA --> DETECT["detect/<br/>XGBoost detector"]
+        DETECT --> ENGINE["attack/engine.py<br/>coordinate descent"]
+        ENGINE --> LOOP["loop/flows.py<br/>retrain on evasions"]
+        LOOP -. retrain .-> DETECT
+    end
+    subgraph Agentic surface
+        CORPUS["agentic/<br/>red team corpus"] --> PORT["web/lib/agent<br/>TypeScript port"]
+        PORT --> CONFORM["check_agent_conformance.py<br/>conformance check"]
+    end
+    LOOP --> ART["artifacts.py<br/>Envelope, placeholder flag"]
+    CONFORM --> ART
+    ART --> WEB["web/<br/>Next.js app, one server route"]
+    WEB --> LIVE["/live<br/>in-browser detector"]
+    WEB --> AGENT["/agent<br/>one server route"]
+    WEB --> AUDIT["/audit<br/>provenance ledger"]
+    WEB --> LINEAGE["/lineage<br/>attack lineage graph"]
+```
 
-**An ASR measured over impossible transactions is a number you would have to retract under
-questioning.** Every published robustness figure that skipped this is measuring an attacker
-who does not exist.
+One sentence per box, tabular lane:
 
-That contract is code, not prose — `src/adversarial_payments/schema.py`, frozen on day one,
-and the attack engine calls `schema.validate()` at entry so a feature change fails loudly
-instead of silently producing a meaningless ASR.
+- **Data** (`data/interim/sparkov.parquet`, loaded by `src/adversarial_payments/data/load.py`)
+  — the raw Sparkov transactions, chronologically split into train/val/test.
+- **Feature schema + constraint contract** (`schema.py`, `attack/constraints.py`) — the
+  frozen feature list and the three projections (immutability, coupling, feasibility) every
+  attack candidate must pass.
+- **Detector** (`detect/`) — an XGBoost fraud classifier trained on the schema's features.
+- **Attack engine** (`attack/engine.py`) — greedy coordinate descent against the detector,
+  projected at every step.
+- **Loop** (`loop/flows.py`) — retrains the detector on the previous round's evasions, three
+  rounds end to end.
+
+One sentence per box, agentic lane:
+
+- **Red team corpus** (`agentic/`) — the injection payloads, scenarios and exploit-scoring
+  oracle, in Python.
+- **TypeScript port** (`web/lib/agent`) — the same defense stack and exploit oracle,
+  re-implemented for the server route that holds the model key.
+- **Conformance check** (`scripts/check_agent_conformance.py`) — proves the TypeScript port
+  agrees with the Python original span-for-span before either is trusted.
+
+Where both lanes land:
+
+- **Artifacts** (`artifacts.py`) — every stage writes a JSON envelope carrying a
+  `placeholder` flag, the single contract the frontend reads.
+- **Web** (`web/`, Next.js) — a running app that reads the artifact JSON at build time; `/live` downloads
+  the exported detector graph and walks it in the browser, `/agent` is the one server route
+  that calls a live model.
+- **Audit console** (`/audit`) — renders the same artifacts as a judge-facing walkthrough of
+  what is real versus placeholder.
+- A `/lineage` page is being added: an attack-lineage graph — task → channel → technique →
+  goal → outcome for the agent surface, feature tier → feature → worked evasion for the
+  tabular surface.
+
+## System design decisions
+
+| Decision | Reason |
+|---|---|
+| Sparkov over ULB `creditcard.csv` | `creditcard.csv` is PCA-anonymized (`V1`–`V28`); no MCC, no geography, so the constraint story is undefined, not just hard. Sparkov keeps raw columns, so the claim is expressible in the data. |
+| XGBoost as the detector | The realistic tree-ensemble baseline for tabular fraud scoring — and gradient-free, which is why the attack below is coordinate descent, not FGSM/PGD. |
+| Greedy coordinate descent with random restarts | Tree ensembles have no gradients; at each step the engine tries every in-bounds value of every controllable coordinate and keeps the move that most reduces fraud probability. |
+| Chronological train/val/test split, never random | A card's later transactions would leak into the features of its earlier ones and every downstream metric would be fiction (`data/load.py`). |
+| Narration-free artifacts | Every artifact carries a `placeholder` flag; only `placeholder: false` renders on the dashboard or prints in the notebook without a `TK` substitution (`artifacts.py`). |
+| Static-first web, one server route | Every page is rendered at build time from committed JSON; `/api/agent` is the only dynamic route, and it exists only because the provider key must not reach the browser. |
+| Cached LLM replay by default (`LLM_LIVE=0`) | Reproduces the agentic numbers with zero network cost; a live call is opt-in. |
+| Per-request provider-key rotation | Free-tier keys cap per key, not per account; round-robin beats draining one key until it 429s. |
+
+---
+
+## Security
+
+### What the system measures
+
+- **Tabular surface.** A white-box query attacker constrained to the features it can
+  actually control — amount, timing, and merchant choice — under the three projections above
+  (`attack/constraints.py`). Immutable victim attributes are excluded from the search
+  entirely.
+- **Agentic surface.** Indirect prompt injection delivered through four untrusted channels
+  the agent ingests as data rather than instruction: `transaction_memo`,
+  `merchant_display_name`, `invoice_metadata`, `dispute_text`.
+- **Defence stack**, three independently toggleable layers (`agentic/defenses.py`): an
+  injection classifier that scores and redacts untrusted spans before they reach the model,
+  tool scoping (allowlist per task type, verified-payee requirement, DLP check on free text),
+  and a human-in-the-loop threshold for high-value or account-changing actions.
+
+### Security of the demo itself
+
+The live site (`web/`) is a separate concern from the framework it demos: what does an
+unauthenticated judge hitting a public URL get to do?
+
+- The only server route, `/api/agent`, rate-limits per client: 8 tokens/minute refilled
+  continuously, 400 calls/day across the deployment (`web/lib/ratelimit.ts`). The bucket is
+  per serverless instance, so on Vercel's model it binds mainly under sustained load rather
+  than a single burst — stated in the file rather than assumed away.
+- Provider keys rotate per request, round-robin over a pooled, comma-separated credential
+  (`web/app/api/agent/route.ts`), mirroring the Python client so no single key is drained
+  alone.
+- No real payment rail: the ledger is an in-memory fixture created per request, the same
+  fixture every Python trial starts from.
+- No key configured returns a labelled `503` rather than failing silently.
+- A judge-typed payload is capped at 600 characters (`MAX_PAYLOAD` in `route.ts`) and control
+  characters are stripped before it reaches the model.
+- No secrets in the repository: `.env` is git-ignored, only `.env.example` is committed.
 
 ---
 
@@ -107,93 +279,26 @@ per-round PR-AUC and `latency.json`. A metric nobody could retract is not a metr
 
 ---
 
-## What this is
+## See it / reproduce
 
-A closed-loop red/blue framework, applied to **two attack surfaces** and reporting the
-**same shape of result** for both.
+### 30 seconds, no Python
 
-| | Red team | Blue team | Metric |
-|---|---|---|---|
-| **Tabular** | Constraint-aware evasion search against an XGBoost fraud detector | Adversarial retraining, 3 rounds | Attack Success Rate |
-| **Agentic** | Indirect prompt injection into memos, invoice metadata, merchant names, dispute text | Injection classifier + tool scoping + HITL threshold | Exploit rate |
+The deployed site is the fastest route: <https://assay-payments.vercel.app>. Every page is
+rendered at build time from the committed artifact JSON; the site never trains. Two pages run
+the real thing in front of you: `/live` walks the exported detector in your browser, and
+`/agent` fires one prompt injection at a live model through the site's only server route.
+`/audit` is the provenance ledger and `/lineage` the attack-lineage graph.
 
-Both terminate in one table — `framework_scorecard`: *surface × attack success before ×
-after × defense cost*. Two rows is the whole claim that this is a **framework**, not two
-projects sharing a repo.
-
-### The part that is actually novel
-
-Most adversarial-ML work asks *"can I flip this prediction?"*. Payments demands a harder
-question: **"can I flip it using only what an attacker actually controls?"**
-
-A fraudster with stolen credentials inherits the victim's age, home city and job; the
-network stamps the timestamp. What they control is the amount, the timing, and which
-merchant to hit — and *choosing a merchant moves four features at once* (category, terminal
-latitude, terminal longitude, distance), because those are four projections of one decision.
-Perturb them independently and you have produced a transaction that cannot physically occur.
-
-So the attack search runs under three projections, enforced at every step:
-
-1. **Immutability** — the victim's attributes are excluded from the search entirely.
-2. **Feasibility** — mutable features stay inside the plausible band observed in training,
-   and coupled features move as a group or not at all.
-3. **Sparsity** — minimise the L0 count of features touched.
-
-This matters commercially, not just aesthetically: **an ASR measured over impossible
-transactions is a number you would have to retract under questioning.**
-
-That contract is code, not prose — `src/adversarial_payments/schema.py`, frozen on Day 1,
-and the attack engine calls `schema.validate()` at entry so a feature change fails loudly
-instead of silently producing a meaningless ASR.
-
-### Why Sparkov and not `creditcard.csv`
-
-The default choice for a fraud demo is the ULB `creditcard.csv`. We rejected it, and the
-reason is the reason the project exists.
-
-`creditcard.csv` is PCA-anonymized to `V1`–`V28`. No merchant category. No geography. No
-device. On that data the constraint story above is not merely hard to implement — it is
-**undefined**. You cannot freeze the MCC because there is no MCC; it has been linearly mixed
-into all 28 components. Every projection degenerates to "perturb `V1`–`V28` freely", which is
-exactly the unconstrained attack we are arguing against.
-
-And it degenerates *silently*: you can point a constraint-aware engine at it and get a
-beautiful ASR-collapse curve. The number would be real and the claim attached to it a
-fiction — catchable by any domain judge in one question: *which of those V-columns is the
-MCC?*
-
-Sparkov keeps the raw columns, so the claim is literally expressible in the data. The cost,
-stated plainly: **Sparkov is itself simulator-generated**, so absolute accuracy figures
-should be read as relative across rounds, never as production expectations. We take a weaker
-dataset that supports a real claim over a stronger one that supports a fake one.
-
----
-
-## See the result in 30 seconds — no Python
-
-The dashboard is a **fully static export**: pre-built HTML with the artifact JSON inlined at
-build time. No server, no backend, nothing to install. It reads `artifacts/`; it never
-trains, by design — so nothing heavy can fail mid-demo, and the results are visible on a
-machine that could not build XGBoost.
+To run it yourself:
 
 ```bash
-# If web/out/ is present, just open it — the export uses relative asset paths,
-# so it works straight off the filesystem with no server at all:
-open web/out/index.html          # macOS
-start web/out/index.html         # Windows
+cd web && npm install && npm run dev     # http://localhost:3000 — reads ../artifacts, no Python needed
 ```
 
-> **Note for a judge cloning this repo:** `web/out/` is currently in `.gitignore`, so a fresh
-> clone will not contain the built export. Until that changes or a deployed URL is published,
-> build it once with the command below. This is a known gap, not the intended final state.
+The live injection needs a provider key in `web/.env.local` (`GROQ_API_KEY=...`); without one
+the route returns a labelled 503 and every other page still works.
 
-```bash
-cd web && npm install && npm run build   # writes web/out/, ~1 min
-```
-
-`npm run dev` serves the same thing at `localhost:3000` if you would rather have hot reload.
-
-## Read the argument — `notebooks/submission.ipynb`
+### Read the argument — `notebooks/submission.ipynb`
 
 The graded artifact. Narrative order: threat model → why Sparkov → the three projections →
 ASR and attacker cost across rounds → agentic exploit rate before/after → the unified
@@ -206,7 +311,7 @@ disagreement with ours would be visible rather than buried.
 
 The notebook defaults to `RUN_ORCHESTRATED=0` — see [Gates](#gates) for why.
 
-## Reproduce the numbers properly
+### Reproduce the numbers properly
 
 For anyone who would rather verify than take our word for it:
 
@@ -438,6 +543,16 @@ Directories are assigned so five people rarely touch the same file.
 **shared contracts** — written Day 1, read-only after. Both fail loudly rather than drift;
 `tests/test_artifacts.py` fails if the Python and TypeScript shapes diverge.
 
+The repository root itself now carries only `README.md`, `LINKS.md`, `pyproject.toml`,
+`uv.lock`, `.env.example` and `.gitignore` — everything else lives under one of the
+directories above. The background-research PDF moved to `docs/archive/`, which is
+git-ignored; `kaggle_code.zip` is gone.
+
+- `video/` — the demo-video pipeline (`mux.sh` and the narration scripts); its rendered
+  outputs are git-ignored, the pipeline itself is committed.
+- `web/` — the Next.js dashboard, audit console and the one live agent route; see
+  [System architecture](#how-we-tackle-it-system-architecture).
+
 ## Gates
 
 - **Day 1** — `schema.py` frozen; Prefect gate run. ✅ Passed, **with a caveat that changed a
@@ -461,6 +576,6 @@ Directories are assigned so five people rarely touch the same file.
   artifacts are required (this repository, a `.docx` walkthrough, a working web prototype).
 - [Deck outline + demo storyboard](docs/2026-08-31-deck-outline.md)
 - [Strategy](docs/2026-08-22-challenge-strategy.md) — threat taxonomy and approach analysis
-- `GenAI Payment Fraud Challenge.pdf` — our own background research. **Not a rules document
-  and not a deliverable**; roadmap appendix only. Its 69 citations include Reddit and Medium
-  sources, and it promises four subsystems we deliberately cut.
+- `GenAI Payment Fraud Challenge.pdf` (`docs/archive/`) — our own background research. **Not a
+  rules document and not a deliverable**; roadmap appendix only. Its 69 citations include
+  Reddit and Medium sources, and it promises four subsystems we deliberately cut.
