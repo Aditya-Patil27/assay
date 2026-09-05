@@ -1,0 +1,82 @@
+{
+  "total": 280.5,
+  "scenes": [
+    {
+      "id": "s1",
+      "start": 0,
+      "slot": 14.2,
+      "spoken": 13.8,
+      "source": "pitch.html"
+    },
+    {
+      "id": "s2",
+      "start": 14.2,
+      "slot": 26.63,
+      "spoken": 26.23,
+      "source": "pitch.html"
+    },
+    {
+      "id": "s3",
+      "start": 40.83,
+      "slot": 42.04,
+      "spoken": 41.64,
+      "source": "pitch.html"
+    },
+    {
+      "id": "s4",
+      "start": 82.87,
+      "slot": 29.4,
+      "spoken": 29,
+      "source": "pitch.html"
+    },
+    {
+      "id": "s5",
+      "start": 112.27,
+      "slot": 32,
+      "spoken": 31.6,
+      "source": "pitch.html"
+    },
+    {
+      "id": "s6",
+      "start": 144.27,
+      "slot": 19.53,
+      "spoken": 19.13,
+      "source": "agent.mp4"
+    },
+    {
+      "id": "s7",
+      "start": 163.8,
+      "slot": 36.87,
+      "spoken": 36.47,
+      "source": "pitch.html"
+    },
+    {
+      "id": "s8",
+      "start": 200.67,
+      "slot": 16.78,
+      "spoken": 16.38,
+      "source": "audit.mp4"
+    },
+    {
+      "id": "s9",
+      "start": 217.45,
+      "slot": 31.63,
+      "spoken": 31.23,
+      "source": "pitch.html"
+    },
+    {
+      "id": "s10",
+      "start": 249.08,
+      "slot": 19.17,
+      "spoken": 18.77,
+      "source": "pitch.html"
+    },
+    {
+      "id": "s11",
+      "start": 268.25,
+      "slot": 12.26,
+      "spoken": 11.86,
+      "source": "pitch.html"
+    }
+  ]
+}
