@@ -10,6 +10,7 @@ import { join } from "node:path";
 
 import type { AgentRuntime } from "./agent/types";
 import type {
+  AdversarialDetection,
   AgenticCategory,
   AttackExample,
   AttackRound,
@@ -63,6 +64,23 @@ export async function loadFeasibility(): Promise<Envelope<FeasibilityAudit> | nu
   } catch (err) {
     if ((err as NodeJS.ErrnoException)?.code === "ENOENT") return null;
     throw err;
+  }
+}
+
+/**
+ * Second-stage detection, or null unless a real run wrote it.
+ *
+ * Stricter than the other optional loaders on purpose. The file spent its first week as a
+ * bare JSON with no envelope, and the audit console showed it amber for exactly that
+ * reason. A file that fails the envelope check or carries placeholder:true renders
+ * nothing here rather than a figure nobody could retract.
+ */
+export async function loadAdversarialDetection(): Promise<Envelope<AdversarialDetection> | null> {
+  try {
+    const env = await load<AdversarialDetection>("attack", "adversarial_detection.json");
+    return env.placeholder === false ? env : null;
+  } catch {
+    return null;
   }
 }
 

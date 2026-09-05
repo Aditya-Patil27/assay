@@ -27,8 +27,8 @@
     },
     {
       "id": "s5",
-      "seconds": 30,
-      "text": "Now the row that did not work. On the tabular detector, three rounds of adversarial retraining stopped zero evasions. Attack success stayed at one hundred percent. What moved was cost. Median queries per success rose from two seventy-five to three ninety-one, and we paid one point six percent of PR-AUC for it. That is the finding. The model-layer defence buys attacker effort, not safety. So the defence has to live somewhere else.",
+      "seconds": 40,
+      "text": "Now the row that did not work. On the tabular detector, three rounds of adversarial retraining stopped zero evasions. Attack success stayed at one hundred percent. What moved was cost. Median queries per success rose from two seventy-five to three ninety-one, and we paid one point six percent of PR-AUC for it. That is the finding. The model-layer defence buys attacker effort, not safety. So the defence has to live somewhere else. We measured one place it can live. A second-stage detector retrained on half of the evasions catches sixty-nine percent of the half it never saw, for ninety-four extra declines per hundred thousand legitimate payments.",
       "clip": "results"
     },
     {
@@ -50,14 +50,14 @@
     },
     {
       "id": "s9",
-      "seconds": 35,
-      "text": "What broke. Four things, all still in the history. We promised attack success would collapse. It did not, and every caption was corrected. We blamed the training dosage. A five-thousand-fold sweep refuted that. The decision threshold was fitted on the test split until August thirtieth, which made every earlier number incomparable. We said so and re-measured. And a trainer that never ran was reported, rather than deleted from the log.",
+      "seconds": 40,
+      "text": "What broke. Four things, all still in the history. We promised attack success would collapse. It did not, and every caption was corrected. We blamed the training dosage. A five-thousand-fold sweep refuted that. The decision threshold was fitted on the test split until August thirtieth, which made every earlier number incomparable. We said so and re-measured. And a trainer that never ran was reported, rather than deleted from the log. And today, re-running a result to give it a provenance flag showed its script had been broken by a refactor. We fixed it and reproduced the number to the digit.",
       "clip": "whatbroke"
     },
     {
       "id": "s10",
       "seconds": 20,
-      "text": "Five artifacts are still unflagged: the dosage and threshold sweeps, the adversarial-detection holdout, the data provenance, and the feature schema. They show amber on the console until something re-runs them. Next is mapping the injection channels onto Razorpay's real surfaces. Payment notes, payment-link descriptions, dispute evidence. And running the corpus there."
+      "text": "Four artifacts are still unflagged: the dosage and threshold sweeps, the data provenance, and the feature schema. They show amber on the console until something re-runs them. Next is mapping the injection channels onto Razorpay's real surfaces. Payment notes, payment-link descriptions, dispute evidence. And running the corpus there."
     },
     {
       "id": "s11",
@@ -69,5 +69,5 @@
   "edge_rate": "+0%",
   "sarvam_speaker": "aditya",
   "sarvam_model": "bulbul:v3",
-  "sarvam_pace": 1.0
+  "sarvam_pace": 1.08
 }

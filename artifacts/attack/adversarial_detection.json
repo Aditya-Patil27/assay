@@ -1,24 +1,31 @@
 {
   "kind": "adversarial_detection",
-  "rows": 400000,
-  "n_train": 196001,
-  "n_test": 119999,
-  "fpr_budget": 0.001,
-  "note": "Recall on adversarial examples the retrained model never saw. Answers 'does the defence detect the generated attacks', which is a different question from 'can a fresh search evade the retrained model'.",
-  "report": {
-    "n_adversarial_total": 566,
-    "n_adversarial_train": 283,
-    "n_adversarial_holdout": 283,
-    "threshold": 0.718604,
-    "holdout_recall_after": 0.68905,
-    "holdout_recall_before": 0.0,
-    "train_recall_after": 1.0,
-    "legit_fpr_before": 0.001139,
-    "legit_fpr_after": 0.000938,
-    "legit_declines_per_100k_after": 93.8,
-    "real_fraud_recall_before": 0.89274,
-    "real_fraud_recall_after": 0.87855,
-    "pr_auc_before": 0.92908,
-    "pr_auc_after": 0.92143
+  "placeholder": false,
+  "schema_version": 1,
+  "created_at": "2026-09-05T09:28:29.342755+00:00",
+  "git_sha": "0e25c15",
+  "payload": {
+    "kind": "adversarial_detection",
+    "rows": 400000,
+    "n_train": 196001,
+    "n_test": 119999,
+    "fpr_budget": 0.001,
+    "note": "Recall on adversarial examples the retrained model never saw. Answers 'does the defence detect the generated attacks', which is a different question from 'can a fresh search evade the retrained model'.",
+    "report": {
+      "n_adversarial_total": 566,
+      "n_adversarial_train": 283,
+      "n_adversarial_holdout": 283,
+      "threshold": 0.718604,
+      "holdout_recall_after": 0.68905,
+      "holdout_recall_before": 0.0,
+      "train_recall_after": 1.0,
+      "legit_fpr_before": 0.001139,
+      "legit_fpr_after": 0.000938,
+      "legit_declines_per_100k_after": 93.8,
+      "real_fraud_recall_before": 0.89274,
+      "real_fraud_recall_after": 0.87855,
+      "pr_auc_before": 0.92908,
+      "pr_auc_after": 0.92143
+    }
   }
 }

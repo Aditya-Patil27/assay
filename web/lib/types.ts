@@ -61,6 +61,35 @@ export interface FeasibilityAudit {
   unconstrained_mean_l0: number;
 }
 
+/**
+ * Second-stage detection: recall on adversarial rows the retrained model never saw.
+ * Mirrors the payload written by scripts/run_adversarial_detection.py.
+ */
+export interface AdversarialDetection {
+  kind: "adversarial_detection";
+  rows: number;
+  n_train: number;
+  n_test: number;
+  fpr_budget: number;
+  note: string;
+  report: {
+    n_adversarial_total: number;
+    n_adversarial_train: number;
+    n_adversarial_holdout: number;
+    threshold: number;
+    holdout_recall_after: number;
+    holdout_recall_before: number;
+    train_recall_after: number;
+    legit_fpr_before: number;
+    legit_fpr_after: number;
+    legit_declines_per_100k_after: number;
+    real_fraud_recall_before: number;
+    real_fraud_recall_after: number;
+    pr_auc_before: number;
+    pr_auc_after: number;
+  };
+}
+
 export interface FeatureDelta {
   feature: string;
   before: number;

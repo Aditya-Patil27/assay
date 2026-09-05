@@ -28,6 +28,11 @@ const ERRORS = [
     fixed: "Reported the error in the document rather than deleting it from the history.",
     sha: "c3b809d",
   },
+  {
+    broke: "The second-stage detection script did not run: a refactor moved the trainer into a shared module and left one call behind, so the committed result predated the code that claimed to produce it.",
+    fixed: "Caught on submission day by re-running it to give it a provenance flag. Fixed the call, re-ran, reproduced 68.9% held-out recall to the digit, and the artifact now carries placeholder: false.",
+    sha: "1374030",
+  },
 ];
 
 export function WhatBroke() {
@@ -36,9 +41,9 @@ export function WhatBroke() {
       <p className="mono-label text-[0.75rem] text-attack">Failure recovery</p>
       <h2 className="display mt-3 text-[1.75rem] md:text-[2rem]">What broke, and how we recovered</h2>
       <p className="prose col mt-3">
-        Four errors, all still in the history. A metric nobody could retract is not a metric.
+        Five errors, all still in the history. A metric nobody could retract is not a metric.
       </p>
-      <ol className="mt-8 grid gap-4 md:grid-cols-2">
+      <ol className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {ERRORS.map((e, i) => (
           <li key={e.sha} className="card flex flex-col border border-rule p-5">
             <span className="mono-label text-[0.75rem] text-muted">{i + 1} · broke</span>
