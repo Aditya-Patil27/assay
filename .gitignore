@@ -62,3 +62,7 @@ video/audio_pitch/
 # Word lock files, created while a .docx is open. Transient, and committing one would
 # tell every later reader the document is checked out by someone who has since closed it.
 ~$*
+
+# Regenerable bundle and archived briefs stay out of the tree
+kaggle_code.zip
+docs/archive/
