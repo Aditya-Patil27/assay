@@ -89,9 +89,14 @@ for (const run of runs) {
   const webm = path.join(dir, fs.readdirSync(dir).find((f) => f.endsWith(".webm")));
   const recorded = probe(webm);
   const lead = Math.max(recorded - 0.9 - declared, 0);  // page load before the timeline started
-  if (recorded < declared) throw new Error(`run${k}: recording ${recorded}s shorter than declared ${declared}s`);
+  // Playwright starts the file at context creation but only writes frames once the page
+  // paints, so a short run can come back a few hundred ms under its slot. Freeze the last
+  // frame to cover the gap; only a gap over a second means something actually went wrong.
+  const short = Math.max(declared - recorded, 0);
+  if (short > 1) throw new Error(`run${k}: recording ${recorded}s is ${r2(short)}s shorter than declared ${declared}s`);
+  const vf = "fps=30,scale=1920:1080,setsar=1" + (short > 0 ? `,tpad=stop_mode=clone:stop_duration=${short.toFixed(3)}` : "");
   run.file = path.join(RAW, `run${k}.mp4`);
-  ff(["-ss", lead.toFixed(3), "-i", webm, "-t", declared.toFixed(3), "-an", "-vf", "fps=30,scale=1920:1080,setsar=1", "-c:v", "libx264", "-crf", "20", "-preset", "medium", "-pix_fmt", "yuv420p", run.file]);
+  ff(["-ss", lead.toFixed(3), "-i", webm, "-t", declared.toFixed(3), "-an", "-vf", vf, "-c:v", "libx264", "-crf", "20", "-preset", "medium", "-pix_fmt", "yuv420p", run.file]);
   console.log(`run${k} [${ids.join(",")}] recorded ${r2(recorded)}s, lead ${r2(lead)}s, kept ${r2(declared)}s`);
   k++;
 }
