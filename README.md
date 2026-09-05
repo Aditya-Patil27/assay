@@ -12,7 +12,13 @@ Open Track
 
 ---
 
+![The system in 37 seconds: a live injection fired with defences off then on, the detector scoring in the browser, the audit ledger replaying, the three-round results](docs/images/system-37s.gif)
+
+*Thirty-seven seconds of the deployed site. No narration; the pitch has that.*
+
 ## Contents
+
+
 
 - [Problem statement](#problem-statement)
 - [What Assay is](#what-assay-is)
@@ -50,6 +56,8 @@ frozen on day one, and the attack engine calls `schema.validate()` at entry so a
 change fails loudly instead of silently producing a meaningless ASR.
 
 ## What Assay is
+
+![Overview page: the thesis, the live score stream scoring real held-out transactions in the browser, and attack success flat across three rounds while attacker effort climbs](docs/images/overview.png)
 
 One loop, two attack surfaces, one scorecard.
 
@@ -114,10 +122,16 @@ strict.
 
 You should trust the second number **because** we showed you the first.
 
+![Results page: the per-round cost table and the framework scorecard](docs/images/results-scorecard.png)
+
 The third row is what you do about the first. Retraining never stops the *next* search, but a
 detector retrained on half of the evasions catches 68.9% of the half it never saw, at the same
 false-positive budget (`artifacts/attack/adversarial_detection.json`, `placeholder: false`).
 The defence works one layer out from the model, not inside it.
+
+![Results page: the second-stage detector panel, recall on evasions the model never saw, what it cost legitimate payments, what it cost real-fraud detection](docs/images/second-stage.png)
+
+![Figure: held-out adversarial recall 0.0% to 68.9%, trained-on recall 100% as the memorisation ceiling, real-fraud recall and legitimate declines at the same operating point](docs/submission/figures/adversarial_detection.png)
 
 Every figure above reads from `artifacts/scorecard.json` (`placeholder: false`,
 `git_sha 6ca9dbd`). Nothing on this page is typed by hand.
@@ -149,6 +163,11 @@ flowchart LR
     WEB --> AUDIT["/audit<br/>provenance ledger"]
     WEB --> LINEAGE["/lineage<br/>attack lineage graph"]
 ```
+
+| The attack lineage, `/lineage` | The detector in the browser, `/live` |
+|---|---|
+| ![Lineage page: task, channel, technique, goal, outcome, with one path lit](docs/images/lineage.png) | ![Live page: the exported detector scoring a transaction in the browser as features are moved](docs/images/live-detector.png) |
+
 
 One sentence per box, tabular lane:
 
@@ -204,6 +223,8 @@ Where both lanes land:
 
 ### What the system measures
 
+![Figure: exploit rate per OWASP category before and after the defence layer](docs/submission/figures/agentic.png)
+
 - **Tabular surface.** A white-box query attacker constrained to the features it can
   actually control — amount, timing, and merchant choice — under the three projections above
   (`attack/constraints.py`). Immutable victim attributes are excluded from the search
@@ -217,6 +238,8 @@ Where both lanes land:
   and a human-in-the-loop threshold for high-value or account-changing actions.
 
 ### Security of the demo itself
+
+![Agent page: the same payload fired twice, EXPLOITED with defences off (the payee IBAN moved), HELD with defences on (the injection filter redacted it)](docs/images/agent-exploited-held.png)
 
 The live site (`web/`) is a separate concern from the framework it demos: what does an
 unauthenticated judge hitting a public URL get to do?
@@ -256,6 +279,8 @@ tool scoping and the human threshold.
 ---
 
 ## What we got wrong, in public
+
+![Overview page: the five errors, each with what broke, what we did, and the commit](docs/images/what-broke.png)
 
 This repository has reported five of its own errors. They are still here:
 
@@ -341,6 +366,8 @@ Then re-run the notebook and rebuild the dashboard. Both re-read the regenerated
 ---
 
 ## Provenance
+
+![Audit page: every artifact as a claim, 15 of 19 grounded, the ledger replaying in lamport order with the four amber rows last](docs/images/audit.png)
 
 Two things a reader is entitled to know before reading any number.
 
