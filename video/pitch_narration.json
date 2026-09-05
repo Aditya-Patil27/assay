@@ -3,27 +3,71 @@
   "voice": "Microsoft Zira Desktop",
   "rate": 0,
   "scenes": [
-    { "id": "s1", "seconds": 15,
-      "text": "This is Assay. An assay is the test that tells you how much real metal is in a coin. We built one for security numbers. Specifically, the numbers a payment fraud defence reports about itself." },
-    { "id": "s2", "seconds": 25,
-      "text": "Here is the problem. A fraud detector gets a PR-AUC on a held-out set, and that number goes into a deck. Nobody attacked it. Nobody checked whether the attacker they imagined could exist. Razorpay's brief asks for honest metrics. So our whole project is one loop: attack a defence, measure it, defend, measure again, and publish whatever comes out." },
-    { "id": "s3", "seconds": 30,
-      "text": "First result. Indirect prompt injection against a payment agent. Payloads planted where a payment system really ingests untrusted text: memos, merchant names, dispute evidence. One hundred forty-four trials per arm, on two independent hundred-and-twenty-billion-parameter models. With the defence stack on, the exploit rate went from four point nine percent to zero on GPT-OSS, significant at p equals point zero one five, with zero false refusals on benign controls. On Nemotron alone it is not significant. One exploit survived. We publish that row too." },
-    { "id": "s4", "seconds": 25,
-      "text": "Second result, and the one I would most want you to remember. Two attackers, same detector, both report one hundred percent success. Ours may only move what a real fraudster controls. The other one moves anything. Ninety-nine point nine percent of its evasions land at a merchant that does not exist. Same headline number. Completely different thing. That audit runs before any number is reported." },
-    { "id": "s5", "seconds": 30,
-      "text": "Now the row that did not work. On the tabular detector, three rounds of adversarial retraining stopped zero evasions. Attack success stayed at one hundred percent. What moved was cost. Median queries per success rose from two seventy-five to three ninety-one, and we paid one point six percent of PR-AUC for it. That is the finding. The model-layer defence buys attacker effort, not safety. So the defence has to live somewhere else." },
-    { "id": "s6", "seconds": 25, "clip": "agent",
-      "text": "This is the live site. I pick a payload planted in a payment memo and fire it at a real model with the defences off. The payee's account moves. Same payload, defences on: an injection classifier, tool scoping, and a human-in-the-loop threshold. It holds." },
-    { "id": "s7", "seconds": 45,
-      "text": "Architecture. One loop: train a detector, attack it, retrain on the evasions, repeat. The constraint contract sits at the attack's entry. It is a frozen schema, and the attacker calls validate before every perturbation, so a feature change fails loudly instead of producing a meaningless number. The same loop drives the second surface, with the agent's defence stack in place of retraining. Every run writes an artifact with a placeholder flag and a git SHA, and the site reads those files. Nothing on it is typed by hand." },
-    { "id": "s8", "seconds": 25, "clip": "audit",
-      "text": "That provenance rule is now a console. Every claim carries its evidence type. Green means a test or a file backs it. Amber means nothing ran. Five of our own artifacts are amber, and they stay that way until something runs." },
-    { "id": "s9", "seconds": 35,
-      "text": "What broke. Four things, all still in the history. We promised attack success would collapse. It did not, and every caption was corrected. We blamed the training dosage. A five-thousand-fold sweep refuted that. The decision threshold was fitted on the test split until August thirtieth, which made every earlier number incomparable. We said so and re-measured. And a trainer that never ran was reported, rather than deleted from the log." },
-    { "id": "s10", "seconds": 20,
-      "text": "Five artifacts are still unflagged: the dosage and threshold sweeps, the adversarial-detection holdout, the data provenance, and the feature schema. They show amber on the console until something re-runs them. Next is mapping the injection channels onto Razorpay's real surfaces. Payment notes, payment-link descriptions, dispute evidence. And running the corpus there." },
-    { "id": "s11", "seconds": 15,
-      "text": "A security number nobody attacked is decoration. Assay is the test. The repo, the live site, and the audit console are linked below. Thanks." }
-  ]
+    {
+      "id": "s1",
+      "seconds": 15,
+      "text": "This is Assay. An assay is the test that tells you how much real metal is in a coin. We built one for security numbers. Specifically, the numbers a payment fraud defence reports about itself."
+    },
+    {
+      "id": "s2",
+      "seconds": 25,
+      "text": "Here is the problem. A fraud detector gets a PR-AUC on a held-out set, and that number goes into a deck. Nobody attacked it. Nobody checked whether the attacker they imagined could exist. Razorpay's brief asks for honest metrics. So our whole project is one loop: attack a defence, measure it, defend, measure again, and publish whatever comes out.",
+      "clip": "landing"
+    },
+    {
+      "id": "s3",
+      "seconds": 30,
+      "text": "First result. Indirect prompt injection against a payment agent. Payloads planted where a payment system really ingests untrusted text: memos, merchant names, dispute evidence. One hundred forty-four trials per arm, on two independent hundred-and-twenty-billion-parameter models. With the defence stack on, the exploit rate went from four point nine percent to zero on GPT-OSS, significant at p equals point zero one five, with zero false refusals on benign controls. On Nemotron alone it is not significant. One exploit survived. We publish that row too.",
+      "clip": "agent_table"
+    },
+    {
+      "id": "s4",
+      "seconds": 25,
+      "text": "Second result, and the one I would most want you to remember. Two attackers, same detector, both report one hundred percent success. Ours may only move what a real fraudster controls. The other one moves anything. Ninety-nine point nine percent of its evasions land at a merchant that does not exist. Same headline number. Completely different thing. That audit runs before any number is reported."
+    },
+    {
+      "id": "s5",
+      "seconds": 30,
+      "text": "Now the row that did not work. On the tabular detector, three rounds of adversarial retraining stopped zero evasions. Attack success stayed at one hundred percent. What moved was cost. Median queries per success rose from two seventy-five to three ninety-one, and we paid one point six percent of PR-AUC for it. That is the finding. The model-layer defence buys attacker effort, not safety. So the defence has to live somewhere else.",
+      "clip": "results"
+    },
+    {
+      "id": "s6",
+      "seconds": 25,
+      "clip": "agent",
+      "text": "This is the live site. I pick a payload planted in a payment memo and fire it at a real model with the defences off. The payee's account moves. Same payload, defences on: an injection classifier, tool scoping, and a human-in-the-loop threshold. It holds."
+    },
+    {
+      "id": "s7",
+      "seconds": 45,
+      "text": "Architecture. One loop: train a detector, attack it, retrain on the evasions, repeat. The constraint contract sits at the attack's entry. It is a frozen schema, and the attacker calls validate before every perturbation, so a feature change fails loudly instead of producing a meaningless number. The same loop drives the second surface, with the agent's defence stack in place of retraining. Every run writes an artifact with a placeholder flag and a git SHA, and the site reads those files. Nothing on it is typed by hand."
+    },
+    {
+      "id": "s8",
+      "seconds": 25,
+      "clip": "audit",
+      "text": "That provenance rule is now a console. Every claim carries its evidence type. Green means a test or a file backs it. Amber means nothing ran. Five of our own artifacts are amber, and they stay that way until something runs."
+    },
+    {
+      "id": "s9",
+      "seconds": 35,
+      "text": "What broke. Four things, all still in the history. We promised attack success would collapse. It did not, and every caption was corrected. We blamed the training dosage. A five-thousand-fold sweep refuted that. The decision threshold was fitted on the test split until August thirtieth, which made every earlier number incomparable. We said so and re-measured. And a trainer that never ran was reported, rather than deleted from the log.",
+      "clip": "whatbroke"
+    },
+    {
+      "id": "s10",
+      "seconds": 20,
+      "text": "Five artifacts are still unflagged: the dosage and threshold sweeps, the adversarial-detection holdout, the data provenance, and the feature schema. They show amber on the console until something re-runs them. Next is mapping the injection channels onto Razorpay's real surfaces. Payment notes, payment-link descriptions, dispute evidence. And running the corpus there."
+    },
+    {
+      "id": "s11",
+      "seconds": 15,
+      "text": "A security number nobody attacked is decoration. Assay is the test. The repo, the live site, and the audit console are linked below. Thanks."
+    }
+  ],
+  "edge_voice": "en-US-AndrewNeural",
+  "edge_rate": "+0%",
+  "sarvam_speaker": "aditya",
+  "sarvam_model": "bulbul:v3",
+  "sarvam_pace": 1.0
 }

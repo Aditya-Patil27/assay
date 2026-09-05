@@ -25,6 +25,8 @@ const NORM = path.join(AUDIO, "norm");
 const PADDED = path.join(AUDIO, "padded");
 const RAW = path.join(here, "raw_pitch");
 const DEMOS = path.join(here, "..", "web", "public", "demos");
+const FOOTAGE = path.join(here, "footage");
+const clipPath = (name) => [FOOTAGE, DEMOS].map((d) => path.join(d, `${name}.mp4`)).find((f) => fs.existsSync(f)) || path.join(FOOTAGE, `${name}.mp4`);
 const OUT = path.join(here, "pitch.mp4");
 const BREATH = 0.4;
 const MAX_TOTAL = 300;
@@ -42,7 +44,7 @@ const scenes = cfg.scenes.map((s) => {
   const norm = path.join(NORM, `${s.id}.wav`);
   ff(["-i", wav, "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-ar", "48000", "-ac", "1", norm]);
   const spoken = probe(norm);
-  const clip = s.clip ? path.join(DEMOS, `${s.clip}.mp4`) : null;
+  const clip = s.clip ? clipPath(s.clip) : null;
   if (clip && !fs.existsSync(clip)) throw new Error(`missing ${clip} — run record_loops.mjs ${s.clip}`);
   const clipDur = clip ? probe(clip) : null;
   const natural = r2(spoken + BREATH);
@@ -87,9 +89,14 @@ for (const run of runs) {
   const webm = path.join(dir, fs.readdirSync(dir).find((f) => f.endsWith(".webm")));
   const recorded = probe(webm);
   const lead = Math.max(recorded - 0.9 - declared, 0);  // page load before the timeline started
-  if (recorded < declared) throw new Error(`run${k}: recording ${recorded}s shorter than declared ${declared}s`);
+  // Playwright starts the file at context creation but only writes frames once the page
+  // paints, so a short run can come back a few hundred ms under its slot. Freeze the last
+  // frame to cover the gap; only a gap over a second means something actually went wrong.
+  const short = Math.max(declared - recorded, 0);
+  if (short > 1) throw new Error(`run${k}: recording ${recorded}s is ${r2(short)}s shorter than declared ${declared}s`);
+  const vf = "fps=30,scale=1920:1080,setsar=1" + (short > 0 ? `,tpad=stop_mode=clone:stop_duration=${short.toFixed(3)}` : "");
   run.file = path.join(RAW, `run${k}.mp4`);
-  ff(["-ss", lead.toFixed(3), "-i", webm, "-t", declared.toFixed(3), "-an", "-vf", "fps=30,scale=1920:1080,setsar=1", "-c:v", "libx264", "-crf", "20", "-preset", "medium", "-pix_fmt", "yuv420p", run.file]);
+  ff(["-ss", lead.toFixed(3), "-i", webm, "-t", declared.toFixed(3), "-an", "-vf", vf, "-c:v", "libx264", "-crf", "20", "-preset", "medium", "-pix_fmt", "yuv420p", run.file]);
   console.log(`run${k} [${ids.join(",")}] recorded ${r2(recorded)}s, lead ${r2(lead)}s, kept ${r2(declared)}s`);
   k++;
 }
