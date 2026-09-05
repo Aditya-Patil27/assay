@@ -122,6 +122,33 @@ strict.
 
 You should trust the second number **because** we showed you the first.
 
+### Results in numbers
+
+Every row below is read from a committed artifact carrying `placeholder: false`; the last
+column names the file. Model names, splits and caveats are in the sections that follow.
+
+| Measure | Value | Artifact |
+|---|---|---|
+| Tabular · attack success per round | 1.000 → 1.000 → 1.000 | `attack/rounds` |
+| Tabular · median queries per successful evasion | 275 → 291 → 391 | `attack/rounds` |
+| Tabular · mean features touched (L0) | 4.12 → 4.00 → 4.03 | `attack/rounds` |
+| Detector · PR-AUC per round | 0.947 → 0.939 → 0.932 | `detect/rounds` |
+| Detector · recall per round | 0.916 → 0.896 → 0.890 | `detect/rounds` |
+| Feasibility · unconstrained evasions at a merchant that does not exist | 99.9% | `attack/feasibility` |
+| Feasibility · unconstrained evasions that forged a frozen attribute | 6.0% | `attack/feasibility` |
+| Feasibility · mean features touched, constrained vs unconstrained | 4.12 vs 1.88 | `attack/feasibility` |
+| Agent · gpt-oss-120b exploits, defences off → on | 7/144 → 0/144 | `agentic/redteam-groq` |
+| Agent · nemotron-120b exploits, defences off → on | 5/144 → 1/144 | `agentic/redteam-nvidia` |
+| Agent · pooled, both models | 12/288 → 1/288 | `both redteam files` |
+| Second stage · evasions split train / held-out | 283 / 283 | `attack/adversarial_detection` |
+| Second stage · recall on held-out evasions, before → after | 0.0% → 68.9% | `attack/adversarial_detection` |
+| Second stage · recall on trained-on evasions (memorisation ceiling) | 100.0% | `attack/adversarial_detection` |
+| Second stage · legitimate declines per 100k, before → after | 114 → 94 | `attack/adversarial_detection` |
+| Second stage · real-fraud recall, before → after | 89.3% → 87.9% | `attack/adversarial_detection` |
+| Second stage · PR-AUC, before → after | 0.929 → 0.921 | `attack/adversarial_detection` |
+| Serving · latency to score one transaction, p50 / p95 / p99 | 0.035 / 0.081 / 0.145 ms | `latency` |
+| Guarantees · cross-language checks / test cases | 4 / 92 | `guarantees` |
+
 ![Results page: the per-round cost table and the framework scorecard](docs/images/results-scorecard.png)
 
 The third row is what you do about the first. Retraining never stops the *next* search, but a
@@ -469,7 +496,7 @@ framings are honest; the numbers did not change between them.
 
 ## Where the work stands
 
-For teammates picking this up mid-flight. The per-person board with full detail is
+For anyone picking this up mid-flight. The per-person board with full detail is
 [`docs/team/STATUS.md`](docs/team/STATUS.md); this is the one-screen version.
 
 | Area | State | Blocked on |

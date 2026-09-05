@@ -22,22 +22,22 @@ import type { LineageNode, LineageNodeKind } from "@/lib/lineage";
 
 /** One colour per column. Ink for the two "where it starts" columns, then the accents. */
 export const COLUMN_COLOR: Record<LineageNodeKind, string> = {
-  task: "#9aa7bd",
-  channel: "#5eb0ff",
-  technique: "#ff4d5e",
-  goal: "#f5b544",
-  outcome: "#9aa7bd",
-  tier: "#9aa7bd",
-  feature: "#5eb0ff",
-  evasion: "#ff4d5e",
+  task: "#6b6558",
+  channel: "#007b9a",
+  technique: "#c9372b",
+  goal: "#9a6205",
+  outcome: "#6b6558",
+  tier: "#6b6558",
+  feature: "#007b9a",
+  evasion: "#c9372b",
 };
 
-const FILL = { attack: "#ff4d5e", defend: "#22d3a6" } as const;
+const FILL = { attack: "#ff6158", defend: "#46daff" } as const;
 
 /** The rail colour: an outcome's tone wins over its column, because that is its meaning. */
 export function nodeAccent(node: LineageNode): string {
-  if (node.tone === "attack") return "#ff4d5e";
-  if (node.tone === "defend") return "#22d3a6";
+  if (node.tone === "attack") return "#c9372b";
+  if (node.tone === "defend") return "#007b9a";
   return COLUMN_COLOR[node.kind];
 }
 
@@ -61,7 +61,7 @@ function LineageNodeCard({ data }: NodeProps<LineageFlowNode>) {
   const { node, dim, active } = data;
   const accent = nodeAccent(node);
   // Outcomes are the terminal reading of the whole graph, so they are filled rather than
-  // railed -- both fill colours carry the ground colour as text at well over 4.5:1.
+  // railed -- both fill colours carry black text at well over 4.5:1.
   const fill = node.kind === "outcome" && node.tone ? FILL[node.tone] : null;
 
   return (
@@ -77,14 +77,13 @@ function LineageNodeCard({ data }: NodeProps<LineageFlowNode>) {
         borderRadius: 4,
         padding: node.kind === "feature" ? "7px 10px" : "9px 12px 10px",
         textAlign: "left",
-        // A filled node carries the ground colour, not ink: ink on coral is unreadable.
-        color: fill ? "var(--color-on-accent)" : "var(--color-ink)",
+        color: "var(--color-ink)",
         // Frozen features are drawn back, not hidden: the point of the lane is that the
         // attacker cannot move them, and an empty gap would not say that.
         opacity: dim ? 0.15 : node.muted ? 0.4 : 1,
         boxShadow: active
-          ? `0 0 0 2px ${accent}, 0 6px 18px rgb(0 0 0 / 0.55)`
-          : "0 1px 2px rgb(0 0 0 / 0.45)",
+          ? `0 0 0 2px ${accent}, 0 6px 18px rgb(23 21 15 / 0.14)`
+          : "0 1px 2px rgb(23 21 15 / 0.05)",
         transition: "opacity 220ms ease, box-shadow 180ms ease",
       }}
     >
@@ -101,14 +100,14 @@ function LineageNodeCard({ data }: NodeProps<LineageFlowNode>) {
             fontSize: 12,
             letterSpacing: "0.08em",
             textTransform: "uppercase",
-            color: fill ? "rgb(8 10 15 / 0.68)" : "var(--color-muted)",
+            color: fill ? "rgb(23 21 15 / 0.62)" : "var(--color-muted)",
           }}
         >
           <span>{node.eyebrow}</span>
           {node.badge ? (
             <span
               style={{
-                border: `1px solid ${fill ? "rgb(8 10 15 / 0.32)" : "var(--color-rule)"}`,
+                border: `1px solid ${fill ? "rgb(23 21 15 / 0.28)" : "var(--color-rule)"}`,
                 borderRadius: 3,
                 padding: "0 4px",
                 letterSpacing: "0.02em",
@@ -142,7 +141,7 @@ function LineageNodeCard({ data }: NodeProps<LineageFlowNode>) {
             fontFamily: "var(--font-mono)",
             fontSize: 14,
             lineHeight: 1.25,
-            color: fill ? "rgb(8 10 15 / 0.78)" : "var(--color-muted)",
+            color: fill ? "rgb(23 21 15 / 0.7)" : "var(--color-muted)",
           }}
         >
           {node.sublabel}

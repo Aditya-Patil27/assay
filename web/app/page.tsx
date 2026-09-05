@@ -173,7 +173,7 @@ export default async function Home() {
             <div data-stagger="7" className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/live"
-                className="btn mono-label rounded-[5px] bg-attack-fill px-4 py-2.5 text-[0.8125rem] font-bold text-on-accent hover:opacity-90"
+                className="btn mono-label rounded-[5px] bg-attack-fill px-4 py-2.5 text-[0.8125rem] font-bold text-ink hover:opacity-90"
               >
                 Run the live detector
               </Link>
@@ -218,7 +218,7 @@ export default async function Home() {
         <div data-stagger className="flex flex-wrap items-baseline justify-between gap-3">
           <h2 className="display text-[1.5rem] md:text-[1.75rem]">The system in 37 seconds</h2>
           <p className="text-[0.8125rem] text-muted">
-            Four cuts from the deployed site, captioned. No narration; the pitch has that.
+            Four cuts from the deployed site, captioned and narrated. Unmute to hear it.
           </p>
         </div>
         <div
@@ -340,7 +340,7 @@ export default async function Home() {
           <div data-stagger className="flex shrink-0 flex-wrap gap-3">
             <Link
               href="/live"
-              className="btn mono-label rounded-[5px] bg-attack-fill px-5 py-3 text-[0.8125rem] font-bold text-on-accent hover:opacity-90"
+              className="btn mono-label rounded-[5px] bg-attack-fill px-5 py-3 text-[0.8125rem] font-bold text-ink hover:opacity-90"
             >
               Run the detector
             </Link>

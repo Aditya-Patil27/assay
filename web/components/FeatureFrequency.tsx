@@ -14,7 +14,7 @@ import {
 import type { AttackRound } from "@/lib/types";
 
 /** One bar shade per round -- attack red, walked from bright to dim as rounds advance. */
-const ROUND_FILL = ["var(--color-attack-fill)", "#b8394a", "var(--color-attack-dim)"];
+const ROUND_FILL = ["var(--color-attack-fill)", "#d05f4b", "var(--color-attack-dim)"];
 
 /**
  * Which features each round's successful evasions actually touched.
@@ -65,7 +65,7 @@ export function FeatureFrequencyPanel({ rounds }: { rounds: AttackRound[] }) {
             axisLine={false}
           />
           <Tooltip
-            cursor={{ fill: "rgba(232,237,247,0.06)" }}
+            cursor={{ fill: "rgba(0,0,0,0.05)" }}
             contentStyle={{
               background: "var(--color-figure-2)",
               border: "1px solid var(--color-rule)",
