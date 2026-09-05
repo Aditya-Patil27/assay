@@ -218,7 +218,7 @@ export default async function Home() {
         <div data-stagger className="flex flex-wrap items-baseline justify-between gap-3">
           <h2 className="display text-[1.5rem] md:text-[1.75rem]">The system in 37 seconds</h2>
           <p className="text-[0.8125rem] text-muted">
-            Four cuts from the deployed site, captioned. No narration; the pitch has that.
+            Four cuts from the deployed site, captioned and narrated. Unmute to hear it.
           </p>
         </div>
         <div
