@@ -40,7 +40,7 @@ const STEPS = [
   },
   {
     k: "What landed",
-    v: "Payment-agent exploits 4.86% → 0.0% with zero false refusals. And a feasibility audit: 99.9% of a naive attacker's identical 100% is transactions that cannot occur.",
+    v: "Payment-agent exploits 4.86% → 0.0% (p = 0.015 on gpt-oss-120b). And a feasibility audit: 99.9% of a naive attacker's identical 100% is transactions that cannot occur.",
   },
   {
     k: "What we priced",

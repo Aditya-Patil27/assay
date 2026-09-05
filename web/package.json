@@ -8,7 +8,6 @@
     "prebuild": "npm run sync",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "deploy": "vercel deploy --prod --yes",
     "check:agent": "tsx scripts/check-agent-port.mjs",

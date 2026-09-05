@@ -88,7 +88,7 @@
     <h2>Indirect prompt injection, 144 trials per arm, two 120B models</h2>
     <div class="pair">
       <div class="stat rise" id="s3a"><div class="v att">4.86%</div><div class="l">exploit rate, defences off</div></div>
-      <div class="stat rise" id="s3b"><div class="v def">0.0%</div><div class="l">defences on · p = 0.015 · 0% false refusals</div></div>
+      <div class="stat rise" id="s3b"><div class="v def">0.0%</div><div class="l">defences on · p = 0.015</div></div>
     </div>
     <p class="sub rise" id="s3c">nemotron-120b alone: not significant (p = 0.214). Published anyway.</p>
   </section>
@@ -108,9 +108,8 @@
       <div class="bar"><div class="vl">1.000</div><div class="col" data-h="300"></div><div class="lb">ASR r0</div></div>
       <div class="bar"><div class="vl">1.000</div><div class="col" data-h="300"></div><div class="lb">ASR r1</div></div>
       <div class="bar"><div class="vl">1.000</div><div class="col" data-h="300"></div><div class="lb">ASR r2</div></div>
-      <div class="bar"><div class="vl">1.000</div><div class="col" data-h="300"></div><div class="lb">ASR r3</div></div>
       <div class="bar" style="margin-left:80px"><div class="vl">275</div><div class="col q" data-h="211"></div><div class="lb">queries r0</div></div>
-      <div class="bar"><div class="vl">391</div><div class="col q" data-h="300"></div><div class="lb">queries r3</div></div>
+      <div class="bar"><div class="vl">391</div><div class="col q" data-h="300"></div><div class="lb">queries r2</div></div>
     </div>
     <p class="sub rise" id="s5c">PR-AUC 0.947 → 0.932 (−1.6%). The defence has to live elsewhere.</p>
   </section>
@@ -141,7 +140,7 @@
     <h2>What broke, and how we recovered</h2>
     <div class="cards">
       <div class="card rise" id="c1"><div class="k">1 · broke</div><div class="b">Promised attack success would collapse.</div><div class="f">It did not. Every caption corrected; headline became attacker cost.</div></div>
-      <div class="card rise" id="c2"><div class="k">2 · broke</div><div class="b">Blamed under-dosed adversarial training.</div><div class="f">5000× sweep: ASR unmoved, −22.3% PR-AUC. Explanation withdrawn.</div></div>
+      <div class="card rise" id="c2"><div class="k">2 · broke</div><div class="b">Blamed under-dosed adversarial training.</div><div class="f">5000× sweep: ASR unmoved, −22.3% PR-AUC. Withdrawn. Sweep unflagged · amber on /audit.</div></div>
       <div class="card rise" id="c3"><div class="k">3 · broke</div><div class="b">Threshold fitted on the test split until Aug 30.</div><div class="f">Named the split, added a tripwire, re-measured.</div></div>
       <div class="card rise" id="c4"><div class="k">4 · broke</div><div class="b">A trainer that never ran was reported.</div><div class="f">Reported the error rather than deleting it from history.</div></div>
     </div>
@@ -149,8 +148,8 @@
 
   <section class="scene" id="s10">
     <div class="kicker">Still unverified · and next</div>
-    <h2>Marked unverified: per-round PR-AUC, latency.json</h2>
-    <p class="sub">Next: map the injection channels onto Razorpay surfaces — payment notes, payment-link descriptions, dispute evidence — and run the corpus there.</p>
+    <h2>Five artifacts are still unflagged. They show amber until something runs.</h2>
+    <p class="sub">Dosage sweep · threshold sweep · adversarial-detection holdout · data provenance · feature schema. Next: map the injection channels onto Razorpay surfaces — payment notes, payment-link descriptions, dispute evidence — and run the corpus there.</p>
   </section>
 
   <section class="scene" id="s11">
@@ -196,7 +195,7 @@ scenes.forEach(id => {
     document.querySelectorAll(".scene").forEach(s => s.classList.remove("on"));
     el(id).style.transition = "opacity .55s ease";
     el(id).classList.add("on");
-    el("foot").textContent = "artifacts/ · placeholder: false · " + id.toUpperCase();
+    el("foot").textContent = (id === "s10" ? "artifacts/ · placeholder: absent on five files · " : "artifacts/ · placeholder: false · ") + id.toUpperCase();
     (BEATS[id] || []).forEach(([f, fn]) => setTimeout(fn, f * dur));
   }, at);
   at += dur;

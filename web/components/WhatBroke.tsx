@@ -15,7 +15,7 @@ const ERRORS = [
   },
   {
     broke: "We explained the flat ASR by under-dosed adversarial training.",
-    fixed: "A 5000× dosage sweep refuted that: ASR unmoved in every arm, at a cost of 22.3% of PR-AUC. The explanation was withdrawn.",
+    fixed: "A 5000× dosage sweep refuted that: ASR unmoved in every arm, at a cost of 22.3% of PR-AUC. The explanation was withdrawn. The sweep is committed but unflagged, so it shows amber on /audit.",
     sha: "727a5c2",
   },
   {
