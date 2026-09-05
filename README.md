@@ -59,6 +59,24 @@ instead of silently producing a meaningless ASR.
 
 ---
 
+## Where this sits in a Razorpay stack
+
+Assay does not call a Razorpay API; nothing here should be read as an integration. It maps
+by field, which is the honest level for a test harness.
+
+| Assay surface | Razorpay surface it would test | What Assay asks of it |
+|---|---|---|
+| Tabular fraud detector (Sparkov, XGBoost) | A risk engine scoring orders and payments on device, velocity and address signals — the job [Thirdwatch](https://razorpay.com/blog/detect-fraud-using-ml-ai-thirdwatch/) and the [Shield risk engine](https://razorpay.com/blog/navigate-payment-risks-with-razorpays-shield-risk-engine/) describe | Does its evasion rate survive an attacker who may only move amount, timing and merchant, and who searches again after every retrain? |
+| Payment agent, four injection channels | The places an agent ingests untrusted text: payment `notes` and description fields (`transaction_memo`), merchant display names (`merchant_display_name`), payment-link and invoice descriptions (`invoice_metadata`), and chargeback dispute evidence (`dispute_text`, the input to a [Chargeback Shield](https://razorpay.com/chargeback-shield/)-style flow) | Can a payload planted in one of those fields move a payee, exfiltrate a balance or skip a control, and does the classifier + tool-scoping + human-in-the-loop stack stop it without refusing legitimate work? |
+
+The transferable finding is the one that costs money to learn in production: against an
+attacker that re-searches after every change, **the model layer is the wrong place to
+defend**. Retraining raised the attacker's price and stopped nothing; the defences that
+held were the ones outside the model — the constraint contract, the injection classifier,
+tool scoping and the human threshold.
+
+---
+
 ## What we got wrong, in public
 
 This repository has reported four of its own errors. They are still here:
@@ -335,6 +353,40 @@ For teammates picking this up mid-flight. The per-person board with full detail 
    the rows the attack was scored over, which lifted the bar to ~0.94 and made evasion free.
    It now uses `choose_threshold` at a fixed FPR budget on a held-out validation slice. Any
    ASR measured before that fix is not comparable to one measured after it.
+
+---
+
+## Related work, and why 1.000 is the expected number
+
+We did not invent the flat curve; we measured it under the conditions the literature says
+produce it.
+
+- [Simonetto et al., 2023](https://arxiv.org/abs/2311.04503) — *Constrained Adaptive Attacks:
+  Realistic Evaluation of Adversarial Examples and Robust Training of Deep Neural Networks for
+  Tabular Data.* Introduces domain-constrained adaptive attacks for tabular models and finds
+  adversarial training can defend against constrained examples in their setting. Their
+  attacker is fixed at evaluation time.
+- [Simonetto et al., 2024](https://arxiv.org/abs/2406.00775) — *Constrained Adaptive Attack.*
+  The follow-up shows the adaptive attack remains effective against adversarially trained
+  models for some architectures, and drops accuracy by up to 96 points relative to prior
+  attacks. Ours is that case, on a gradient-free tree ensemble: the attacker re-searches
+  after every retrain, and constrained ASR stays at 1.000 while the attacker's median query
+  cost rises 275 → 391.
+- [Tramèr et al., 2020](https://arxiv.org/abs/2002.08347) — *On Adaptive Attacks to
+  Adversarial Example Defenses.* The general result: defences evaluated against a
+  non-adaptive attacker report robustness that an adaptive one removes. A closed loop is the
+  only evaluation that does not make this mistake by construction.
+- [Cartella et al., 2021](https://ceur-ws.org/Vol-2808/Paper_4.pdf) — *Adversarial Attacks
+  for Tabular Data: Application to Fraud Detection and Imbalanced Data.* Fraud-specific
+  evasion on tabular models, and the feasibility question this repository turns into a
+  contract: [`schema.py`](src/adversarial_payments/schema.py).
+- [Adversarial Learning in Real-World Fraud Detection: Challenges and Perspectives,
+  2023](https://arxiv.org/abs/2307.01390) — the survey that frames why fraud detection is
+  evaluated against fraud that already happened, which is the problem statement above.
+
+What this repository adds is not a better attack. It is the audit that says which share of a
+reported evasion rate is physically possible, and a scorecard that publishes the row where
+the defence failed next to the one where it held.
 
 ---
 
