@@ -9,6 +9,8 @@ slug it was created under.*
 **Mastercard Innovation Challenge 2026 — AI red teaming for payment security**
 
 **Demo Video:** https://www.youtube.com/watch?v=oE7-N0wZTM0
+**Audit console:** https://adversarial-payments.vercel.app/audit — every artifact as a claim, green where something ran, amber where nothing did
+**Razorpay AI Buildathon 2026, Open Track** — pitch video link to follow once uploaded
 
 > ## Status — 2026-08-30: five of six results are real
 >
