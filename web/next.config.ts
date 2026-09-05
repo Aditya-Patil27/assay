@@ -23,13 +23,6 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Pin the workspace root; without it Turbopack walks up and finds a stray lockfile.
   turbopack: { root: path.join(__dirname) },
-  // The audit console is a static file at public/audit/index.html. Next's public-folder
-  // serving matches paths exactly and does not resolve a directory to its index.html, so
-  // without this rewrite /audit 404s (both in `next dev` and once deployed) even though
-  // /audit/index.html serves fine.
-  async rewrites() {
-    return [{ source: "/audit", destination: "/audit/index.html" }];
-  },
 };
 
 export default nextConfig;
