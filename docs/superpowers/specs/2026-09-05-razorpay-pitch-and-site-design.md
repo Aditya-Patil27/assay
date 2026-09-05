@@ -84,8 +84,9 @@ Three, in build order. A is independent; B needs A's page for one loop; C needs 
    - `PEERS = ["assay", "reviewer"]`, with roles "red/blue loop" and "you".
    - `live()` is replaced by `replay()`: `fetch("./frames.json")`, feed `nodes` through
      `onNode`, then `messages` through `onMessage` at 400 ms intervals; on fetch failure
-     fall back to Samvad's `demo()` with the hint text changed to say the file did not
-     load. The header badge reads `artifacts` instead of `live`.
+     show a hint naming the exporter command and leave the table empty (Samvad's synthetic
+     `demo()` is keyed to its own peer names and is not used). The header badge reads
+     `artifacts` instead of `live`.
    - A one-line provenance comment at the top naming the upstream file and commit.
 3. `web/scripts/sync-artifacts.mjs` additionally runs `python scripts/export_audit_frames.py`
    when the repo root is present and Python is on PATH; failure to run Python is a warning,
@@ -96,8 +97,8 @@ Three, in build order. A is independent; B needs A's page for one loop; C needs 
 Samvad's own `evidence()` → green/amber pills and the "grounded" KPI.
 
 **Error handling.** Missing artifact directory: script exits 1 with the path. Malformed
-JSON: exit 1 naming the file. Console: fetch failure → synthetic demo with an explicit
-"frames.json did not load" hint; never a blank page.
+JSON: exit 1 naming the file. Console: fetch failure → an explicit "frames.json did not
+load" hint with the command to regenerate it; the roster still renders.
 
 **Testing.** `tests/test_export_audit_frames.py`: runs the exporter on a temp directory with
 one flagged and one unflagged fixture; asserts evidence types, statuses, ordering, and that
