@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+import { CountUp } from "@/components/CountUp";
+import { Reveal } from "@/components/Reveal";
+
 import { LiveScoreStream } from "@/components/LiveScoreStream";
 import { WhatBroke } from "@/components/WhatBroke";
 import { FeatureLoop } from "@/components/FeatureLoop";
@@ -133,23 +136,32 @@ export default async function Home() {
   return (
     <>
       {/* ---- Dark hero ---------------------------------------------------------- */}
-      <section className="bg-night text-night-ink">
+      {/* Above the fold, so this plays at mount rather than waiting for a scroll that never
+          comes. The headline is split at a break the natural wrap already made, so its two
+          lines can rise in sequence without the paragraph reflowing. */}
+      <Reveal as="section" immediate step={100} className="bg-night text-night-ink">
         <div className="wrap grid gap-12 py-16 md:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-start">
           <div>
-            <p className="mono-label text-[0.8125rem] text-attack">
+            <p data-stagger="0" className="mono-label text-[0.8125rem] text-attack">
               Razorpay AI Buildathon 2026 · Open Track
             </p>
             <h1 className="display mt-4 max-w-[15ch] text-[2.75rem] sm:text-[3.75rem] md:text-[4.5rem]">
-              The test that tells you which of your security numbers are real.
+              <span data-stagger="1" className="block">
+                The test that tells you which
+              </span>
+              <span data-stagger="2" className="block">
+                of your security numbers are real.
+              </span>
             </h1>
 
             {/* The three-step read, before the paragraph. A panel scans; it does not
                 start by reading 60 words of prose. */}
             <dl className="mt-8 space-y-4 border-l border-night-rule pl-5">
-              {STEPS.map((s) => (
-                <div key={s.k}>
+              {STEPS.map((s, i) => (
+                <div key={s.k} data-stagger={String(3 + i)}>
                   <dt className="mono-label text-[0.75rem] text-attack">
-                    {s.k}
+                    {/* One underline, drawn once, under the only step that reports a win. */}
+                    {s.k === "What landed" ? <span className="sweep">{s.k}</span> : s.k}
                   </dt>
                   <dd className="mt-1 max-w-[56ch] text-[0.9375rem] leading-relaxed text-night-muted">
                     {s.v}
@@ -158,16 +170,16 @@ export default async function Home() {
               ))}
             </dl>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div data-stagger="7" className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/live"
-                className="mono-label rounded-[5px] bg-attack-fill px-4 py-2.5 text-[0.8125rem] font-bold text-ink transition-opacity hover:opacity-90"
+                className="btn mono-label rounded-[5px] bg-attack-fill px-4 py-2.5 text-[0.8125rem] font-bold text-ink hover:opacity-90"
               >
                 Run the live detector
               </Link>
               <Link
                 href="/results"
-                className="mono-label rounded-[5px] border border-rule px-4 py-2.5 text-[0.8125rem] text-ink transition-colors hover:border-muted"
+                className="btn mono-label rounded-[5px] border border-rule px-4 py-2.5 text-[0.8125rem] text-ink hover:border-muted"
               >
                 See the results
               </Link>
@@ -175,7 +187,10 @@ export default async function Home() {
 
             {/* The transparency claim, up here rather than buried in a footnote. It is
                 the most persuasive thing on the page for this particular panel. */}
-            <p className="mt-8 max-w-[60ch] border-t border-night-rule pt-5 text-[0.8125rem] leading-relaxed text-night-muted">
+            <p
+              data-stagger="8"
+              className="mt-8 max-w-[60ch] border-t border-night-rule pt-5 text-[0.8125rem] leading-relaxed text-night-muted"
+            >
               <span className="font-medium text-night-ink">Every number on this site is read
               from a committed artifact.</span>{" "}
               There are no customer logos, testimonials or award badges anywhere on it, because
@@ -183,24 +198,33 @@ export default async function Home() {
             </p>
           </div>
 
+          {/* Pinned to slots 2 and 4 so the right column interleaves with the headline
+              instead of waiting for the whole left column to finish. */}
           <div className="space-y-4">
             {live?.payload.stream?.length ? (
-              <LiveScoreStream samples={live.payload} />
+              <div data-stagger="2">
+                <LiveScoreStream samples={live.payload} />
+              </div>
             ) : null}
-            <CoevolutionSpark rounds={rounds} l0Pct={l0Pct} qPct={qPct} />
+            <div data-stagger="4">
+              <CoevolutionSpark rounds={rounds} l0Pct={l0Pct} qPct={qPct} />
+            </div>
           </div>
         </div>
-      </section>
+      </Reveal>
 
       {/* ---- The system in 37 seconds ------------------------------------------- */}
-      <section className="wrap reveal pt-12">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
+      <Reveal as="section" className="wrap pt-12">
+        <div data-stagger className="flex flex-wrap items-baseline justify-between gap-3">
           <h2 className="display text-[1.5rem] md:text-[1.75rem]">The system in 37 seconds</h2>
           <p className="text-[0.8125rem] text-muted">
             Four cuts from the deployed site, captioned. No narration; the pitch has that.
           </p>
         </div>
-        <div className="mt-4 overflow-hidden rounded-[8px] border border-rule bg-black">
+        <div
+          data-stagger
+          className="mt-4 overflow-hidden rounded-[8px] border border-rule bg-black"
+        >
           <video
             src="/demos/hero.mp4"
             autoPlay
@@ -213,25 +237,29 @@ export default async function Home() {
             className="block h-auto w-full"
           />
         </div>
-      </section>
+      </Reveal>
 
       {/* ---- Bento statistics ---------------------------------------------------- */}
-      <section className="wrap reveal py-14">
-        <h2 className="mono-label text-[0.8125rem] text-muted">Measured, end to end</h2>
+      <Reveal as="section" className="wrap py-14">
+        <h2 data-stagger className="mono-label text-[0.8125rem] text-muted">
+          Measured, end to end
+        </h2>
         <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {stats.map((s) => (
-            <div key={s.label} className="card border border-rule p-5">
+          {stats.map((s, i) => (
+            <div key={s.label} data-stagger={String(i + 1)} className="card border border-rule p-5">
               <dd
                 className={`tnum display text-[1.875rem] leading-none ${s.tone === "attack" ? "text-attack" : ""}`}
               >
-                {s.value}
+                {/* Counts up once, then writes the server's own string back -- the digits a
+                    reader ends up reading are never something the animation computed. */}
+                <CountUp value={s.value} />
               </dd>
               <dt className="mt-2 text-[0.9375rem] font-medium">{s.label}</dt>
               <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">{s.sub}</p>
             </div>
           ))}
         </dl>
-      </section>
+      </Reveal>
 
       <WhatBroke />
 
@@ -272,13 +300,14 @@ export default async function Home() {
       />
 
       {/* ---- Remaining pages ----------------------------------------------------- */}
-      <section className="wrap reveal pb-14 pt-4">
+      <Reveal as="section" className="wrap pb-14 pt-4">
         <div className="grid gap-4 md:grid-cols-3">
-          {CAPABILITIES.map((c) => (
+          {CAPABILITIES.map((c, i) => (
             <Link
               key={c.href}
               href={c.href}
-              className="card group flex flex-col border border-rule p-5 transition-shadow hover:shadow-md"
+              data-stagger={String(i)}
+              className="card group flex flex-col border border-rule p-5"
             >
               <span className="display text-[1.0625rem]">{c.label}</span>
               <span className="mt-2 flex-1 text-[0.8125rem] leading-relaxed text-muted">
@@ -286,22 +315,19 @@ export default async function Home() {
               </span>
               <span className="mt-4 text-[0.8125rem] font-medium text-defend">
                 Open
-                <span
-                  aria-hidden="true"
-                  className="ml-1 inline-block transition-transform group-hover:translate-x-0.5"
-                >
+                <span aria-hidden="true" className="nudge ml-1">
                   →
                 </span>
               </span>
             </Link>
           ))}
         </div>
-      </section>
+      </Reveal>
 
       {/* ---- Close --------------------------------------------------------------- */}
-      <section className="bg-night text-night-ink">
+      <Reveal as="section" className="bg-night text-night-ink">
         <div className="wrap flex flex-wrap items-center justify-between gap-6 py-12">
-          <div>
+          <div data-stagger>
             <h2 className="display text-[1.5rem] md:text-[1.75rem]">
               Both demos run for real, and neither needs a sign-up.
             </h2>
@@ -311,22 +337,22 @@ export default async function Home() {
               live.
             </p>
           </div>
-          <div className="flex shrink-0 flex-wrap gap-3">
+          <div data-stagger className="flex shrink-0 flex-wrap gap-3">
             <Link
               href="/live"
-              className="mono-label rounded-[5px] bg-attack-fill px-5 py-3 text-[0.8125rem] font-bold text-ink transition-opacity hover:opacity-90"
+              className="btn mono-label rounded-[5px] bg-attack-fill px-5 py-3 text-[0.8125rem] font-bold text-ink hover:opacity-90"
             >
               Run the detector
             </Link>
             <Link
               href="/agent"
-              className="mono-label rounded-[5px] border border-rule px-5 py-3 text-[0.8125rem] text-ink transition-colors hover:border-muted"
+              className="btn mono-label rounded-[5px] border border-rule px-5 py-3 text-[0.8125rem] text-ink hover:border-muted"
             >
               Fire an injection
             </Link>
           </div>
         </div>
-      </section>
+      </Reveal>
     </>
   );
 }

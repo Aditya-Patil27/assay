@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 
 import { Block, PageHeader } from "@/components/Chrome";
 import { AuditLedger, type AuditMessage } from "@/components/AuditLedger";
+import { CountUp } from "@/components/CountUp";
+import { Reveal } from "@/components/Reveal";
 
 export const metadata: Metadata = { title: "Audit" };
 
@@ -52,11 +54,11 @@ export default async function AuditPage() {
         lede="Each artifact in artifacts/ becomes one audited claim. Green means a real run wrote it and it carries placeholder: false and a git SHA. Amber means nothing ran: the file exists, but no number in it may be quoted as verified. Four of our own artifacts are amber, on purpose."
       />
 
-      <section className="wrap reveal pb-4">
+      <Reveal as="section" className="wrap pb-4">
         <div className="flex flex-wrap items-end gap-8">
-          <div className="shrink-0">
+          <div data-stagger="0" className="shrink-0">
             <p className="tnum display text-[3rem] leading-none text-defend sm:text-[3.75rem]">
-              {groundedClaimPct.toFixed(0)}%
+              <CountUp value={`${groundedClaimPct.toFixed(0)}%`} />
             </p>
             <p className="mt-2 max-w-[24ch] text-[0.8125rem] leading-relaxed text-muted">
               of claims: test_output over all claims made
@@ -64,19 +66,19 @@ export default async function AuditPage() {
           </div>
 
           <dl className="grid min-w-[280px] flex-1 gap-3 sm:grid-cols-3">
-            <div className="card border border-rule p-4">
+            <div data-stagger="1" className="card border border-rule p-4">
               <dd className="tnum display text-[1.5rem] leading-none">
                 {groundedMessages} of {messages.length}
               </dd>
               <dt className="mt-1 text-[0.8125rem] text-muted">artifacts grounded</dt>
             </div>
-            <div className="card border border-rule p-4">
+            <div data-stagger="2" className="card border border-rule p-4">
               <dd className="tnum display text-[1.5rem] leading-none text-attack">
                 {unflaggedMessages}
               </dd>
               <dt className="mt-1 text-[0.8125rem] text-muted">unflagged</dt>
             </div>
-            <div className="card border border-rule p-4">
+            <div data-stagger="3" className="card border border-rule p-4">
               <dd className="tnum display text-[1.5rem] leading-none">1</dd>
               <dt className="mt-1 text-[0.8125rem] text-muted">git SHA behind the scorecard</dt>
               <p className="mt-0.5 font-mono text-[0.75rem] text-muted">{scorecardSha}</p>
@@ -84,9 +86,9 @@ export default async function AuditPage() {
           </dl>
         </div>
 
-        <div className="mt-6">
+        <div data-stagger="4" className="mt-6">
           <div
-            className="flex h-2.5 w-full overflow-hidden rounded-full bg-rule"
+            className="bar-draw flex h-2.5 w-full overflow-hidden rounded-full bg-rule"
             role="img"
             aria-label={`${groundedClaims.length} of ${allClaims.length} claims grounded, ${
               allClaims.length - groundedClaims.length
@@ -106,7 +108,7 @@ export default async function AuditPage() {
             </span>
           </div>
         </div>
-      </section>
+      </Reveal>
 
       <Block
         title="The ledger, replayed"

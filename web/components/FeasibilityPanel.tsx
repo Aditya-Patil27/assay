@@ -44,7 +44,7 @@ export function FeasibilityPanel({
 
           <div className="mt-5 border-t border-rule pt-4">
             <div
-              className="flex h-2.5 w-full overflow-hidden bg-rule"
+              className="bar-draw flex h-2.5 w-full overflow-hidden bg-rule"
               role="img"
               aria-label={`${pct(impossible)} of successes are physically impossible, ${pct(plausible)} are plausible`}
             >
@@ -79,7 +79,7 @@ export function FeasibilityPanel({
 
           <div className="mt-5 border-t border-rule pt-4">
             <div
-              className="flex h-2.5 w-full overflow-hidden bg-rule"
+              className="bar-draw flex h-2.5 w-full overflow-hidden bg-rule"
               role="img"
               aria-label="Every success is a transaction that could occur"
             >

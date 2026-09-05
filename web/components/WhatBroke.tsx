@@ -5,6 +5,8 @@
  * that unattacked numbers are decoration has to put its own corrections where a judge
  * lands, not in a changelog.
  */
+import { Reveal } from "@/components/Reveal";
+
 const REPO = "https://github.com/Aditya-Patil27/assay";
 
 const ERRORS = [
@@ -37,15 +39,23 @@ const ERRORS = [
 
 export function WhatBroke() {
   return (
-    <section id="what-broke" className="wrap reveal py-14">
-      <p className="mono-label text-[0.75rem] text-attack">Failure recovery</p>
-      <h2 className="display mt-3 text-[1.75rem] md:text-[2rem]">What broke, and how we recovered</h2>
-      <p className="prose col mt-3">
+    <Reveal as="section" id="what-broke" className="wrap py-14">
+      <p data-stagger="0" className="mono-label text-[0.75rem] text-attack">
+        Failure recovery
+      </p>
+      <h2 data-stagger="0" className="display mt-3 text-[1.75rem] md:text-[2rem]">
+        What broke, and how we recovered
+      </h2>
+      <p data-stagger="1" className="prose col mt-3">
         Five errors, all still in the history. A metric nobody could retract is not a metric.
       </p>
       <ol className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {ERRORS.map((e, i) => (
-          <li key={e.sha} className="card flex flex-col border border-rule p-5">
+          <li
+            key={e.sha}
+            data-stagger={String(i + 2)}
+            className="card flex flex-col border border-rule p-5"
+          >
             <span className="mono-label text-[0.75rem] text-muted">{i + 1} · broke</span>
             <p className="mt-1 text-[0.9375rem] leading-relaxed">{e.broke}</p>
             <span className="mono-label mt-4 text-[0.75rem] text-defend">recovered</span>
@@ -56,11 +66,11 @@ export function WhatBroke() {
               target="_blank"
               rel="noreferrer"
             >
-              commit {e.sha} →
+              commit {e.sha} <span className="nudge">→</span>
             </a>
           </li>
         ))}
       </ol>
-    </section>
+    </Reveal>
   );
 }

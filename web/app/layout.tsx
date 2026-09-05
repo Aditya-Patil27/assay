@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, Libre_Baskerville, Space_Mono } from "next/font/google";
 
 import { PlaceholderBanner, Provenance } from "@/components/Chrome";
+import { PageFade } from "@/components/PageFade";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import { loadArtifacts, placeholderSources, provenance } from "@/lib/load";
 
@@ -64,7 +65,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="min-h-screen font-sans antialiased">
         <PlaceholderBanner sources={placeholderSources(artifacts)} />
         <SiteHeader />
-        <main>{children}</main>
+        <main>
+          <PageFade>{children}</PageFade>
+        </main>
         <SiteFooter>
           <Provenance shas={shas} newest={newest} />
         </SiteFooter>

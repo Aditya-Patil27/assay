@@ -41,7 +41,7 @@ export function SiteHeader() {
                 key={n.href}
                 href={n.href}
                 aria-current={active ? "page" : undefined}
-                className={`shrink-0 rounded-[5px] px-2.5 py-1.5 text-[0.8125rem] transition-colors ${
+                className={`nav-link shrink-0 rounded-[5px] px-2.5 pb-2 pt-1.5 text-[0.8125rem] transition-colors ${
                   active
                     ? "bg-figure-2 font-medium text-ink"
                     : "text-muted hover:bg-figure-2 hover:text-ink"
@@ -101,7 +101,7 @@ export function SiteFooter({ children }: { children?: React.ReactNode }) {
               <Link
                 key={n.href}
                 href={n.href}
-                className="text-[0.8125rem] text-muted transition-colors hover:text-ink"
+                className="w-fit text-[0.8125rem] text-muted transition-colors hover:text-ink"
               >
                 {n.label}
               </Link>
