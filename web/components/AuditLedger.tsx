@@ -118,7 +118,7 @@ export function AuditLedger({ messages }: { messages: AuditMessage[] }) {
                 </span>
                 <span
                   className={`mono-label shrink-0 rounded-[4px] px-2 py-0.5 text-[0.6875rem] ${
-                    grounded ? "bg-defend-fill/15 text-defend" : "bg-warn-fill/15 text-warn"
+                    grounded ? "bg-defend-fill/15 text-defend" : "bg-[#fbf0dc] text-[#9a6205]"
                   }`}
                 >
                   {grounded ? "grounded" : "nothing ran"}
@@ -136,7 +136,7 @@ export function AuditLedger({ messages }: { messages: AuditMessage[] }) {
                 <div className="mt-4 space-y-3 border-t border-rule pt-4">
                   <p
                     className={`mono-label text-[0.75rem] ${
-                      grounded ? "text-defend" : "text-warn"
+                      grounded ? "text-defend" : "text-[#9a6205]"
                     }`}
                   >
                     {grounded ? "ran for real — grounded" : "nothing ran — not grounded"}

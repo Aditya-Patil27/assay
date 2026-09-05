@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { DM_Sans, Libre_Baskerville, Space_Mono } from "next/font/google";
 
 import { PlaceholderBanner, Provenance } from "@/components/Chrome";
@@ -39,12 +39,6 @@ const dmSans = DM_Sans({
   display: "swap",
   variable: "--font-dmsans",
 });
-
-/** The site is dark-only, so the browser chrome and form controls are told so up front. */
-export const viewport: Viewport = {
-  colorScheme: "dark",
-  themeColor: "#080a0f",
-};
 
 export const metadata: Metadata = {
   title: {
