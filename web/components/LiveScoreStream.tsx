@@ -200,12 +200,12 @@ export function LiveScoreStream({ samples }: { samples: LiveSamples }) {
         </div>
         <div>
           <dd className="tnum display text-[1.25rem] text-defend">{stream?.length ?? 0}</dd>
-          <dt className="text-[0.6875rem] text-night-muted">real rows in rotation</dt>
+          <dt className="text-[0.6875rem] text-night-muted">held-out rows in rotation</dt>
         </div>
       </dl>
 
       <p className="mt-3 text-[0.6875rem] leading-relaxed text-night-muted">
-        Real transactions from the held-out split, scored by the trained detector walking its
+        Held-out Sparkov rows (a simulator corpus, not customer data), scored by the trained detector walking its
         own 400 trees — no server and no inference runtime. Timing measured on these calls.
       </p>
     </div>
