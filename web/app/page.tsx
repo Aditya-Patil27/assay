@@ -97,7 +97,7 @@ export default async function Home() {
   const stats = [
     corpus && {
       value: corpus.n_rows.toLocaleString("en-US"),
-      label: "real transactions",
+      label: "transactions, Sparkov simulator corpus",
       sub: `${corpus.n_fraud.toLocaleString("en-US")} labelled fraud · ${(corpus.fraud_rate * 100).toFixed(2)}% base rate`,
     },
     latency && {

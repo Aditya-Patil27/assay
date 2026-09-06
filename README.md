@@ -57,7 +57,7 @@ change fails loudly instead of silently producing a meaningless ASR.
 
 ## What Assay is
 
-![Overview page: the thesis, the live score stream scoring real held-out transactions in the browser, and attack success flat across three rounds while attacker effort climbs](docs/images/overview.png)
+![Overview page: the thesis, the live score stream scoring held-out Sparkov rows in the browser, and attack success flat across three rounds while attacker effort climbs](docs/images/overview.png)
 
 One loop, two attack surfaces, one scorecard.
 
@@ -412,7 +412,7 @@ grep -r '"placeholder"' artifacts/
 **2. Human-attested — what was it computed on?** Two claims only a person can make, and both
 are outstanding:
 
-- **Dataset provenance — ✅ real.** Results are computed on the real Sparkov *Credit Card
+- **Dataset provenance — ✅ the published Sparkov corpus, not our fallback.** Results are computed on the Kaggle Sparkov *Credit Card
   Transactions Fraud Detection* dataset (Kaggle `kartik2112/fraud-detection`): **1,852,394
   transactions from 999 cardholders, 2019-01-01 to 2020-12-31, with 9,651 labelled frauds
   (0.521% base rate)**.
